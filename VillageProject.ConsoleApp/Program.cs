@@ -7,21 +7,32 @@ using VillageProject.Core.Map.Terrain;
 
 Console.WriteLine("Hello, World!");
 
-var defPath = @"C:\Users\Jack\Documents\Repos\VillageProject\Assets";
+string GetDefPath()
+{
+    switch (Environment.UserName)
+    {
+        case "Jack":
+            return @"C:\Users\Jack\Documents\Repos\VillageProject\Assets";
+        case "johnnie.hunt":
+            return @"C:\Users\johnnie.hunt\Documents\Personal\Repo\VillageProject\Assets\Defs";
+    }
+
+    throw new NotImplementedException($"No DefPath set for user: '{Environment.UserName}'");
+}
 
 
-// var terrainDef = new Def
-// {
-//     DefName = "Defs.Terrain.Dirt",
-//     Label = "Dirt",
-//     CompDefs = new List<ICompDef>
-//     {
-//         new TerrainDef()
-//     }
-// };
-// SaveDef(terrainDef);
+var terrainDef = new Def
+{
+    DefName = "Defs.Terrain.Dirt",
+    Label = "Dirt",
+    CompDefs = new List<ICompDef>
+    {
+        new TerrainDef()
+    }
+};
+SaveDef(terrainDef);
 
-await DefMaster.LoadDefs(defPath);
+await DefMaster.LoadDefs(GetDefPath());
 
 foreach (var def in DefMaster.Defs)
 {
@@ -41,5 +52,5 @@ string BuildSavePath(Def def)
 {
     var tokens = def.DefName.Split(DefMaster.PATH_SEPERATOR);
     var relativePath = Path.Combine(tokens) + ".json";
-    return Path.Combine(defPath, relativePath);
+    return Path.Combine(GetDefPath(), relativePath);
 }

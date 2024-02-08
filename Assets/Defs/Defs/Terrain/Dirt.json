@@ -1,0 +1,1 @@
+{"DefName":"Defs.Terrain.Dirt","Label":"Dirt","CompDefs":[{"RegisterOnLoad":true,"CompDefClassName":"VillageProject.Core.Map.Terrain.TerrainDef","CompInstClassName":"VillageProject.Core.Map.Terrain.TerrainCompInst","ManagerClassName":"VillageProject.Core.Map.Terrain.TerrainManager"}]}

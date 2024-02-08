@@ -1,4 +1,5 @@
-﻿using VillageProject.Core.DIM.Insts;
+﻿using System.Text.Json.Serialization;
+using VillageProject.Core.DIM.Insts;
 
 namespace VillageProject.Core.DIM.Defs;
 
@@ -6,6 +7,8 @@ public abstract class BaseCompDef<TCompInst, TManager> : ICompDef
     where TCompInst : class, ICompInst
     where TManager : class, IManager
 {
+    
+    [JsonPropertyName("CompDefClassName"), JsonPropertyOrder(0)]
     public virtual string CompDefClassName
     {
         get { return this.GetType().FullName; }

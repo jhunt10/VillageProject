@@ -1,5 +1,8 @@
-﻿namespace VillageProject.Core.DIM.Defs;
+﻿using System.Text.Json.Serialization;
 
+namespace VillageProject.Core.DIM.Defs;
+
+[JsonConverter(typeof(CompDefJsonConverter))]
 public interface ICompDef
 {
     string CompDefClassName { get; }

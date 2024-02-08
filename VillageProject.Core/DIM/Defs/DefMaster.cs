@@ -11,7 +11,7 @@ public class DefMaster
     {
         if (Defs == null)
             Defs = new List<IDef>();
-        
+
         var defFiles = Directory.EnumerateFiles(defPath, "*.json", SearchOption.AllDirectories).ToList();
         foreach (var defFile in defFiles)
         {

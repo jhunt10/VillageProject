@@ -4,10 +4,8 @@ namespace VillageProject.Core.DIM.Defs;
 
 public interface IDef
 {
-    string Name { get; }
+    string DefName { get; }
     string Label { get; }
     
-    [JsonIgnore]
-    public IDef ParentDef { get; }
-    public List<IDef> SubDefs { get; }
+    public List<ICompDef> CompDefs { get; }
 }

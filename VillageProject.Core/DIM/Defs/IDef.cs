@@ -6,6 +6,7 @@ public interface IDef
 {
     string DefName { get; }
     string Label { get; }
+    string LoadPath { get; }
     
     public List<ICompDef> CompDefs { get; }
 }

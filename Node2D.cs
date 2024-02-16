@@ -12,9 +12,6 @@ public partial class Node2D : Godot.Node2D
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		var test = new TestClass();
-		GD.Print(test.GetTestString());
-
-		this.Position = this.Position + new Vector2(1, 1);
+		
 	}
 }

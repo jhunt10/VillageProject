@@ -1,6 +1,6 @@
 {
-    "DefName": "Defs.Terrain.Dirt",
-    "Label": "Dirt",
+    "DefName": "Defs.Terrain.Stone",
+    "Label": "Stone",
     "CompDefs": [
         {
             "CompDefClassName": "VillageProject.Core.Map.Terrain.TerrainDef",
@@ -12,7 +12,7 @@
             "CompInstClassName": "VillageProject.Godot.Sprites.GodotPatchCellSpriteComp",
             "ManagerClassName": "VillageProject.Core.Sprites.SpriteManager",
             "CompKey": "TopSprite",
-            "SpriteSheet": "dirt_tiles.png",
+            "SpriteSheet": "stone_tiles.png",
             "SpriteWidth": 32,
             "SpriteHight": 32
         },
@@ -21,7 +21,7 @@
             "CompInstClassName": "VillageProject.Godot.Sprites.GodotPatchCellSpriteComp",
             "ManagerClassName": "VillageProject.Core.Sprites.SpriteManager",
             "CompKey": "FrontSprite",
-            "SpriteSheet": "dirt_tiles_front.png",
+            "SpriteSheet": "stone_tiles_front.png",
             "SpriteWidth": 32,
             "SpriteHight": 40
         }

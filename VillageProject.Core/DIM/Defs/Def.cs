@@ -14,7 +14,7 @@ public class Def : IDef
         get
         {
             if (string.IsNullOrWhiteSpace(_label))
-                _label = DefName.Split(DefMaster.PATH_SEPERATOR).Last();
+                _label = DefName.Split(DimMaster.PATH_SEPERATOR).Last();
             return _label;
         }
 
@@ -24,5 +24,9 @@ public class Def : IDef
         }
     }
     
+    [JsonIgnore]
+    public string LoadPath { get; internal set; }
+    
+    [JsonPropertyName("CompDefs")]
     public List<ICompDef> CompDefs { get; set; }
 }

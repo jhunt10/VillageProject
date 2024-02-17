@@ -9,6 +9,8 @@ using VillageProject.Godot.Sprites;
 
 public partial class MapNode : Node
 {
+	public const int TILE_WIDTH = 32;
+	public const int TILE_HIGHT = 40;
 	private MapSpace MapSpace;
 	private TerrainManager TerrainManager;
 
@@ -37,6 +39,34 @@ public partial class MapNode : Node
 		}
 			
 		
+	}
+
+	public void ShowZLayer(int zLayer)
+	{
+
+		var maxZ = ZLayers.Keys.Max();
+		var minZ = ZLayers.Keys.Min();
+		currentZ = zLayer;
+		if (zLayer > maxZ)
+			currentZ = maxZ;
+		if (currentZ < minZ)
+			currentZ = minZ;
+
+		for (int z = minZ; z <= maxZ; z++)
+			if (ZLayers.ContainsKey(z))
+			{
+				ZTerrainShadows[z].Visible = z == (currentZ + 1);
+				if (z <= currentZ)
+				{
+					ZLayers[z].Visible = true;
+					ZLayerShadows[z].Visible = true;
+				}
+				else
+				{
+					ZLayers[z].Visible = false;
+					ZLayerShadows[z].Visible = false;
+				}
+			}
 	}
 
 	public void GenerateMap()
@@ -77,36 +107,41 @@ public partial class MapNode : Node
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		zTimmer += delta;
-		if (zTimmer > zDelay)
-		{
-			zTimmer = 0;
-			var maxZ = ZLayers.Keys.Max();
-			var minZ = ZLayers.Keys.Min();
-			currentZ += 1;
-			if (currentZ == maxZ)
-				currentZ = minZ;
-			else
-				currentZ += 1;
+		var mouseOverSpot = GetMouseOverMapSpot();
+		var mouseOverPos = MapSpotToWorldPos(mouseOverSpot);
 		
-			for (int z = minZ; z <= maxZ; z++)
-				if (ZLayers.ContainsKey(z))
-				{
-					ZTerrainShadows[z].Visible = z == (currentZ + 1);
-					if (z <= currentZ)
-					{
-						ZLayers[z].Visible = true;
-						ZLayerShadows[z].Visible = true;
-					}
-					else
-					{
-						ZLayers[z].Visible = false;
-						ZLayerShadows[z].Visible = false;
-					}
-				}
+	}
+	
+	public override void _UnhandledInput(InputEvent @event)
+	{
+		if (@event is InputEventKey eventKey)
+		{
+			if (eventKey.Pressed && eventKey.Keycode == Key.Up)
+			{
+				ShowZLayer(currentZ+1);
+			}
+			else if (eventKey.Pressed && eventKey.Keycode == Key.Down)
+			{
+				ShowZLayer(currentZ-1);
+			}
 		}
+			
 	}
 
+	public MapSpot GetMouseOverMapSpot()
+	{
+		var mousePos = GetViewport().GetMousePosition();
+		var x = (int)(mousePos.X / TILE_WIDTH);
+		var y = (int)(mousePos.Y / TILE_HIGHT);
+		var z = 0;
+		return new MapSpot(x, y, z);
+	}
+
+	public Vector2 MapSpotToWorldPos(MapSpot spot)
+	{
+		return new Vector2(spot.X * TILE_WIDTH, (spot.Y * TILE_WIDTH) - (spot.Z * TILE_HIGHT));
+	}
+	
 	private void CreateZLayer(int z)
 	{
 		var node = new Node2D();

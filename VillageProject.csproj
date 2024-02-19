@@ -21,4 +21,8 @@
   <ItemGroup>
     <Folder Include="Godot\" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Private.CoreLib">
+    </Reference>
+  </ItemGroup>
 </Project>

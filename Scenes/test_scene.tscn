@@ -1,19 +1,68 @@
-[gd_scene load_steps=4 format=3 uid="uid://dq0d812v1qmf4"]
+[gd_scene load_steps=11 format=3 uid="uid://dq0d812v1qmf4"]
 
 [ext_resource type="Script" path="res://Godot/GameMaster.cs" id="1_ox1jl"]
 [ext_resource type="Script" path="res://Godot/Map/MapNode.cs" id="2_6m56v"]
-[ext_resource type="Texture2D" uid="uid://b4if3gj4c3203" path="res://icon.svg" id="2_jxw1e"]
+[ext_resource type="Texture2D" uid="uid://ca4d7l3q7ddrg" path="res://Assets/Sprites/MouseOverCell.png" id="3_0lpvn"]
+[ext_resource type="Script" path="res://Godot/Map/ZLayerPrefab.cs" id="3_qhcw6"]
+[ext_resource type="Texture2D" uid="uid://bobbmxqax1spf" path="res://Assets/Sprites/shadow_sprite.png" id="4_ep16e"]
+[ext_resource type="Script" path="res://Godot/UI/MouseOverSprite.cs" id="4_qemjc"]
+[ext_resource type="Script" path="res://Godot/Map/TerrainNode.cs" id="5_njey8"]
+[ext_resource type="Texture2D" uid="uid://bbrujo6l8wrw" path="res://Assets/Sprites/TerrainSpriteTop.png" id="6_47g7n"]
+[ext_resource type="Script" path="res://Godot/UI/MainCamera.cs" id="7_0kvpc"]
+[ext_resource type="Texture2D" uid="uid://dk0c1g65hs8ei" path="res://Assets/Sprites/TerrainSpriteFront.png" id="7_466ww"]
 
-[node name="Node2D" type="Node2D"]
+[node name="GameMaster" type="Node2D"]
 script = ExtResource("1_ox1jl")
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_jxw1e")
 
 [node name="MapNode" type="Node2D" parent="."]
 script = ExtResource("2_6m56v")
 
-[node name="TileMap" type="TileMap" parent="MapNode"]
+[node name="ZLayerPrefab" type="Node2D" parent="MapNode"]
+script = ExtResource("3_qhcw6")
+
+[node name="LayerShadow" type="Sprite2D" parent="MapNode/ZLayerPrefab"]
+modulate = Color(1, 1, 1, 0.0901961)
+scale = Vector2(100, 100)
+texture = ExtResource("4_ep16e")
+
+[node name="TerrainNodes" type="Node2D" parent="MapNode/ZLayerPrefab"]
+
+[node name="TerrainNodePrefab" type="Node2D" parent="MapNode/ZLayerPrefab/TerrainNodes"]
 visible = false
-format = 2
-layer_0/tile_data = PackedInt32Array(131076, 524288, 0, 196612, 524288, 1, 196613, 589824, 2, 131077, 655360, 0, 131078, 720896, 0, 262150, 720896, 3, 262148, 524288, 3, 196615, 131072, 3, 196616, 524288, 2, 131080, 524288, 0, 131081, 655360, 0, 196617, 589824, 2, 262152, 524288, 3, 262154, 393216, 3, 262155, 196608, 3, 196618, 720896, 2, 131082, 720896, 0, 262153, 589824, 3, 262149, 589824, 3, 196614, 720896, 1)
+script = ExtResource("5_njey8")
+
+[node name="ShadowSprite" type="Sprite2D" parent="MapNode/ZLayerPrefab/TerrainNodes/TerrainNodePrefab"]
+modulate = Color(1, 1, 1, 0.313726)
+texture = ExtResource("4_ep16e")
+centered = false
+offset = Vector2(0, 40)
+
+[node name="TopSprite" type="Sprite2D" parent="MapNode/ZLayerPrefab/TerrainNodes/TerrainNodePrefab"]
+texture = ExtResource("6_47g7n")
+centered = false
+
+[node name="FrontSprite" type="Sprite2D" parent="MapNode/ZLayerPrefab/TerrainNodes/TerrainNodePrefab"]
+texture = ExtResource("7_466ww")
+centered = false
+offset = Vector2(0, 32)
+
+[node name="TerrainShadows" type="Node2D" parent="MapNode/ZLayerPrefab"]
+
+[node name="MouseOverSprite" type="Sprite2D" parent="."]
+texture = ExtResource("3_0lpvn")
+centered = false
+script = ExtResource("4_qemjc")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="MouseOverSprite"]
+
+[node name="Label" type="Label" parent="MouseOverSprite"]
+z_index = 1
+offset_left = 32.0
+offset_top = 3.0
+offset_right = 79.0
+offset_bottom = 26.0
+text = "(0,0,0)"
+
+[node name="MainCamera" type="Camera2D" parent="."]
+anchor_mode = 0
+script = ExtResource("7_0kvpc")

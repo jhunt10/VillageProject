@@ -54,14 +54,23 @@ public class TerrainManager : BaseManager
     //     return inst;
     // }
 
-    public AdjacencyFlags GetHorizontalAdjacency(IMapSpace mapSpace, MapSpot spot)
+    public AdjacencyFlags GetHorizontalAdjacency(
+        IMapSpace mapSpace, 
+        MapSpot spot, 
+        RotationFlag rotation = RotationFlag.North, 
+        bool matchAny = false)
     {
         var terrain = mapSpace.GetTerrainAtSpot(spot);
         var adjacency = AdjacencyFlags.None;
         if (terrain == null)
-            return adjacency;
+            return (AdjacencyFlags) (-1);
+
+        var topSpot = spot.DirectionToSpot(DirectionFlags.Top);
+        var topTerrain = mapSpace.GetTerrainAtSpot(topSpot);
+        if (topTerrain != null)
+            return (AdjacencyFlags) (-1);
         
-        foreach (var adjPair in spot.ListAdjacentSpots())
+        foreach (var adjPair in spot.ListAdjacentSpots(rotation))
         {
             var direction = adjPair.Key;
             var adjSpot = adjPair.Value;
@@ -76,7 +85,7 @@ public class TerrainManager : BaseManager
             var terrainAtSpot = mapSpace.GetTerrainAtSpot(adjSpot);
             if(terrainAtSpot == null)
                 continue;
-            if (terrainAtSpot.Id == terrain.Id)
+            if (terrainAtSpot.Id == terrain.Id || matchAny)
             {
                 var adjFlag = MapHelper.DirectionToAdjacency(direction);
                 
@@ -92,14 +101,19 @@ public class TerrainManager : BaseManager
     /// <summary>
     /// Returns adjacency for front of block, but translated to horizontal adjacency for PatchSprites
     /// </summary>
-    public AdjacencyFlags GetVerticalAdjacencyAsHorizontal(MapSpace mapSpace, MapSpot spot)
+    public AdjacencyFlags GetVerticalAdjacencyAsHorizontal(MapSpace mapSpace, MapSpot spot, RotationFlag rotation = RotationFlag.North, bool matchAny = false)
     {
         var terrain = mapSpace.GetTerrainAtSpot(spot);
         var adjacency = AdjacencyFlags.None;
         if (terrain == null)
-            return adjacency;
+            return (AdjacencyFlags) (-1);
+
+        var frontSpace = spot.DirectionToSpot(DirectionFlags.Front, rotation);
+        var frontTerrain = mapSpace.GetTerrainAtSpot(frontSpace);
+        if (frontTerrain != null)
+            return (AdjacencyFlags) (-1);
         
-        foreach (var adjPair in spot.ListAdjacentSpots())
+        foreach (var adjPair in spot.ListAdjacentSpots(rotation))
         {
             var direction = adjPair.Key;
             var adjSpot = adjPair.Value;
@@ -114,7 +128,7 @@ public class TerrainManager : BaseManager
             var terrainAtSpot = mapSpace.GetTerrainAtSpot(adjSpot);
             if(terrainAtSpot == null)
                 continue;
-            if (terrainAtSpot.Id == terrain.Id)
+            if (terrainAtSpot.Id == terrain.Id || matchAny)
             {
                 var adjFlag = MapHelper.DirectionToAdjacency(direction);
                 switch (direction)
@@ -132,13 +146,22 @@ public class TerrainManager : BaseManager
                         adjFlag = AdjacencyFlags.FrontLeft;
                         break;
                     case DirectionFlags.Bottom:
-                        adjFlag = AdjacencyFlags.Front;
+                        // If it's got a block to the bottom front of it, show no adj bottom
+                        var botFrontSpot = spot.DirectionToSpot(DirectionFlags.BottomFront);
+                        var botFrontTerrain =  mapSpace.GetTerrainAtSpot(botFrontSpot);
+                        if(botFrontTerrain != null && (botFrontTerrain.Def.DefName == terrain.Def.DefName || matchAny))
+                            adjFlag = AdjacencyFlags.None;
+                        else
+                            adjFlag = AdjacencyFlags.Front;
+                            
                         break;
                     case DirectionFlags.BottomRight:
                         adjFlag = AdjacencyFlags.FrontRight;
                         break;
                         
                 }
+                
+                
                 
                 // Console.WriteLine($"Before adding {adjFlag} to {adjacency}");
                 adjacency = adjacency | adjFlag;

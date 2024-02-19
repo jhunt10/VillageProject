@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cni1rnhi548hl"
-path="res://.godot/imported/Dirt.png-31d204050fbc4c6fe01715399cdf4282.ctex"
+uid="uid://dk0c1g65hs8ei"
+path="res://.godot/imported/TerrainSpriteFront.png-cf0d9579b7da94711a7b36501a51e439.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Defs/Terrain/Dirt.png"
-dest_files=["res://.godot/imported/Dirt.png-31d204050fbc4c6fe01715399cdf4282.ctex"]
+source_file="res://Assets/Sprites/TerrainSpriteFront.png"
+dest_files=["res://.godot/imported/TerrainSpriteFront.png-cf0d9579b7da94711a7b36501a51e439.ctex"]
 
 [params]
 

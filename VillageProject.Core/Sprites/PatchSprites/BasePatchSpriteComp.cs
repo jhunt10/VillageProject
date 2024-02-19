@@ -30,6 +30,8 @@ public abstract class BasePatchCellSpriteComp : BaseSpriteComp, ISpriteComp
     /// </summary>
     public static int[] AdjacencyToAtlasCo(AdjacencyFlags adj)
     {
+        if(((int)adj) < 0)
+            return new int[] { 10, 1 };
         // Has Back
         if (adj.HasFlag(AdjacencyFlags.Back))
         {

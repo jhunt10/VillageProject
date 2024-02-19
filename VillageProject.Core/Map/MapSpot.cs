@@ -5,10 +5,10 @@
 /// </summary>
 public enum RotationFlag
 {
-    North = 1,
-    East = 2,
-    South = 4,
-    West = 8
+    North = 0,
+    East = 1,
+    South = 2,
+    West = 3
 }
 
 /// <summary>
@@ -103,6 +103,13 @@ public struct MapSpot
     public int Y { get; set; }
     public int Z { get; set; }
 
+    public MapSpot()
+    {
+        X = 0;
+        Y = 0;
+        Z = 0;
+    }
+    
     public MapSpot(int x, int y, int z)
     {
         X = x;
@@ -130,7 +137,7 @@ public struct MapSpot
             X = x; Y = y; Z = z;
         }
     }
-
+    
     // AdjacencyToSpot doesn't make sense because one AdjacencyFlags contains references to multiple spots
     // public MapSpot AdjacencyToSpot(AdjacencyFlags flags, RotationFlag rotationFlag = RotationFlag.North)
 
@@ -171,6 +178,17 @@ public struct MapSpot
             z -= 1;
         
         //TODO: Rotation
+        switch (rotation)
+        {
+            case RotationFlag.North:
+                return new MapSpot(X + x, Y + y, Z + z);
+            case RotationFlag.East:
+                return new MapSpot(X - y, Y + x, Z + z);
+            case RotationFlag.South:
+                return new MapSpot(X - x, Y - y, Z + z);
+            case RotationFlag.West:
+                return new MapSpot(X + y, Y - x, Z + z);
+        }
 
         return new MapSpot(X + x, Y + y, Z + z);
     }

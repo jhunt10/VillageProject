@@ -1,15 +1,22 @@
-﻿using Godot;
+﻿using System;
+using System.IO;
+using Godot;
+using Godot.Collections;
 using VillageProject.Core.Sprites;
 using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Map;
 using VillageProject.Core.Sprites.PatchSprites;
+using Array = Godot.Collections.Array;
 
 namespace VillageProject.Godot.Sprites;
 
 public class GodotPatchCellSpriteComp : BasePatchCellSpriteComp, ISpriteComp
 {
     public const string SPRITE_KEY = "full_sprite";
+
+    private int _gridWidth;
+    private ImageTexture[] _cache; 
 
     private Image _image;
 
@@ -34,7 +41,23 @@ public class GodotPatchCellSpriteComp : BasePatchCellSpriteComp, ISpriteComp
         var width = def.SpriteWidth;
         var hight = def.SpriteHight;
 
+        if (_cache == null)
+        {
+            var imageSize = _image.GetSize();
+            _gridWidth = imageSize.X / width;
+            var gridHight = imageSize.Y / hight;
+            _cache = new ImageTexture[_gridWidth * gridHight];
+        }
+
+        var index = (_gridWidth * y) + x;
+        if (index > _cache.Length)
+            throw new Exception("Atlas Co outside of bounds.");
+        if (_cache[index] != null)
+            return new SpriteData(_cache[index]);
+        
+
         var subImage = _image.GetRegion(new Rect2I(x * width, y * hight, width, hight));
-        return new SpriteData(ImageTexture.CreateFromImage(subImage));
+        _cache[index] = ImageTexture.CreateFromImage(subImage);
+        return new SpriteData(_cache[index]);
     }
 }

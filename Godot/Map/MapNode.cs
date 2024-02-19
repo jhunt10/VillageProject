@@ -1,5 +1,8 @@
+using static Godot.GD;
 using Godot;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using VillageProject.Core.DIM;
 using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.Map;
@@ -7,16 +10,21 @@ using VillageProject.Core.Map.Terrain;
 using VillageProject.Core.Sprites.PatchSprites;
 using VillageProject.Godot.Sprites;
 
-public partial class MapNode : Node
+public partial class MapNode : Node2D
 {
 	public const int TILE_WIDTH = 32;
 	public const int TILE_HIGHT = 40;
-	private MapSpace MapSpace;
 	private TerrainManager TerrainManager;
 
-	private Dictionary<int, Node2D> ZLayers = new Dictionary<int, Node2D>();
-	private Dictionary<int, Sprite2D> ZLayerShadows = new Dictionary<int, Sprite2D>();
-	private Dictionary<int, Node2D> ZTerrainShadows = new Dictionary<int, Node2D>();
+	
+	public MapSpace MapSpace;
+	public RotationFlag ViewRotaion;
+	public int VisibleZLayer = 0;
+
+	private Dictionary<MapSpot, Node2D> TerrainNodes = new Dictionary<MapSpot, Node2D>();
+	private Dictionary<int, ZLayerPrefab> ZLayers = new Dictionary<int, ZLayerPrefab>();
+	// private Dictionary<int, Sprite2D> ZLayerShadows = new Dictionary<int, Sprite2D>();
+	// private Dictionary<int, Node2D> ZTerrainShadows = new Dictionary<int, Node2D>();
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -39,52 +47,71 @@ public partial class MapNode : Node
 		}
 			
 		
+		// ShowZLayer(0);
+		
 	}
 
 	public void ShowZLayer(int zLayer)
 	{
-
+		if(!ZLayers.Any())
+			return;
+		
 		var maxZ = ZLayers.Keys.Max();
 		var minZ = ZLayers.Keys.Min();
-		currentZ = zLayer;
+		VisibleZLayer = zLayer;
 		if (zLayer > maxZ)
-			currentZ = maxZ;
-		if (currentZ < minZ)
-			currentZ = minZ;
+			VisibleZLayer = maxZ;
+		if (VisibleZLayer < minZ)
+			VisibleZLayer = minZ;
 
 		for (int z = minZ; z <= maxZ; z++)
 			if (ZLayers.ContainsKey(z))
 			{
-				ZTerrainShadows[z].Visible = z == (currentZ + 1);
-				if (z <= currentZ)
-				{
-					ZLayers[z].Visible = true;
-					ZLayerShadows[z].Visible = true;
-				}
-				else
-				{
-					ZLayers[z].Visible = false;
-					ZLayerShadows[z].Visible = false;
-				}
+				ZLayers[z].SetShow(z <= VisibleZLayer, z == VisibleZLayer + 1);
 			}
 	}
 
+	public void RotateMap(RotationFlag rotation)
+	{
+		ViewRotaion = (RotationFlag)(((int)rotation) % 4);
+		if (ViewRotaion < 0)
+			ViewRotaion = 0;
+		Console.WriteLine($"Rotate Map: {ViewRotaion}");
+		foreach (var layer in ZLayers)
+		{
+			layer.Value.SetRotation(MapSpace, rotation);
+		}
+	}
+	
 	public void GenerateMap()
 	{
 		var maxX = 30;
+		var minX = -30;
 		var maxY = 20;
-		var maxZ = 10;
-		MapSpace._buildCellMatrix(maxX,0,maxY,0,maxZ,0);
+		var minY = -20;
+		var maxZ = 3;
+		var minZ = -3;
+		
+		// var maxX = 3;
+		// var minX = -3;
+		// var maxY = 3;
+		// var minY = -3;
+		// var maxZ = 0;
+		// var minZ = 0;
+		MapSpace._buildCellMatrix(maxX,minX,maxY,minY,maxZ,minZ);
 		
 		TerrainManager = DimMaster.GetManager<TerrainManager>();
 		var terrainNoise = new FastNoiseLite();
+		
+		terrainNoise.Seed = DateTime.Now.Millisecond;
+		
 		terrainNoise.Frequency = (float)0.05;
 		var hightNoise = new FastNoiseLite();
 		hightNoise.Seed = terrainNoise.Seed + 1;
-		hightNoise.Frequency = (float)0.05;
+		hightNoise.Frequency = (float)0.02;
 		
-		for(int x = 0; x < 30; x++)
-		for (int y = 0; y < 20; y++)
+		for(int x = minX; x < 30; x++)
+		for (int y = minY; y < 20; y++)
 		{
 			var terrainVal = terrainNoise.GetNoise2D(x, y);
 			var index = 0;//(int)(GD.Randi() % TerrainManager._terrainInsts.Count);
@@ -92,17 +119,15 @@ public partial class MapNode : Node
 				index = 1;
 
 			var hightVal = hightNoise.GetNoise2D(x, y);
-			var hight = 5 - (int)(hightVal * 10);
+			var hight = (int)(hightVal * (maxZ - minZ + 1));
+			if (minZ == 0 && maxZ == 0)
+				hight = 1;
 			
 			var terrainInst = TerrainManager._terrainInsts.Values.ToList()[index];
-			for(int z = 0; z < hight; z++)
+			for(int z = minZ; z < hight; z++)
 				MapSpace.SetTerrainAtSpot(terrainInst, new MapSpot(x, y, z));
 		}
 	}
-
-	private double zTimmer = 0;
-	private double zDelay = 2;
-	private int currentZ = 0;
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
@@ -111,58 +136,118 @@ public partial class MapNode : Node
 		var mouseOverPos = MapSpotToWorldPos(mouseOverSpot);
 		
 	}
-	
-	public override void _UnhandledInput(InputEvent @event)
-	{
-		if (@event is InputEventKey eventKey)
-		{
-			if (eventKey.Pressed && eventKey.Keycode == Key.Up)
-			{
-				ShowZLayer(currentZ+1);
-			}
-			else if (eventKey.Pressed && eventKey.Keycode == Key.Down)
-			{
-				ShowZLayer(currentZ-1);
-			}
-		}
-			
-	}
 
 	public MapSpot GetMouseOverMapSpot()
 	{
+		var mainCamera = GameMaster.MainCamera;
+		if (mainCamera == null)
+			return new MapSpot(0, 0, 0);
+
 		var mousePos = GetViewport().GetMousePosition();
-		var x = (int)(mousePos.X / TILE_WIDTH);
-		var y = (int)(mousePos.Y / TILE_HIGHT);
-		var z = 0;
-		return new MapSpot(x, y, z);
+		var relativePos = mousePos + mainCamera.Position;
+		var x = Mathf.FloorToInt(relativePos.X / (float)TILE_WIDTH);
+		
+		var maxZ = ZLayers.Keys.Max();
+		var minZ = ZLayers.Keys.Min();
+		
+		for (int z = VisibleZLayer; z >= minZ; z--)
+		{
+			var y = Mathf.FloorToInt((relativePos.Y + (float)(z * TILE_HIGHT))  / (float)TILE_WIDTH);
+			MapSpot spot = default(MapSpot);
+			switch (ViewRotaion)
+			{
+				case RotationFlag.North:
+					spot = new MapSpot(x, y, z);
+					break;
+				case RotationFlag.East:
+					spot = new MapSpot(-y, x, z);
+					break;
+				case RotationFlag.South:
+					spot = new MapSpot(-x, -y, z);
+					break;
+				case RotationFlag.West:
+					spot = new MapSpot(y, -x, z);
+					break;
+			}
+			
+			// Check if top of cell
+			if (MapSpace.GetTerrainAtSpot(spot) != null)
+			{
+				Console.WriteLine($"TopFound: Mouse: {relativePos} | Spot: {spot}");
+				return spot;
+			}
+			
+			// Check if front of cell
+			var backSpot = spot.DirectionToSpot(DirectionFlags.Back, ViewRotaion);
+			if (MapSpace.GetTerrainAtSpot(backSpot) != null)
+			{
+				Console.WriteLine($"FrontFound: Mouse: {relativePos} | Spot: {backSpot}");
+				return backSpot;
+			}
+
+			// There is a gap between the bottom of where a tile top would be and where the bottom of the front sprite really is
+			// We need to correct for this with an extra check
+			var diff = relativePos.Y - ((y * TILE_WIDTH) - (z * TILE_HIGHT));
+			if(z ==0)
+				Console.WriteLine($"Diff: {diff}");
+			if ( diff < (TILE_HIGHT - TILE_WIDTH))
+			{
+				var doubleBackSpot = backSpot.DirectionToSpot(DirectionFlags.Back, ViewRotaion);
+				Console.WriteLine($"Edge Case: Mouse: {relativePos}Checking Spot: {spot} | FrontSpot: {backSpot} | DoubleCheck: {doubleBackSpot} | Diff: {diff}");
+				if (MapSpace.GetTerrainAtSpot(doubleBackSpot) != null)
+				{
+					return doubleBackSpot;
+				}
+			}
+
+		}
+
+		Console.WriteLine($"NO RESULT!!! relativePos: {relativePos} | mainCamera.Position: {mainCamera.Position}");
+		return new MapSpot(0, 0, 0);
 	}
 
 	public Vector2 MapSpotToWorldPos(MapSpot spot)
 	{
+		switch (ViewRotaion)
+		{
+			case RotationFlag.North:
+				return new Vector2(spot.X * TILE_WIDTH, (spot.Y * TILE_WIDTH) - (spot.Z * TILE_HIGHT));
+			case RotationFlag.East:
+				return new Vector2(spot.Y * TILE_WIDTH, (-spot.X * TILE_WIDTH) - (spot.Z * TILE_HIGHT));
+			case RotationFlag.South:
+				return new Vector2(-spot.X * TILE_WIDTH, (-spot.Y * TILE_WIDTH) - (spot.Z * TILE_HIGHT));
+			case RotationFlag.West:
+				return new Vector2(-spot.Y * TILE_WIDTH, (spot.X * TILE_WIDTH) - (spot.Z * TILE_HIGHT));
+				
+			
+		}
 		return new Vector2(spot.X * TILE_WIDTH, (spot.Y * TILE_WIDTH) - (spot.Z * TILE_HIGHT));
+	}
+
+
+
+	private void CreateTerrainNode(MapSpot spot)
+	{
+		if(!ZLayers.ContainsKey(spot.Z))
+			CreateZLayer(spot.Z);
+		var newNode = ZLayers[spot.Z].CreateTerrainNode(this, TerrainManager, MapSpace, spot);
+		TerrainNodes.Add(spot, newNode);
 	}
 	
 	private void CreateZLayer(int z)
 	{
-		var node = new Node2D();
-		AddChild(node);
-		node.Position = new Vector2(0, -40 * z);
-		ZLayers.Add(z, node);
-		
-		var shadow = CreateZLayerShadow();
-		node.AddChild(shadow);
-		shadow.Position = new Vector2(0, 40 * z);
-		ZLayerShadows.Add(z, shadow);
+		var prefab = GetNode("ZLayerPrefab");
 
-		var terrainShadows = new Node2D();
-		AddChild(terrainShadows);
-		terrainShadows.Position = new Vector2(0, -40 * (z - 1));
-		ZTerrainShadows.Add(z, terrainShadows);
+		var newLayer = (ZLayerPrefab)prefab.Duplicate();
+		newLayer.Position = new Vector2(0, -40 * z);
+		ZLayers.Add(z, newLayer);
+		this.AddChild(newLayer);
 	}
 
 	private Sprite2D CreateZLayerShadow()
 	{
 		var size = this.GetViewport().GetWindow().Size;
+		size.Y += TILE_HIGHT;
 		var image = Image.Create(size.X, size.Y, false, Image.Format.Rgba8);
 		for(int x = 0; x < size.X; x++)
 			for(int y = 0; y < size.Y; y++)
@@ -173,72 +258,16 @@ public partial class MapNode : Node
 		return newNode;
 	}
 
-	private Sprite2D CreateTerrainShadow()
+
+	public Node2D GetTerrainNodeAtSpot(MapSpot spot)
 	{
-		var size = new Vector2I(32,32);
-		var image = Image.Create(size.X, size.Y, false, Image.Format.Rgba8);
-		for(int x = 0; x < size.X; x++)
-		for(int y = 0; y < size.Y; y++)
-			image.SetPixel(x, y, new Color(0,0,0,(float)0.3));
-		var newNode = new Sprite2D();
-		newNode.Texture = ImageTexture.CreateFromImage(image);
-		newNode.Centered = false;
-		return newNode;
+		if (TerrainNodes.ContainsKey(spot))
+			return TerrainNodes[spot];
+		return null;
 	}
 
-	private object CreateTerrainNode(MapSpot spot)
-	{
-		var inst = MapSpace.GetTerrainAtSpot(spot);
-		if (inst == null)
-			return null;
-		
-		var topSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("TopSprite");
-		var topSpriteDef = topSpriteComp.CompDef as IPatchSpriteCompDef;
-		var topSprite = topSpriteComp.GetPatchSprite(() =>
-		{
-			return TerrainManager.GetHorizontalAdjacency(MapSpace, spot);
-		});
-
-		var frontSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
-		var frontSpriteDef = frontSpriteComp.CompDef as IPatchSpriteCompDef;
-		var frontSprite = frontSpriteComp.GetPatchSprite(() =>
-		{
-			return TerrainManager.GetVerticalAdjacencyAsHorizontal(MapSpace, spot);
-		});
-		
-		var shadowSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
-		var shadowSpriteDef = topSpriteComp.CompDef as IPatchSpriteCompDef;
-		var shadowSprite = frontSpriteComp.GetPatchSprite(() =>
-		{
-			return TerrainManager.GetVerticalAdjacencyAsHorizontal(MapSpace, spot);
-		});
-		
-		var newNode = new Node2D(); // Create a new Sprite2D.
-		if (!ZLayers.ContainsKey(spot.Z))
-		{
-			CreateZLayer(spot.Z);
-		}
-		ZLayers[spot.Z].AddChild(newNode);
-		
-		var topSpriteNode = new Sprite2D();
-		newNode.AddChild(topSpriteNode);
-		topSpriteNode.Texture = (ImageTexture)topSprite.Sprite;
-		topSpriteNode.Centered = false;
-		
-		var frontSpriteNode = new Sprite2D();
-		newNode.AddChild(frontSpriteNode);
-		frontSpriteNode.Texture = (ImageTexture)frontSprite.Sprite;
-		frontSpriteNode.Position = new Vector2(0, topSpriteDef.SpriteHight);
-		frontSpriteNode.Centered = false;
-		
-		
-		var pos = new Vector2(spot.X * topSpriteDef.SpriteWidth, spot.Y * topSpriteDef.SpriteHight);
-		newNode.Position = pos;
-
-		var terrainShadow = CreateTerrainShadow();
-		ZTerrainShadows[spot.Z].AddChild(terrainShadow);
-		terrainShadow.Position = new Vector2(spot.X * topSpriteDef.SpriteWidth, (spot.Y * topSpriteDef.SpriteHight)); ;
-		
-		return newNode;
-	}
+	// public Sprite2D CreateGrassNode(MapSpot spot)
+	// {
+	// 	var image = GD.Load<Image>()
+	// }
 }

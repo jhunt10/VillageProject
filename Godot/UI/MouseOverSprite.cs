@@ -8,6 +8,8 @@ public partial class MouseOverSprite : Sprite2D
 	public Label TextLabel;
 	public CanvasLayer Canvas;
 	
+	public static MapSpot MosueOverSpot {get; private set; }
+	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -36,5 +38,6 @@ public partial class MouseOverSprite : Sprite2D
 		else
 			node.AddChild(this);
 		_lastSpot = mouseSpot;
+		MosueOverSpot = _lastSpot;
 	}
 }

@@ -42,8 +42,15 @@ public class DimMaster
         var defFiles = Directory.EnumerateFiles(defPath, "*.json", SearchOption.AllDirectories).ToList();
         foreach (var defFile in defFiles)
         {
-            var def = _loadDefFromFile(defFile);
-            Defs.Add(def);
+            try
+            {
+                var def = _loadDefFromFile(defFile);
+                Defs.Add(def);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Failed to load Def from file '{defFile}': {e.Message}");
+            }
         }
     }
 
@@ -81,8 +88,8 @@ public class DimMaster
             var managerName = compDef.ManagerClassName;
             var manager = GetManagerByName(managerName);
             var args = default(object?);
-            if (compArgs != null && compArgs.ContainsKey(managerName))
-                args = compArgs[managerName];
+            if (compArgs != null && compArgs.ContainsKey(compDef.CompKey))
+                args = compArgs[compDef.CompKey];
             var compInst = manager.CreateCompInst(compDef, inst, args);
             if(!inst.Components.Contains(compInst))
                 inst.AddComponent(compInst);

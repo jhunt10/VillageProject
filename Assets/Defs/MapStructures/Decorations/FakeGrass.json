@@ -1,0 +1,27 @@
+{
+    "DefName": "Defs.MapStructures.Decorations.FakeGrass",
+    "Label": "Grass",
+    "CompDefs": [
+        {
+            "MapLayer": "Default",
+            "FootPrint": {
+                "(0,0,0)": [
+                    0
+                ]
+            },
+            "CompDefClassName": "VillageProject.Core.Map.MapStructures.MapStructCompDef",
+            "CompInstClassName": "VillageProject.Core.Map.MapStructures.MapStructCompInst",
+            "ManagerClassName": "VillageProject.Core.Map.MapStructures.MapStructureManager",
+            "CompKey": "VillageProject.Core.Map.MapStructures.MapStructCompDef"
+        },
+        {
+            "CompDefClassName": "VillageProject.Godot.Sprites.GodotPatchCellSpriteDef",
+            "CompInstClassName": "VillageProject.Godot.Sprites.GodotPatchCellSpriteComp",
+            "ManagerClassName": "VillageProject.Core.Sprites.SpriteManager",
+            "CompKey": "Sprite",
+            "SpriteSheet": "planter_tiles.png",
+            "SpriteWidth": 32,
+            "SpriteHight": 32
+        }
+    ]
+}

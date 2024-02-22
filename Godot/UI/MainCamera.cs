@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using VillageProject.Core.DIM;
+using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.Terrain;
 
@@ -76,7 +77,6 @@ public partial class MainCamera : Camera2D
 	{
 		if (@event is InputEventKey eventKey)
 		{
-			
 			if (eventKey.Pressed && eventKey.Keycode == Key.Escape)
 			{
 				GetTree().Quit();
@@ -113,6 +113,12 @@ public partial class MainCamera : Camera2D
 			{
 				RotateCamera(1, true);
 			}
+		}
+
+		if (@event is InputEventMouseButton eventMouseButton)
+		{
+			GD.Print("Mouse Click/Unclick at: ", eventMouseButton.Position);
+			GameMaster.MapNode.CreateGrassNode(MouseOverSprite.MosueOverSpot + new MapSpot(0,0,1));
 		}
 			
 	}

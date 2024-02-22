@@ -1,5 +1,6 @@
 ﻿using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.DIM.Insts;
+using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 
 namespace VillageProject.Core.Sprites.PatchSprites;

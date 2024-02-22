@@ -14,10 +14,12 @@ public abstract class BaseCompDef<TCompInst, TManager> : RootCompDef
     {
         get { return this.GetType().FullName; }
     }
+    [JsonPropertyName("CompInstClassName"), JsonPropertyOrder(1)]
     public override string CompInstClassName
     {
         get { return typeof(TCompInst).FullName; }
     }
+    [JsonPropertyName("ManagerClassName"), JsonPropertyOrder(2)]
     public override string ManagerClassName 
     {
         get { return typeof(TManager).FullName; }

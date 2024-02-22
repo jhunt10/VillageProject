@@ -4,7 +4,9 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using VillageProject.Core.DIM;
 using VillageProject.Core.DIM.Defs;
+using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
+using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.Terrain;
 
 Console.WriteLine("Hello, World!");
@@ -23,11 +25,29 @@ string GetDefPath()
 }
 
 
-var mapSpot = new MapSpot(0, 0, 0);
-foreach (var adj in mapSpot.ListAdjacentSpots())
+// var mapSpot = new MapSpot(0, 0, 0);
+// foreach (var adj in mapSpot.ListAdjacentSpots())
+// {
+//     Console.WriteLine($"{adj.Key}: {adj.Value}");
+// }
+
+var fakeGrassDef = new Def
 {
-    Console.WriteLine($"{adj.Key}: {adj.Value}");
-}
+    DefName = "Defs.MapStructures.Decorations.FakeGrass",
+    Label = "Grass",
+    CompDefs = new List<ICompDef>
+    {
+        new MapStructCompDef
+        {
+            MapLayer = "Default",
+            FootPrint = new Dictionary<MapSpot, OccupationFlags[]>
+            {
+                { new MapSpot(0, 0, 0), new OccupationFlags[]{OccupationFlags.None }}
+            }
+        }
+    }
+};
+// SaveDef(fakeGrassDef);
 
 // var terrainDef = new Def
 // {
@@ -41,7 +61,16 @@ foreach (var adj in mapSpot.ListAdjacentSpots())
 // };
 // SaveDef(terrainDef);
 //
-// DimMaster.StartUp();
+var ocupation = OccupationFlags.TopLeft | OccupationFlags.FrontLeft | OccupationFlags.BottomRight;
+var occ2 = ocupation.Rotate(RotationDirection.Clockwise);
+var occ3 = ocupation.Rotate(RotationDirection.HalfTurn);
+var occ4 = ocupation.Rotate(RotationDirection.CounterClockwise);
+
+DimMaster.StartUp();
+// var mapStructManager = DimMaster.GetManager<MapStructureManager>();
+// var def = DimMaster.GetAllDefsWithCompDefType<MapStructCompDef>().First();
+// mapStructManager.CreateMapStructureFromDef(def, new MapSpot(0, 0, 0), RotationFlag.North);
+
 // var terrainManager = DimMaster.GetManager<TerrainManager>();
 //
 //

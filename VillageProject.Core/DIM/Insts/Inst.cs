@@ -50,13 +50,17 @@ public class Inst : IInst
         }
     }
     
-    public TComp? GetComponentOfType<TComp>()
+    public TComp? GetComponentOfType<TComp>(bool errorIfNull = false)
     {
         foreach (var comp in Components)
         {
             if (comp is TComp)
                 return (TComp)comp;
         }
+
+        if (errorIfNull)
+            throw new Exception(
+                $"Failed to find Component of type '{typeof(TComp).FullName}' on Inst '{Def.DefName}:{Id}'.");
         return default(TComp);
     }
 }

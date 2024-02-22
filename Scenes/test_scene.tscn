@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://dq0d812v1qmf4"]
+[gd_scene load_steps=12 format=3 uid="uid://dq0d812v1qmf4"]
 
 [ext_resource type="Script" path="res://Godot/GameMaster.cs" id="1_ox1jl"]
 [ext_resource type="Script" path="res://Godot/Map/MapNode.cs" id="2_6m56v"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://bbrujo6l8wrw" path="res://Assets/Sprites/TerrainSpriteTop.png" id="6_47g7n"]
 [ext_resource type="Script" path="res://Godot/UI/MainCamera.cs" id="7_0kvpc"]
 [ext_resource type="Texture2D" uid="uid://dk0c1g65hs8ei" path="res://Assets/Sprites/TerrainSpriteFront.png" id="7_466ww"]
+[ext_resource type="Script" path="res://Godot/Map/MapStructureNode.cs" id="8_1vd1e"]
 
 [node name="GameMaster" type="Node2D"]
 script = ExtResource("1_ox1jl")
@@ -25,32 +26,41 @@ modulate = Color(1, 1, 1, 0.0901961)
 scale = Vector2(100, 100)
 texture = ExtResource("4_ep16e")
 
-[node name="TerrainNodes" type="Node2D" parent="MapNode/ZLayerPrefab"]
+[node name="PrefabNodes" type="Node2D" parent="MapNode/ZLayerPrefab"]
 
-[node name="TerrainNodePrefab" type="Node2D" parent="MapNode/ZLayerPrefab/TerrainNodes"]
+[node name="TerrainNodePrefab" type="Node2D" parent="MapNode/ZLayerPrefab/PrefabNodes"]
 visible = false
 script = ExtResource("5_njey8")
 
-[node name="ShadowSprite" type="Sprite2D" parent="MapNode/ZLayerPrefab/TerrainNodes/TerrainNodePrefab"]
+[node name="ShadowSprite" type="Sprite2D" parent="MapNode/ZLayerPrefab/PrefabNodes/TerrainNodePrefab"]
 modulate = Color(1, 1, 1, 0.313726)
 texture = ExtResource("4_ep16e")
 centered = false
-offset = Vector2(0, 40)
 
-[node name="TopSprite" type="Sprite2D" parent="MapNode/ZLayerPrefab/TerrainNodes/TerrainNodePrefab"]
+[node name="TopSprite" type="Sprite2D" parent="MapNode/ZLayerPrefab/PrefabNodes/TerrainNodePrefab"]
 texture = ExtResource("6_47g7n")
 centered = false
+offset = Vector2(0, -40)
 
-[node name="FrontSprite" type="Sprite2D" parent="MapNode/ZLayerPrefab/TerrainNodes/TerrainNodePrefab"]
+[node name="FrontSprite" type="Sprite2D" parent="MapNode/ZLayerPrefab/PrefabNodes/TerrainNodePrefab"]
 texture = ExtResource("7_466ww")
 centered = false
-offset = Vector2(0, 32)
+offset = Vector2(0, -8)
+
+[node name="MapStructureNodePrefab" type="Node2D" parent="MapNode/ZLayerPrefab/PrefabNodes"]
+script = ExtResource("8_1vd1e")
+
+[node name="Sprite2D" type="Sprite2D" parent="MapNode/ZLayerPrefab/PrefabNodes/MapStructureNodePrefab"]
+centered = false
+
+[node name="CellNodes" type="Node2D" parent="MapNode/ZLayerPrefab"]
 
 [node name="TerrainShadows" type="Node2D" parent="MapNode/ZLayerPrefab"]
 
 [node name="MouseOverSprite" type="Sprite2D" parent="."]
 texture = ExtResource("3_0lpvn")
 centered = false
+offset = Vector2(0, -40)
 script = ExtResource("4_qemjc")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="MouseOverSprite"]

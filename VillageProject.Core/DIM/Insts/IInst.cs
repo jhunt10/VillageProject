@@ -9,6 +9,6 @@ public interface IInst
     List<ICompInst> Components { get; }
     void AddComponent(ICompInst comp);
     TComp? GetComponentWithKey<TComp>(string key);
-    TComp? GetComponentOfType<TComp>();
+    TComp? GetComponentOfType<TComp>(bool errorIfNull = false);
     IEnumerable<TComp> GetComponentsOfType<TComp>();
 }

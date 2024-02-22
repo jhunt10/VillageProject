@@ -1,5 +1,6 @@
 ﻿using VillageProject.Core.DIM;
 using VillageProject.Core.DIM.Insts;
+using VillageProject.Core.Enums;
 
 namespace VillageProject.Core.Map.Terrain;
 
@@ -30,7 +31,7 @@ public class TerrainManager : BaseManager
     
     private void LoadDefsToInsts()
     {
-        var terrainDefs = DimMaster.GetAllDefsWithCompDefType<TerrainDef>();
+        var terrainDefs = DimMaster.GetAllDefsWithCompDefType<TerrainCompDef>();
         foreach (var def in terrainDefs)
         {
             var inst = DimMaster.InstantiateDef(def);
@@ -65,10 +66,10 @@ public class TerrainManager : BaseManager
         if (terrain == null)
             return (AdjacencyFlags) (-1);
 
-        var topSpot = spot.DirectionToSpot(DirectionFlags.Top);
-        var topTerrain = mapSpace.GetTerrainAtSpot(topSpot);
-        if (topTerrain != null)
-            return (AdjacencyFlags) (-1);
+        // var topSpot = spot.DirectionToSpot(DirectionFlags.Top);
+        // var topTerrain = mapSpace.GetTerrainAtSpot(topSpot);
+        // if (topTerrain != null)
+        //     return (AdjacencyFlags) (-1);
         
         foreach (var adjPair in spot.ListAdjacentSpots(rotation))
         {

@@ -1,4 +1,6 @@
-﻿namespace VillageProject.Core.Map;
+﻿using VillageProject.Core.Enums;
+
+namespace VillageProject.Core.Map;
 
 public static class MapHelper
 {

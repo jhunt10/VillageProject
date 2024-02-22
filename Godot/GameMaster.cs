@@ -2,6 +2,7 @@ using Godot;
 using System;
 using VillageProject.Core.DIM;
 using VillageProject.Core.DIM.Defs;
+using VillageProject.Core.Map;
 using Environment = System.Environment;
 using Timer = Godot.Timer;
 
@@ -11,6 +12,7 @@ public partial class GameMaster : Node2D
 	public static MapNode MapNode;
 	public static MainCamera MainCamera;
 	public static MouseOverSprite MouseOverSprite;
+	
 	
 	public override void _EnterTree()
 	{

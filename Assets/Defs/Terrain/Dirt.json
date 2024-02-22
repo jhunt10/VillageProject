@@ -3,7 +3,7 @@
     "Label": "Dirt",
     "CompDefs": [
         {
-            "CompDefClassName": "VillageProject.Core.Map.Terrain.TerrainDef",
+            "CompDefClassName": "VillageProject.Core.Map.Terrain.TerrainCompDef",
             "CompInstClassName": "VillageProject.Core.Map.Terrain.TerrainCompInst",
             "ManagerClassName": "VillageProject.Core.Map.Terrain.TerrainManager"
         },

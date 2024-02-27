@@ -2,11 +2,14 @@
 
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using VillageProject.ConsoleApp.DefDefs;
 using VillageProject.Core.DIM;
 using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapStructures;
+using VillageProject.Core.Map.MapStructures.Constructables;
 using VillageProject.Core.Map.Terrain;
 
 Console.WriteLine("Hello, World!");
@@ -24,65 +27,24 @@ string GetDefPath()
     throw new NotImplementedException($"No DefPath set for user: '{Environment.UserName}'");
 }
 
+MakeAndSaveNewDef();
 
-// var mapSpot = new MapSpot(0, 0, 0);
-// foreach (var adj in mapSpot.ListAdjacentSpots())
-// {
-//     Console.WriteLine($"{adj.Key}: {adj.Value}");
-// }
-
-var fakeGrassDef = new Def
-{
-    DefName = "Defs.MapStructures.Decorations.FakeGrass",
-    Label = "Grass",
-    CompDefs = new List<ICompDef>
-    {
-        new MapStructCompDef
-        {
-            MapLayer = "Default",
-            FootPrint = new Dictionary<MapSpot, OccupationFlags[]>
-            {
-                { new MapSpot(0, 0, 0), new OccupationFlags[]{OccupationFlags.None }}
-            }
-        }
-    }
-};
-// SaveDef(fakeGrassDef);
-
-// var terrainDef = new Def
-// {
-//     DefName = "Defs.Terrain.Dirt",
-//     Label = "Dirt",
-//     CompDefs = new List<ICompDef>
-//     {
-//         new TerrainDef(),
-//         
-//     }
-// };
-// SaveDef(terrainDef);
-//
-var ocupation = OccupationFlags.TopLeft | OccupationFlags.FrontLeft | OccupationFlags.BottomRight;
-var occ2 = ocupation.Rotate(RotationDirection.Clockwise);
-var occ3 = ocupation.Rotate(RotationDirection.HalfTurn);
-var occ4 = ocupation.Rotate(RotationDirection.CounterClockwise);
 
 DimMaster.StartUp();
-// var mapStructManager = DimMaster.GetManager<MapStructureManager>();
-// var def = DimMaster.GetAllDefsWithCompDefType<MapStructCompDef>().First();
-// mapStructManager.CreateMapStructureFromDef(def, new MapSpot(0, 0, 0), RotationFlag.North);
-
-// var terrainManager = DimMaster.GetManager<TerrainManager>();
-//
-//
-// var defSearch = DimMaster.GetAllDefsWithCompDefType<TerrainDef>();
-//
-// foreach (var inst in terrainManager._terrainInsts)
-// {
-//     var t = inst;
-// }
 
 
-void SaveDef(Def def)
+void MakeAndSaveNewDef()
+{
+    var defs = FurnitureDefs.Defs.Values;
+    foreach (var d in defs)
+    {
+        SaveDef(d);
+    }
+    
+}
+
+
+void SaveDef(IDef def)
 {
     var savePath = BuildSavePath(def);
     var serialized = JsonSerializer.Serialize(def);
@@ -90,7 +52,7 @@ void SaveDef(Def def)
     File.WriteAllText(savePath, serialized);
 }
 
-string BuildSavePath(Def def)
+string BuildSavePath(IDef def)
 {
     var tokens = def.DefName.Split(DimMaster.PATH_SEPERATOR);
     var relativePath = Path.Combine(tokens) + ".json";

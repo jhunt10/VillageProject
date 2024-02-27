@@ -9,4 +9,10 @@ public interface IDef
     string LoadPath { get; }
     
     public List<ICompDef> CompDefs { get; }
+    
+    TComp? GetComponentWithKey<TComp>(string key);
+    
+    TComp? GetComponentOfType<TComp>(bool errorIfNull = false);
+    
+    IEnumerable<TComp> GetComponentsOfType<TComp>();
 }

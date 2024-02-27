@@ -16,6 +16,8 @@ public partial class ZLayerPrefab : Node2D
 	public Sprite2D LayerShadow;
 
 	public Node2D CellsParentNode;
+
+	public MapNode MapNode;
 	// public Node2D TerrainNodes;
 	// public Node2D MapStructureNodes;
 	// public Node2D TerrainShadowNodes;
@@ -65,23 +67,23 @@ public partial class ZLayerPrefab : Node2D
 		LayerShadow.Visible = show;
 	}
 
-	public void SetRotation(MapSpace mapSpace, RotationFlag rotation)
+	public void ResyncRotation()
 	{
 		var terrainManager = DimMaster.GetManager<TerrainManager>();
 		var spots = _cellNodes.Keys.ToList().OrderBy(x => -x.Y);
-		switch (rotation)
+		switch (MapNode.ViewRotation)
 		{
 			case RotationFlag.North:
-				spots = _cellNodes.Keys.ToList().OrderBy(x => x.Y);
-				break;
-			case RotationFlag.East:
-				spots = _cellNodes.Keys.ToList().OrderBy(x => -x.X);
-				break;
-			case RotationFlag.South:
 				spots = _cellNodes.Keys.ToList().OrderBy(x => -x.Y);
 				break;
-			case RotationFlag.West:
+			case RotationFlag.East:
 				spots = _cellNodes.Keys.ToList().OrderBy(x => x.X);
+				break;
+			case RotationFlag.South:
+				spots = _cellNodes.Keys.ToList().OrderBy(x => x.Y);
+				break;
+			case RotationFlag.West:
+				spots = _cellNodes.Keys.ToList().OrderBy(x => -x.X);
 				break;
 		}
 		foreach (var spot in spots)
@@ -89,17 +91,17 @@ public partial class ZLayerPrefab : Node2D
 
 			if (_cellNodes[spot] is TerrainNode)
 			{
-				var inst = mapSpace.GetTerrainAtSpot(spot);
+				var inst = terrainManager.GetTerrainAtSpot(MapNode.MapSpace, spot);
 				var topSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("TopSprite");
 				var topSprite = topSpriteComp.GetPatchSprite(() =>
 				{
-					return terrainManager.GetHorizontalAdjacency(mapSpace, spot, rotation, true);
+					return terrainManager.GetHorizontalAdjacency(MapNode.MapSpace, spot, MapNode.ViewRotation, true);
 				});
 
 				var frontSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
 				var frontSprite = frontSpriteComp.GetPatchSprite(() =>
 				{
-					return terrainManager.GetVerticalAdjacencyAsHorizontal(mapSpace, spot, rotation, true);
+					return terrainManager.GetVerticalAdjacencyAsHorizontal(MapNode.MapSpace, spot, MapNode.ViewRotation, true);
 				});
 
 				// var shadowSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("TopSprite");
@@ -111,14 +113,14 @@ public partial class ZLayerPrefab : Node2D
 				node.TopSprite.Texture = (ImageTexture)topSprite.Sprite;
 				node.FrontSprite.Texture = (ImageTexture)frontSprite.Sprite;
 				// _terrainNodes[spot].ShadowSprite.Texture = (ImageTexture)shadowSprite.Sprite;
-				_cellNodes[spot].Position = SpotToLocalPosition(spot, rotation);
+				_cellNodes[spot].Position = SpotToLocalPosition(spot, MapNode.ViewRotation);
 
 			}
 
 			if (_cellNodes[spot] is MapStructureNode)
 			{
 				((MapStructureNode)_cellNodes[spot]).DirtySprite = true;
-				_cellNodes[spot].Position = SpotToLocalPosition(spot, rotation);
+				_cellNodes[spot].Position = SpotToLocalPosition(spot, MapNode.ViewRotation);
 			}
 
 			CellsParentNode.RemoveChild(_cellNodes[spot]);
@@ -126,9 +128,9 @@ public partial class ZLayerPrefab : Node2D
 		}
 	}
 
-	public Node2D CreateMapStructureNode(MapNode mapNode, MapStructureManager mapStructureManager, 
-		MapSpace mapSpace, IInst mapStructInst)
+	public Node2D CreateMapStructureNode(IInst mapStructInst)
 	{
+		var mapStructureManager = DimMaster.GetManager<MapStructureManager>();
 		var mapStructComp = mapStructInst.GetComponentOfType<MapStructCompInst>(errorIfNull: true);
 
 		if (_cellNodes.ContainsKey(mapStructComp.MapSpot))
@@ -138,10 +140,10 @@ public partial class ZLayerPrefab : Node2D
 		var spriteDef = spriteComp.CompDef as IPatchSpriteCompDef;
 		var sprite = spriteComp.GetPatchSprite(() =>
 		{
-			return mapStructureManager.GetAdjacency(mapStructInst, mapSpace, mapStructComp.MapSpot, mapStructComp.Rotation);
+			return mapStructureManager.GetAdjacency(mapStructInst, MapNode.MapSpace, mapStructComp.MapSpot, mapStructComp.Rotation);
 		});
 		
-		var pos = SpotToLocalPosition(mapStructComp.MapSpot);
+		var pos = SpotToLocalPosition(mapStructComp.MapSpot, MapNode.ViewRotation);
 		var newNode = (MapStructureNode)MapStructureNodePrefab.Duplicate();
 		newNode.Inst = mapStructInst;
 		newNode.DirtySprite = true;
@@ -159,11 +161,12 @@ public partial class ZLayerPrefab : Node2D
 		return newNode;
 	}
 	
-	public Node2D CreateTerrainNode(MapNode mapNode, TerrainManager terrainManager, MapSpace mapSpace, MapSpot spot)
+	public Node2D CreateTerrainNode(MapSpot spot)
 	{
 		Init();
+		var terrainManager = DimMaster.GetManager<TerrainManager>();
 		
-		var inst = mapSpace.GetTerrainAtSpot(spot);
+		var inst = terrainManager.GetTerrainAtSpot(MapNode.MapSpace, spot);
 		if (inst == null)
 			return null;
 		
@@ -171,24 +174,24 @@ public partial class ZLayerPrefab : Node2D
 		var topSpriteDef = topSpriteComp.CompDef as IPatchSpriteCompDef;
 		var topSprite = topSpriteComp.GetPatchSprite(() =>
 		{
-			return terrainManager.GetHorizontalAdjacency(mapSpace, spot, matchAny:true);
+			return terrainManager.GetHorizontalAdjacency(MapNode.MapSpace, spot, matchAny:true);
 		});
 
 		var frontSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
 		var frontSpriteDef = frontSpriteComp.CompDef as IPatchSpriteCompDef;
 		var frontSprite = frontSpriteComp.GetPatchSprite(() =>
 		{
-			return terrainManager.GetVerticalAdjacencyAsHorizontal(mapSpace, spot, matchAny:true);
+			return terrainManager.GetVerticalAdjacencyAsHorizontal(MapNode.MapSpace, spot, matchAny:true);
 		});
 		
 		var shadowSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
 		var shadowSpriteDef = topSpriteComp.CompDef as IPatchSpriteCompDef;
 		var shadowSprite = frontSpriteComp.GetPatchSprite(() =>
 		{
-			return terrainManager.GetVerticalAdjacencyAsHorizontal(mapSpace, spot, matchAny:true);
+			return terrainManager.GetVerticalAdjacencyAsHorizontal(MapNode.MapSpace, spot, matchAny:true);
 		});
 		
-		var pos = SpotToLocalPosition(spot);
+		var pos = SpotToLocalPosition(spot, MapNode.ViewRotation);
 		var newNode = (TerrainNode)TerrainNodePrefab.Duplicate(); // Create a new Sprite2D.
 
 		newNode.Visible = true;
@@ -201,19 +204,10 @@ public partial class ZLayerPrefab : Node2D
 		return newNode;
 	}
 
-	private Vector2 SpotToLocalPosition(MapSpot spot, RotationFlag rotation = RotationFlag.North)
+	private Vector2 SpotToLocalPosition(MapSpot spot, RotationFlag rotation)
 	{
-		switch (rotation)
-		{
-			case RotationFlag.North:
-				return new Vector2(spot.X * MapNode.TILE_WIDTH, spot.Y * MapNode.TILE_WIDTH);
-			case RotationFlag.East:
-				return new Vector2(spot.Y * MapNode.TILE_WIDTH, -spot.X * MapNode.TILE_WIDTH);
-			case RotationFlag.South:
-				return new Vector2(-spot.X * MapNode.TILE_WIDTH, -spot.Y * MapNode.TILE_WIDTH);
-			case RotationFlag.West:
-				return new Vector2(-spot.Y * MapNode.TILE_WIDTH, spot.X * MapNode.TILE_WIDTH);
-		}
-		return new Vector2(spot.X * MapNode.TILE_WIDTH, spot.Y * MapNode.TILE_WIDTH);
+		var mapSpace = MapNode.MapSpace;
+		var pos = MapHelper.MapSpotToWorldPosition(mapSpace, new MapSpot(spot.X, spot.Y, 0), rotation);
+		return new Vector2(pos[0], pos[1]);
 	}
 }

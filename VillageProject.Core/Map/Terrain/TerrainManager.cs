@@ -16,6 +16,7 @@ public enum TerrainAdjacency
 /// </summary>
 public class TerrainManager : BaseManager
 {
+    public const string TERRAIN_LAYER = "Terrain";
     public Dictionary<string, IInst> _terrainInsts;
     
     public TerrainManager()
@@ -46,14 +47,11 @@ public class TerrainManager : BaseManager
         return null;
     }
 
-    // public IInst? GetTerrainAtSpot(IMapSpace mapSpace, MapSpot spot)
-    // {
-    //     if (!TerrainMap.ContainsKey(spot))
-    //         return null;
-    //     var terrainName = TerrainMap[spot];
-    //     var inst = _terrainInsts[terrainName];
-    //     return inst;
-    // }
+    public IInst? GetTerrainAtSpot(IMapSpace mapSpace, MapSpot spot)
+    {
+        var insts = mapSpace.ListInstsAtSpot(spot, TERRAIN_LAYER)?.FirstOrDefault();
+        return insts;
+    }
 
     public AdjacencyFlags GetHorizontalAdjacency(
         IMapSpace mapSpace, 
@@ -61,7 +59,7 @@ public class TerrainManager : BaseManager
         RotationFlag rotation = RotationFlag.North, 
         bool matchAny = false)
     {
-        var terrain = mapSpace.GetTerrainAtSpot(spot);
+        var terrain = GetTerrainAtSpot(mapSpace, spot);
         var adjacency = AdjacencyFlags.None;
         if (terrain == null)
             return (AdjacencyFlags) (-1);
@@ -83,7 +81,7 @@ public class TerrainManager : BaseManager
             }
             // Console.WriteLine($"Checking direction: {direction}, {adjSpot}");
                 
-            var terrainAtSpot = mapSpace.GetTerrainAtSpot(adjSpot);
+            var terrainAtSpot = GetTerrainAtSpot(mapSpace, adjSpot);
             if(terrainAtSpot == null)
                 continue;
             if (terrainAtSpot.Id == terrain.Id || matchAny)
@@ -104,13 +102,13 @@ public class TerrainManager : BaseManager
     /// </summary>
     public AdjacencyFlags GetVerticalAdjacencyAsHorizontal(MapSpace mapSpace, MapSpot spot, RotationFlag rotation = RotationFlag.North, bool matchAny = false)
     {
-        var terrain = mapSpace.GetTerrainAtSpot(spot);
+        var terrain = GetTerrainAtSpot(mapSpace, spot);
         var adjacency = AdjacencyFlags.None;
         if (terrain == null)
             return (AdjacencyFlags) (-1);
 
         var frontSpace = spot.DirectionToSpot(DirectionFlags.Front, rotation);
-        var frontTerrain = mapSpace.GetTerrainAtSpot(frontSpace);
+        var frontTerrain = GetTerrainAtSpot(mapSpace, frontSpace);
         if (frontTerrain != null)
             return (AdjacencyFlags) (-1);
         
@@ -126,7 +124,7 @@ public class TerrainManager : BaseManager
             }
             // Console.WriteLine($"Checking direction: {direction}, {adjSpot}");
                 
-            var terrainAtSpot = mapSpace.GetTerrainAtSpot(adjSpot);
+            var terrainAtSpot = GetTerrainAtSpot(mapSpace, adjSpot);
             if(terrainAtSpot == null)
                 continue;
             if (terrainAtSpot.Id == terrain.Id || matchAny)
@@ -149,7 +147,7 @@ public class TerrainManager : BaseManager
                     case DirectionFlags.Bottom:
                         // If it's got a block to the bottom front of it, show no adj bottom
                         var botFrontSpot = spot.DirectionToSpot(DirectionFlags.BottomFront);
-                        var botFrontTerrain =  mapSpace.GetTerrainAtSpot(botFrontSpot);
+                        var botFrontTerrain =  GetTerrainAtSpot(mapSpace, botFrontSpot);
                         if(botFrontTerrain != null && (botFrontTerrain.Def.DefName == terrain.Def.DefName || matchAny))
                             adjFlag = AdjacencyFlags.None;
                         else

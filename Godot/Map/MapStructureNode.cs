@@ -56,7 +56,8 @@ public partial class MapStructureNode : Node2D
 			return DimMaster.GetManager<MapStructureManager>()
 				.GetAdjacency(Inst, GameMaster.MapNode.MapSpace, mapStructComp.MapSpot, GameMaster.MapNode.ViewRotation);
 		});
-		
-		this.Spite.Texture = (ImageTexture)sprite.Sprite; 
+		var imageText = (ImageTexture)sprite.Sprite;
+		this.Spite.Texture = imageText;
+		this.Spite.Offset = new Vector2(0, -imageText.GetHeight());
 	}
 }

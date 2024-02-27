@@ -3,8 +3,8 @@ using VillageProject.Core.Enums;
 
 namespace VillageProject.Core.Map.MapStructures;
 
-public class MapStructCompDef : BaseCompDef<MapStructCompInst, MapStructureManager>
+public class MapStructCompDef : GenericCompDef<MapStructCompInst, MapStructureManager>
 {
     public string MapLayer { get; set; }
-    public Dictionary<MapSpot, OccupationFlags[]> FootPrint { get; set; }
+    public OccupationData OccupationData { get; set; }
 }

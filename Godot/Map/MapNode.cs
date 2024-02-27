@@ -44,7 +44,7 @@ public partial class MapNode : Node2D
 		
 		GenerateMap();
 
-		foreach (var spot in MapSpace.EnumerateMapSpots())
+		foreach (var spot in MapSpace.EnumerateMapSpots().OrderBy(x => -x.Y))
 		{
 			CreateTerrainNode(spot);
 		}
@@ -82,25 +82,25 @@ public partial class MapNode : Node2D
 		Console.WriteLine($"Rotate Map: {ViewRotation}");
 		foreach (var layer in ZLayers)
 		{
-			layer.Value.SetRotation(MapSpace, rotation);
+			layer.Value.ResyncRotation();
 		}
 	}
 	
 	public void GenerateMap()
 	{
-		var maxX = 30;
-		var minX = -30;
-		var maxY = 20;
-		var minY = -20;
-		var maxZ = 3;
-		var minZ = -3;
+		// var maxX = 30;
+		// var minX = -30;
+		// var maxY = 20;
+		// var minY = -20;
+		// var maxZ = 3;
+		// var minZ = -3;
 		
-		// var maxX = 3;
-		// var minX = -3;
-		// var maxY = 3;
-		// var minY = -3;
-		// var maxZ = 1;
-		// var minZ = 0;
+		var maxX = 3;
+		var minX = -3;
+		var maxY = 3;
+		var minY = -3;
+		var maxZ = 1;
+		var minZ = 0;
 		MapSpace._buildCellMatrix(maxX,minX,maxY,minY,maxZ,minZ);
 		
 		TerrainManager = DimMaster.GetManager<TerrainManager>();
@@ -116,6 +116,8 @@ public partial class MapNode : Node2D
 		for(int x = minX; x <= maxX; x++)
 		for (int y = minY; y <= maxY; y++)
 		{
+			if(x == 1 && y == 1)
+				continue;
 			var terrainVal = terrainNoise.GetNoise2D(x, y);
 			var index = 0;
 			if (terrainVal > 0)
@@ -160,7 +162,7 @@ public partial class MapNode : Node2D
 		
 		for (int z = VisibleZLayer; z >= minZ; z--)
 		{
-			var y = Mathf.FloorToInt((relativePos.Y + (float)(z * TILE_HIGHT))  / (float)TILE_WIDTH);
+			var y = Mathf.FloorToInt((relativePos.Y + (float)((z+1) * TILE_HIGHT))  / (float)TILE_WIDTH);
 			MapSpot spot = default(MapSpot);
 			switch (ViewRotation)
 			{
@@ -179,17 +181,17 @@ public partial class MapNode : Node2D
 			}
 			
 			// Check if top of cell
-			if (MapSpace.GetTerrainAtSpot(spot) != null)
+			if (TerrainManager.GetTerrainAtSpot(MapSpace, spot) != null)
 			{
-				Console.WriteLine($"TopFound: Mouse: {relativePos} | Spot: {spot}");
+				// Console.WriteLine($"TopFound: Mouse: {relativePos} | Spot: {spot}");
 				return spot;
 			}
 			
 			// Check if front of cell
 			var backSpot = spot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
-			if (MapSpace.GetTerrainAtSpot(backSpot) != null)
+			if (TerrainManager.GetTerrainAtSpot(MapSpace,backSpot) != null)
 			{
-				Console.WriteLine($"FrontFound: Mouse: {relativePos} | Spot: {backSpot}");
+				// Console.WriteLine($"FrontFound: Mouse: {relativePos} | Spot: {backSpot}");
 				return backSpot;
 			}
 
@@ -197,12 +199,12 @@ public partial class MapNode : Node2D
 			// We need to correct for this with an extra check
 			var diff = relativePos.Y - ((y * TILE_WIDTH) - (z * TILE_HIGHT));
 			if(z ==0)
-				Console.WriteLine($"Diff: {diff}");
+				// Console.WriteLine($"Diff: {diff}");
 			if ( diff < (TILE_HIGHT - TILE_WIDTH))
 			{
 				var doubleBackSpot = backSpot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
-				Console.WriteLine($"Edge Case: Mouse: {relativePos}Checking Spot: {spot} | FrontSpot: {backSpot} | DoubleCheck: {doubleBackSpot} | Diff: {diff}");
-				if (MapSpace.GetTerrainAtSpot(doubleBackSpot) != null)
+				// Console.WriteLine($"Edge Case: Mouse: {relativePos}Checking Spot: {spot} | FrontSpot: {backSpot} | DoubleCheck: {doubleBackSpot} | Diff: {diff}");
+				if (TerrainManager.GetTerrainAtSpot(MapSpace,doubleBackSpot) != null)
 				{
 					return doubleBackSpot;
 				}
@@ -210,26 +212,15 @@ public partial class MapNode : Node2D
 
 		}
 
-		Console.WriteLine($"NO RESULT!!! relativePos: {relativePos} | mainCamera.Position: {mainCamera.Position}");
+		// Console.WriteLine($"NO RESULT!!! relativePos: {relativePos} | mainCamera.Position: {mainCamera.Position}");
 		return new MapSpot(0, 0, 0);
 	}
 
 	public Vector2 MapSpotToWorldPos(MapSpot spot)
 	{
-		switch (ViewRotation)
-		{
-			case RotationFlag.North:
-				return new Vector2(spot.X * TILE_WIDTH, (spot.Y * TILE_WIDTH) - (spot.Z * TILE_HIGHT));
-			case RotationFlag.East:
-				return new Vector2(spot.Y * TILE_WIDTH, (-spot.X * TILE_WIDTH) - (spot.Z * TILE_HIGHT));
-			case RotationFlag.South:
-				return new Vector2(-spot.X * TILE_WIDTH, (-spot.Y * TILE_WIDTH) - (spot.Z * TILE_HIGHT));
-			case RotationFlag.West:
-				return new Vector2(-spot.Y * TILE_WIDTH, (spot.X * TILE_WIDTH) - (spot.Z * TILE_HIGHT));
-				
-			
-		}
-		return new Vector2(spot.X * TILE_WIDTH, (spot.Y * TILE_WIDTH) - (spot.Z * TILE_HIGHT));
+		var pos = MapHelper.MapSpotToWorldPosition(MapSpace, spot, ViewRotation, 
+			TILE_WIDTH, TILE_WIDTH, TILE_HIGHT);
+		return new Vector2(pos[0], pos[1]);
 	}
 
 
@@ -238,7 +229,7 @@ public partial class MapNode : Node2D
 	{
 		if(!ZLayers.ContainsKey(spot.Z))
 			CreateZLayer(spot.Z);
-		var newNode = ZLayers[spot.Z].CreateTerrainNode(this, TerrainManager, MapSpace, spot);
+		var newNode = ZLayers[spot.Z].CreateTerrainNode(spot);
 		TerrainNodes.Add(spot, newNode);
 	}
 	
@@ -247,6 +238,7 @@ public partial class MapNode : Node2D
 		var prefab = GetNode("ZLayerPrefab");
 
 		var newLayer = (ZLayerPrefab)prefab.Duplicate();
+		newLayer.MapNode = this;
 		newLayer.Position = new Vector2(0, -40 * z);
 		ZLayers.Add(z, newLayer);
 		this.AddChild(newLayer);
@@ -289,7 +281,7 @@ public partial class MapNode : Node2D
 		if(!ZLayers.ContainsKey(spot.Z))
 			CreateZLayer(spot.Z);
 		var newNode = ZLayers[spot.Z]
-			.CreateMapStructureNode(this, DimMaster.GetManager<MapStructureManager>(), MapSpace, newInst);
+			.CreateMapStructureNode(newInst);
 		
 	}
 }

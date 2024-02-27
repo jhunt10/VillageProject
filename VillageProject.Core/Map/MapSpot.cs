@@ -118,6 +118,29 @@ public struct MapSpot
                 yield return new KeyValuePair<DirectionFlags, MapSpot>(direction, DirectionToSpot(direction, rot));
         }
     }
+
+    public MapSpot RotateSpot(RotationFlag rotation, RotationFlag previousRotation = RotationFlag.North)
+    {
+        var dir = previousRotation.GetRotationDirection(rotation);
+        return RotateSpot(dir);
+    }
+
+    public MapSpot RotateSpot(RotationDirection rotDir)
+    {
+        switch (rotDir)
+        {
+            case RotationDirection.None:
+                return new MapSpot(X, Y, Z);
+            case RotationDirection.Clockwise:
+                return new MapSpot(Y, -X, Z);
+            case RotationDirection.HalfTurn:
+                return new MapSpot(-X, -Y, Z);
+            case RotationDirection.CounterClockwise:
+                return new MapSpot(-Y, X, Z);
+        }
+
+        throw new Exception($"Unknown RotationDirection {rotDir}.");
+    }
     
     public override int GetHashCode()
     {

@@ -6,11 +6,6 @@ namespace VillageProject.Core.Map;
 
 public class MapSpace : IMapSpace
 {
-    private class MapCell
-    {
-        public int? TerrainIndex { get; set; }
-    }
-    
     public int MinX { get; private set; }
     public int MaxX { get; private set; }
     public int MinY { get; private set; }
@@ -22,8 +17,8 @@ public class MapSpace : IMapSpace
     /// Matrix if cells ordered in [z][x][y]
     /// </summary>
     private MapCell[][][] _cellMatrix;
-
-    private Dictionary<int, string> _terrainLibrary = new Dictionary<int, string>();
+    
+    private Dictionary<string, List<MapSpot>> _inst_to_spots = new Dictionary<string, List<MapSpot>>();
 
     public void _buildCellMatrix(int maxX, int minX, int maxY, int minY, int maxZ, int minZ)
     {
@@ -72,44 +67,123 @@ public class MapSpace : IMapSpace
             yield return new MapSpot(x, y, z);
     }
 
-    public IInst? GetTerrainAtSpot(MapSpot spot)
+    public IEnumerable<IInst>? ListInstsAtSpot(MapSpot spot, string? layer = null)
     {
         var cell = _getCellAtSpot(spot);
-        if (cell == null)
-            return null;
-        var terrainIndex = cell.TerrainIndex;
-        if (!terrainIndex.HasValue)
-            return null;
+        if(cell != null)
+        foreach (var instId in cell.ListInstIds(layer))
+        {
+            var inst = DimMaster.GetInstById(instId);
+            if (inst == null)
+            {
+                //TODO: handle lost insts
+                continue;
+            }
 
-        if (!_terrainLibrary.ContainsKey(terrainIndex.Value))
-            throw new Exception($"Unknown terrain index {terrainIndex.Value} at spot {spot}.");
-
-        var terrainName = _terrainLibrary[terrainIndex.Value];
-        var terrainManager = DimMaster.GetManager<TerrainManager>();
-        var terrainInst = terrainManager.GetTerrainByName(terrainName);
-        if(terrainInst == null)
-            throw new Exception($"No terrain found with name {terrainName}.");
-        return terrainInst;
+            yield return inst;
+        }
+    }
+    
+    public Result TryAddInstToSpot(MapSpot spot, string layer, IInst inst)
+    {
+        throw new NotImplementedException();
     }
 
+    public Result TryAddInstsToSpot(List<MapSpot> spot, string layer, IInst inst)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void RemoveInstFromSpot(MapSpot spot, IInst inst)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void RemoveInstFromSpots(MapSpot spot, IInst inst)
+    {
+        throw new NotImplementedException();
+    }
+
+    // public void RemoveInstFromSpots(MapSpot spot, IInst inst)
+    // {
+    //     throw new NotImplementedException();
+    // }
+    //
+    // public IInst? GetTerrainAtSpot(MapSpot spot)
+    // {
+    //     var cell = _getCellAtSpot(spot);
+    //     if (cell == null)
+    //         return null;
+    //     var terrainIndex = cell.TerrainIndex;
+    //     if (!terrainIndex.HasValue)
+    //         return null;
+    //
+    //     if (!_terrainLibrary.ContainsKey(terrainIndex.Value))
+    //         throw new Exception($"Unknown terrain index {terrainIndex.Value} at spot {spot}.");
+    //
+    //     var terrainName = _terrainLibrary[terrainIndex.Value];
+    //     var terrainManager = DimMaster.GetManager<TerrainManager>();
+    //     var terrainInst = terrainManager.GetTerrainByName(terrainName);
+    //     if(terrainInst == null)
+    //         throw new Exception($"No terrain found with name {terrainName}.");
+    //     return terrainInst;
+    // }
+    //
     public void SetTerrainAtSpot(IInst terrain, MapSpot spot)
     {
         var terrainName = terrain.Def.DefName;
-        var index = -1;
-        var existing = _terrainLibrary.Where(x => x.Value == terrainName).ToList();
-        if (existing.Count > 1)
-            throw new Exception($"Multiple indexes found for terrain named '{terrainName}'.");
-        if (existing.Count == 1)
-            index = existing.First().Key;
-        else
-        {
-            index = _terrainLibrary.Count;
-            _terrainLibrary.Add(index, terrainName);
-        }
-
+        
         var cell = _getCellAtSpot(spot);
         if(cell == null)
             return;
-        cell.TerrainIndex = index;
+        cell.AddInst(TerrainManager.TERRAIN_LAYER, terrain);
+    }
+    
+    private class MapCell
+    {
+        private Dictionary<string, List<string>> _layers = new Dictionary<string, List<string>>();
+
+        public bool HasInst(string layer, IInst inst)
+        {
+            if (!_layers.ContainsKey(layer))
+                return false;
+
+            return _layers[layer].Contains(inst.Id);
+        }
+
+        public void AddInst(string layer, IInst inst)
+        {
+            if(!_layers.ContainsKey(layer))
+                _layers.Add(layer, new List<string>());
+            if(!_layers[layer].Contains(inst.Id))
+                _layers[layer].Add(inst.Id);
+        }
+
+        public void RemoveInst(string layer, IInst inst)
+        {
+            if(!_layers.ContainsKey(layer))
+                return;
+            if (_layers[layer].Contains(inst.Id))
+                _layers[layer].Remove(inst.Id);
+            if (!_layers[layer].Any())
+                _layers.Remove(layer);
+
+        }
+
+        public IEnumerable<string> ListInstIds(string? layer)
+        {
+            if (!string.IsNullOrEmpty(layer))
+            {
+                if(_layers.ContainsKey(layer))
+                    foreach (var instId in _layers[layer])
+                        yield return instId;
+            }
+            else
+            {
+                foreach (var insts in _layers.Values)
+                foreach (var instId in insts)
+                    yield return instId;
+            }
+        }
     }
 }

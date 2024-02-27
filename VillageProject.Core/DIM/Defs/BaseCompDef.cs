@@ -1,56 +1,30 @@
 ﻿using System.Text.Json.Serialization;
-using VillageProject.Core.DIM.Insts;
 
 namespace VillageProject.Core.DIM.Defs;
 
-public abstract class BaseCompDef<TCompInst, TManager> : RootCompDef 
-    where TCompInst : class, ICompInst
-    where TManager : class, IManager
+/// <summary>
+/// A root class for internal functionality of CompDefs without dealing with generics.
+/// </summary>
+public abstract class BaseCompDef : ICompDef
 {
-    private string _compKey;
+    [JsonIgnore]
+    public IDef ParentDef { get; internal set; }
     
-    [JsonPropertyName("CompDefClassName"), JsonPropertyOrder(0)]
-    public override string CompDefClassName
-    {
-        get { return this.GetType().FullName; }
-    }
-    [JsonPropertyName("CompInstClassName"), JsonPropertyOrder(1)]
-    public override string CompInstClassName
-    {
-        get { return typeof(TCompInst).FullName; }
-    }
-    [JsonPropertyName("ManagerClassName"), JsonPropertyOrder(2)]
-    public override string ManagerClassName 
-    {
-        get { return typeof(TManager).FullName; }
-    }
+    [JsonPropertyName("CompDefClassName"), JsonPropertyOrder(-10)]
+    public abstract string CompDefClassName { get; }
+    
+    [JsonPropertyName("CompInstClassName"), JsonPropertyOrder(-9)]
+    public abstract string CompInstClassName { get; }
+    
+    [JsonPropertyName("ManagerClassName"), JsonPropertyOrder(-8)]
+    public abstract string ManagerClassName { get; }
+    
+    [JsonPropertyName("CompKey"), JsonPropertyOrder(-7)]
+    public abstract string CompKey { get; set; }
 
-    public override string CompKey
+
+    public IManager GetManager()
     {
-        get
-        {
-            if (string.IsNullOrEmpty(_compKey))
-            {
-                if (ParentDef == null)
-                    _compKey = CompDefClassName;
-                else
-                {
-                    _compKey = ParentDef.DefName + DimMaster.PATH_SEPERATOR 
-                            + CompDefClassName.Split('.').Last(); 
-                }
-            }
-
-            return _compKey;
-        }
-        set
-        {
-            _compKey = value;
-        }
+        return DimMaster.GetManagerByName(ManagerClassName);
     }
-
-    internal BaseCompDef<TCompInst, TManager> GetAsBaseClass()
-    {
-        return this as BaseCompDef<TCompInst, TManager>;
-    }
-
 }

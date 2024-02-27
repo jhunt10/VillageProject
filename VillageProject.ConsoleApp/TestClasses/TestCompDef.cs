@@ -2,7 +2,7 @@
 
 namespace VillageProject.ConsoleApp.TestClasses;
 
-public class TestCompDef : BaseCompDef<TestCompInst, TestManager>
+public class TestCompDef : GenericCompDef<TestCompInst, TestManager>
 {
     
 }

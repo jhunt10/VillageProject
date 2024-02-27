@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Collections;
+using System.Text.Json;
 using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.DIM.Insts;
 
@@ -23,13 +24,17 @@ public class DimMaster
     public static List<IDef> Defs;
     public static Dictionary<string, IManager> Managers;
 
+    private static Dictionary<string, IInst> _insts;
+
     private static bool _startup_completed = false;
 
     public static void StartUp()
     {
+        _insts = new Dictionary<string, IInst>();
         LoadManagers();
         LoadDefs(GetDefPath());
         InitiateManagers();
+        _startup_completed = true;
     }
 
     #region Defs
@@ -75,7 +80,7 @@ public class DimMaster
         def.LoadPath = Path.GetDirectoryName(filePath);
         foreach (var compDef in def.CompDefs)
         {
-            ((RootCompDef)compDef).ParentDef = def;
+            ((BaseCompDef)compDef).ParentDef = def;
         }
         return def;
     }
@@ -94,7 +99,7 @@ public class DimMaster
             if(!inst.Components.Contains(compInst))
                 inst.AddComponent(compInst);
         }
-
+        _insts.Add(inst.Id, inst);
         return inst;
     }
 
@@ -153,9 +158,31 @@ public class DimMaster
         throw new Exception($"No Manager found with class name '{name}'.");
     }
 
+    public static IEnumerable<TManager> ListManagersOfType<TManager>()
+        where TManager : IManager
+    {
+        foreach (var manager in Managers.Values)
+        {
+            if (manager is TManager)
+                yield return (TManager)manager;
+        }
+    }
+
     #endregion
-    
-    
+
+
+    #region Insts
+
+    public static IInst? GetInstById(string id, bool errorIfNull = false)
+    {
+        if (_insts.ContainsKey(id))
+            return _insts[id];
+        if (errorIfNull)
+            throw new Exception($"Failed to find inst with Id '{id}'.");
+        return null;
+    }
+
+    #endregion
     
     public static Type? GetTypeByName(string name)
     {

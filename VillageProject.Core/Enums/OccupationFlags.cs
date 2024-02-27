@@ -52,13 +52,32 @@ public enum OccupationFlags
 
 public static class OccupationExtentions
 {
+    /// <summary>
+    /// Does this set of flag contain the one provided
+    /// </summary>
+    /// <param name="flag">This OccupationFlags</param>
+    /// <param name="check">OccupationFlag to check for</param>
+    /// <returns>True if contains, otherwise False</returns>
     public static bool HasFlag(this OccupationFlags flag, OccupationFlags check)
     {
         return ((flag & check) == check);
     }
     
+    /// <summary>
+    /// Get the occupation that would result from turning this occupation in the provided rotation direction.
+    /// </summary>
+    /// <param name="occupation">Current Occupation</param>
+    /// <param name="turn">Direction to turn</param>
+    /// <returns>Rotated Occupation</returns>
     public static OccupationFlags Rotate(this OccupationFlags occupation, RotationDirection turn)
     {
+        if (turn == RotationDirection.None)
+        {
+            return occupation;
+            var newFlag = occupation;
+            return newFlag;
+        }
+        
         var bitSets = new int[]
         {
             5, // Top Cardinal

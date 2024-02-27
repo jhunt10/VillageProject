@@ -4,7 +4,7 @@ using VillageProject.Core.Sprites.PatchSprites;
 
 namespace VillageProject.Godot.Sprites;
 
-public class GodotPatchCellSpriteDef : BasePatchCellSpriteDef<GodotPatchCellSpriteComp>
+public class GodotPatchCellSpriteDef : GenericPatchCellSpriteDef<GodotPatchCellSpriteComp>
 {
     
 }

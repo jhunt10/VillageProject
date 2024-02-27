@@ -5,7 +5,7 @@ using VillageProject.Core.Enums;
 
 namespace VillageProject.Core.Map.MapStructures;
 
-public interface IMapStructureManager : IManager
+public interface IMapStructureManager : IManager, IMapPlacementValidator
 {
     public void RemoveMapStructure(IInst inst);
     

@@ -66,12 +66,12 @@ public struct MapSpot
         if   ( direction == DirectionFlags.Back || direction == DirectionFlags.BackLeft || direction == DirectionFlags.BackRight 
             || direction == DirectionFlags.TopBack || direction == DirectionFlags.TopBackLeft || direction == DirectionFlags.TopBackRight
             || direction == DirectionFlags.BottomBack || direction == DirectionFlags.BottomBackLeft || direction == DirectionFlags.BottomBackRight)
-            y -= 1;
+            y += 1;
         
         if  ( direction == DirectionFlags.Front || direction == DirectionFlags.FrontLeft || direction == DirectionFlags.FrontRight 
            || direction == DirectionFlags.TopFront || direction == DirectionFlags.TopFrontLeft || direction == DirectionFlags.TopFrontRight
            || direction == DirectionFlags.BottomFront || direction == DirectionFlags.BottomFrontLeft || direction == DirectionFlags.BottomFrontRight)
-            y += 1;
+            y -= 1;
         
         
         if  ( direction == DirectionFlags.BackLeft || direction == DirectionFlags.Left || direction == DirectionFlags.FrontLeft 
@@ -94,17 +94,16 @@ public struct MapSpot
         || direction == DirectionFlags.BottomFrontLeft || direction == DirectionFlags.BottomFront || direction == DirectionFlags.BottomFrontRight)
             z -= 1;
         
-        //TODO: Rotation
         switch (rotation)
         {
             case RotationFlag.North:
                 return new MapSpot(X + x, Y + y, Z + z);
             case RotationFlag.East:
-                return new MapSpot(X - y, Y + x, Z + z);
+                return new MapSpot(X + y, Y - x, Z + z);
             case RotationFlag.South:
                 return new MapSpot(X - x, Y - y, Z + z);
             case RotationFlag.West:
-                return new MapSpot(X + y, Y - x, Z + z);
+                return new MapSpot(X - y, Y + x, Z + z);
         }
 
         return new MapSpot(X + x, Y + y, Z + z);

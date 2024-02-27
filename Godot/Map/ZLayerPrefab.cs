@@ -77,13 +77,13 @@ public partial class ZLayerPrefab : Node2D
 				spots = _cellNodes.Keys.ToList().OrderBy(x => -x.Y);
 				break;
 			case RotationFlag.East:
-				spots = _cellNodes.Keys.ToList().OrderBy(x => x.X);
+				spots = _cellNodes.Keys.ToList().OrderBy(x => -x.X);
 				break;
 			case RotationFlag.South:
 				spots = _cellNodes.Keys.ToList().OrderBy(x => x.Y);
 				break;
 			case RotationFlag.West:
-				spots = _cellNodes.Keys.ToList().OrderBy(x => -x.X);
+				spots = _cellNodes.Keys.ToList().OrderBy(x => x.X);
 				break;
 		}
 		foreach (var spot in spots)

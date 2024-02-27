@@ -88,19 +88,19 @@ public partial class MapNode : Node2D
 	
 	public void GenerateMap()
 	{
-		// var maxX = 30;
-		// var minX = -30;
-		// var maxY = 20;
-		// var minY = -20;
-		// var maxZ = 3;
-		// var minZ = -3;
+		var maxX = 30;
+		var minX = -30;
+		var maxY = 20;
+		var minY = -20;
+		var maxZ = 3;
+		var minZ = -3;
 		
-		var maxX = 3;
-		var minX = -3;
-		var maxY = 3;
-		var minY = -3;
-		var maxZ = 1;
-		var minZ = 0;
+		// var maxX = 3;
+		// var minX = -3;
+		// var maxY = 3;
+		// var minY = -3;
+		// var maxZ = 1;
+		// var minZ = 0;
 		MapSpace._buildCellMatrix(maxX,minX,maxY,minY,maxZ,minZ);
 		
 		TerrainManager = DimMaster.GetManager<TerrainManager>();
@@ -155,65 +155,71 @@ public partial class MapNode : Node2D
 
 		var mousePos = GetViewport().GetMousePosition();
 		var relativePos = mousePos + mainCamera.Position;
-		var x = Mathf.FloorToInt(relativePos.X / (float)TILE_WIDTH);
-		
-		var maxZ = ZLayers.Keys.Max();
-		var minZ = ZLayers.Keys.Min();
-		
-		for (int z = VisibleZLayer; z >= minZ; z--)
-		{
-			var y = Mathf.FloorToInt((relativePos.Y + (float)((z+1) * TILE_HIGHT))  / (float)TILE_WIDTH);
-			MapSpot spot = default(MapSpot);
-			switch (ViewRotation)
-			{
-				case RotationFlag.North:
-					spot = new MapSpot(x, y, z);
-					break;
-				case RotationFlag.East:
-					spot = new MapSpot(-y, x, z);
-					break;
-				case RotationFlag.South:
-					spot = new MapSpot(-x, -y, z);
-					break;
-				case RotationFlag.West:
-					spot = new MapSpot(y, -x, z);
-					break;
-			}
-			
-			// Check if top of cell
-			if (TerrainManager.GetTerrainAtSpot(MapSpace, spot) != null)
-			{
-				// Console.WriteLine($"TopFound: Mouse: {relativePos} | Spot: {spot}");
-				return spot;
-			}
-			
-			// Check if front of cell
-			var backSpot = spot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
-			if (TerrainManager.GetTerrainAtSpot(MapSpace,backSpot) != null)
-			{
-				// Console.WriteLine($"FrontFound: Mouse: {relativePos} | Spot: {backSpot}");
-				return backSpot;
-			}
-
-			// There is a gap between the bottom of where a tile top would be and where the bottom of the front sprite really is
-			// We need to correct for this with an extra check
-			var diff = relativePos.Y - ((y * TILE_WIDTH) - (z * TILE_HIGHT));
-			if(z ==0)
-				// Console.WriteLine($"Diff: {diff}");
-			if ( diff < (TILE_HIGHT - TILE_WIDTH))
-			{
-				var doubleBackSpot = backSpot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
-				// Console.WriteLine($"Edge Case: Mouse: {relativePos}Checking Spot: {spot} | FrontSpot: {backSpot} | DoubleCheck: {doubleBackSpot} | Diff: {diff}");
-				if (TerrainManager.GetTerrainAtSpot(MapSpace,doubleBackSpot) != null)
-				{
-					return doubleBackSpot;
-				}
-			}
-
-		}
-
-		// Console.WriteLine($"NO RESULT!!! relativePos: {relativePos} | mainCamera.Position: {mainCamera.Position}");
-		return new MapSpot(0, 0, 0);
+		var mapSpot = MapHelper.WorldPositionToMapSpot(
+			MapSpace, (int)relativePos.X, (int)relativePos.Y,
+			VisibleZLayer, ViewRotation);
+		if(mapSpot.HasValue)
+			return mapSpot.Value;
+		return new MapSpot();
+		// var x = Mathf.FloorToInt(relativePos.X / (float)TILE_WIDTH);
+		//
+		// var maxZ = ZLayers.Keys.Max();
+		// var minZ = ZLayers.Keys.Min();
+		//
+		// for (int z = VisibleZLayer; z >= minZ; z--)
+		// {
+		// 	var y = Mathf.FloorToInt((relativePos.Y + (float)((z+1) * TILE_HIGHT))  / (float)TILE_WIDTH);
+		// 	MapSpot spot = default(MapSpot);
+		// 	switch (ViewRotation)
+		// 	{
+		// 		case RotationFlag.North:
+		// 			spot = new MapSpot(x, y, z);
+		// 			break;
+		// 		case RotationFlag.East:
+		// 			spot = new MapSpot(-y, x, z);
+		// 			break;
+		// 		case RotationFlag.South:
+		// 			spot = new MapSpot(-x, -y, z);
+		// 			break;
+		// 		case RotationFlag.West:
+		// 			spot = new MapSpot(y, -x, z);
+		// 			break;
+		// 	}
+		// 	
+		// 	// Check if top of cell
+		// 	if (TerrainManager.GetTerrainAtSpot(MapSpace, spot) != null)
+		// 	{
+		// 		// Console.WriteLine($"TopFound: Mouse: {relativePos} | Spot: {spot}");
+		// 		return spot;
+		// 	}
+		// 	
+		// 	// Check if front of cell
+		// 	var backSpot = spot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
+		// 	if (TerrainManager.GetTerrainAtSpot(MapSpace,backSpot) != null)
+		// 	{
+		// 		// Console.WriteLine($"FrontFound: Mouse: {relativePos} | Spot: {backSpot}");
+		// 		return backSpot;
+		// 	}
+		//
+		// 	// There is a gap between the bottom of where a tile top would be and where the bottom of the front sprite really is
+		// 	// We need to correct for this with an extra check
+		// 	var diff = relativePos.Y - ((y * TILE_WIDTH) - (z * TILE_HIGHT));
+		// 	if(z ==0)
+		// 		// Console.WriteLine($"Diff: {diff}");
+		// 	if ( diff < (TILE_HIGHT - TILE_WIDTH))
+		// 	{
+		// 		var doubleBackSpot = backSpot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
+		// 		// Console.WriteLine($"Edge Case: Mouse: {relativePos}Checking Spot: {spot} | FrontSpot: {backSpot} | DoubleCheck: {doubleBackSpot} | Diff: {diff}");
+		// 		if (TerrainManager.GetTerrainAtSpot(MapSpace,doubleBackSpot) != null)
+		// 		{
+		// 			return doubleBackSpot;
+		// 		}
+		// 	}
+		//
+		// }
+		//
+		// // Console.WriteLine($"NO RESULT!!! relativePos: {relativePos} | mainCamera.Position: {mainCamera.Position}");
+		// return new MapSpot(0, 0, 0);
 	}
 
 	public Vector2 MapSpotToWorldPos(MapSpot spot)

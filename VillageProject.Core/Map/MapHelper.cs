@@ -11,18 +11,67 @@ public static class MapHelper
     /// </summary>
     /// <returns></returns>
     public static MapSpot? WorldPositionToMapSpot(
-        int worldX, int worldY, MapSpace mapSpace, 
+        MapSpace mapSpace, float worldX, float worldY, 
         int? visibleZLayer = null,
         RotationFlag mapFaceing = RotationFlag.North, 
         int cellWidth = 32, int cellDepth = 32, int cellHight = 40)
     {
-        var x = (worldX / cellWidth);
+        var x = Convert.ToInt32(Math.Floor(worldX / cellWidth));;
         if (x > mapSpace.MaxX || x < mapSpace.MinX)
             return null;
         
         for (int z = visibleZLayer ?? mapSpace.MaxZ; z >= mapSpace.MinZ; z--)
         {
-            
+            var zOffset = z * cellHight;
+            var y = Convert.ToInt32(Math.Floor((-worldY + zOffset) / cellDepth));
+            MapSpot spot = default(MapSpot);
+            switch (mapFaceing)
+            {
+                case RotationFlag.North:
+                    spot = new MapSpot(x, y, z);
+                    break;
+                case RotationFlag.East:
+                    spot = new MapSpot(y, -x, z);
+                    break;
+                case RotationFlag.South:
+                    spot = new MapSpot(-x, -y, z);
+                    break;
+                case RotationFlag.West:
+                    spot = new MapSpot(-y, x, z);
+                    break;
+            }
+
+            return spot;
+
+            /*// Check if top of cell
+            if (TerrainManager.GetTerrainAtSpot(MapSpace, spot) != null)
+            {
+                // Console.WriteLine($"TopFound: Mouse: {relativePos} | Spot: {spot}");
+                return spot;
+            }
+			
+            // Check if front of cell
+            var backSpot = spot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
+            if (TerrainManager.GetTerrainAtSpot(MapSpace,backSpot) != null)
+            {
+                // Console.WriteLine($"FrontFound: Mouse: {relativePos} | Spot: {backSpot}");
+                return backSpot;
+            }
+
+            // There is a gap between the bottom of where a tile top would be and where the bottom of the front sprite really is
+            // We need to correct for this with an extra check
+            var diff = relativePos.Y - ((y * TILE_WIDTH) - (z * TILE_HIGHT));
+            if(z ==0)
+                // Console.WriteLine($"Diff: {diff}");
+                if ( diff < (TILE_HIGHT - TILE_WIDTH))
+                {
+                    var doubleBackSpot = backSpot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
+                    // Console.WriteLine($"Edge Case: Mouse: {relativePos}Checking Spot: {spot} | FrontSpot: {backSpot} | DoubleCheck: {doubleBackSpot} | Diff: {diff}");
+                    if (TerrainManager.GetTerrainAtSpot(MapSpace,doubleBackSpot) != null)
+                    {
+                        return doubleBackSpot;
+                    }
+                }*/
         }
         return new MapSpot();
     }
@@ -43,25 +92,37 @@ public static class MapHelper
         var xPos = spot.X * celleWidth;
         var yPos = spot.Y * cellDepth;
         var zOffset = spot.Z * cellHight;
-        if (invertY)
-        {
-            yPos = -yPos;
-            zOffset = -zOffset;
-        }
+        // if (invertY)
+        // {
+        //     yPos = -yPos;
+        //     zOffset = -zOffset;
+        // }
         
         switch (mapRotation)
         {
             case RotationFlag.North:
-                pos = new int[]{xPos, yPos + zOffset};
+                if(invertY)
+                    pos = new int[]{xPos, -yPos - zOffset};
+                else
+                    pos = new int[]{xPos, yPos + zOffset};
                 break;
             case RotationFlag.East:
-                pos = new int[]{yPos, xPos + zOffset};
+                if(invertY)
+                    pos = new int[]{-yPos, -xPos + zOffset};
+                else
+                    pos = new int[]{-yPos, xPos - zOffset};
                 break;
             case RotationFlag.South:
-                pos = new int[]{-xPos, -yPos + zOffset};
+                if(invertY)
+                    pos = new int[]{-xPos, yPos - zOffset};
+                else
+                    pos = new int[]{-xPos, -yPos + zOffset};
                 break;
             case RotationFlag.West:
-                pos = new int[]{-yPos, -xPos + zOffset};
+                if(invertY)
+                    pos = new int[]{yPos, xPos + zOffset};
+                else
+                    pos = new int[]{yPos, -xPos - zOffset};
                 break;
         }
 

@@ -62,7 +62,6 @@ centered = false
 [node name="TerrainShadows" type="Node2D" parent="MapNode/ZLayerPrefab"]
 
 [node name="MouseOverSprite" type="Sprite2D" parent="."]
-z_index = 1
 texture = ExtResource("3_0lpvn")
 centered = false
 offset = Vector2(0, -72)
@@ -96,6 +95,7 @@ script = ExtResource("12_atnyw")
 
 [node name="Background" type="NinePatchRect" parent="CanvasLayer/BuildBar"]
 custom_minimum_size = Vector2(88, 88)
+layout_mode = 0
 offset_right = 88.0
 offset_bottom = 88.0
 texture = ExtResource("13_75ih2")

@@ -68,7 +68,7 @@ public class OccupationDataJsonConverter : JsonConverter<OccupationData>
 
     public override void Write(Utf8JsonWriter writer, OccupationData value, JsonSerializerOptions options)
     {
-        var internalData = value._occupiedSpots;
+        var internalData = value.OccupationDict;
         JsonSerializer.Serialize(writer, (object)internalData, options);
     }
 

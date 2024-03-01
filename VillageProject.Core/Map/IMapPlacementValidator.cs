@@ -10,6 +10,6 @@ namespace VillageProject.Core.Map;
 /// </summary>
 public interface IMapPlacementValidator : IManager
 {
-    // public List<MapSpot> GetSpotsForDef(MapSpace space, IDef def, MapSpot anchorSpot, RotationFlag rotation, object args);
-    public Result CanPlaceDefOnMapSpace(MapSpace space, IDef def, MapSpot anchorSpot, RotationFlag rotation, object args);
+    public Result CanPlaceInstOnMapSpace(MapSpace space, IInst inst, MapSpot anchorSpot, RotationFlag rotation, object args);
+    public Result TryPlaceInstOnMapSpace(MapSpace space, IInst inst, MapSpot anchorSpot, RotationFlag rotation, object args);
 }

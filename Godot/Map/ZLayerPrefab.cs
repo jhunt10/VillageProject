@@ -130,35 +130,36 @@ public partial class ZLayerPrefab : Node2D
 
 	public Node2D CreateMapStructureNode(IInst mapStructInst)
 	{
-		var mapStructureManager = DimMaster.GetManager<MapStructureManager>();
-		var mapStructComp = mapStructInst.GetComponentOfType<MapStructCompInst>(errorIfNull: true);
-
-		if (_cellNodes.ContainsKey(mapStructComp.MapSpot))
-			return _cellNodes[mapStructComp.MapSpot];
-		
-		var spriteComp = mapStructInst.GetComponentOfType<GodotPatchCellSpriteComp>();
-		var spriteDef = spriteComp.CompDef as IPatchSpriteCompDef;
-		var sprite = spriteComp.GetPatchSprite(() =>
-		{
-			return mapStructureManager.GetAdjacency(mapStructInst, MapNode.MapSpace, mapStructComp.MapSpot, mapStructComp.Rotation);
-		});
-		
-		var pos = SpotToLocalPosition(mapStructComp.MapSpot, MapNode.ViewRotation);
-		var newNode = (MapStructureNode)MapStructureNodePrefab.Duplicate();
-		newNode.Inst = mapStructInst;
-		newNode.DirtySprite = true;
-		newNode.Position = pos;
-		CellsParentNode.AddChild(newNode);
-		_cellNodes.Add(mapStructComp.MapSpot, newNode);
-
-		foreach (var pair in mapStructComp.MapSpot.ListAdjacentSpots())
-		{
-			if (_cellNodes.ContainsKey(pair.Value))
-				if(_cellNodes[pair.Value] is MapStructureNode)
-					((MapStructureNode)_cellNodes[pair.Value]).DirtySprite = true;
-		}
-		
-		return newNode;
+		throw new  NotImplementedException();
+		// var mapStructureManager = DimMaster.GetManager<MapStructureManager>();
+		// var mapStructComp = mapStructInst.GetComponentOfType<MapStructCompInst>(errorIfNull: true);
+		//
+		// if (_cellNodes.ContainsKey(mapStructComp.MapSpot))
+		// 	return _cellNodes[mapStructComp.MapSpot];
+		//
+		// var spriteComp = mapStructInst.GetComponentOfType<GodotPatchCellSpriteComp>();
+		// var spriteDef = spriteComp.CompDef as IPatchSpriteCompDef;
+		// var sprite = spriteComp.GetPatchSprite(() =>
+		// {
+		// 	return mapStructureManager.GetAdjacency(mapStructInst, MapNode.MapSpace, mapStructComp.MapSpot, mapStructComp.Rotation);
+		// });
+		//
+		// var pos = SpotToLocalPosition(mapStructComp.MapSpot, MapNode.ViewRotation);
+		// var newNode = (MapStructureNode)MapStructureNodePrefab.Duplicate();
+		// newNode.Inst = mapStructInst;
+		// newNode.DirtySprite = true;
+		// newNode.Position = pos;
+		// CellsParentNode.AddChild(newNode);
+		// _cellNodes.Add(mapStructComp.MapSpot, newNode);
+		//
+		// foreach (var pair in mapStructComp.MapSpot.ListAdjacentSpots())
+		// {
+		// 	if (_cellNodes.ContainsKey(pair.Value))
+		// 		if(_cellNodes[pair.Value] is MapStructureNode)
+		// 			((MapStructureNode)_cellNodes[pair.Value]).DirtySprite = true;
+		// }
+		//
+		// return newNode;
 	}
 	
 	public Node2D CreateTerrainNode(MapSpot spot)

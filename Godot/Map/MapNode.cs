@@ -31,7 +31,7 @@ public partial class MapNode : Node2D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		MapSpace = new MapSpace();
+		MapSpace = new MapSpace(0,0,0,0,0,0);
 		// TerrainManager = DimMaster.GetManager<TerrainManager>();
 		// for(int x = 0; x < 10; x++)
 		// for (int y = 0; y < 10; y++)
@@ -88,55 +88,56 @@ public partial class MapNode : Node2D
 	
 	public void GenerateMap()
 	{
-		var maxX = 30;
-		var minX = -30;
-		var maxY = 20;
-		var minY = -20;
-		var maxZ = 3;
-		var minZ = -3;
-		
+		// // var maxX = 30;
+		// // var minX = -30;
+		// // var maxY = 20;
+		// // var minY = -20;
+		// // var maxZ = 3;
+		// // var minZ = -3;
+		//
 		// var maxX = 3;
 		// var minX = -3;
 		// var maxY = 3;
 		// var minY = -3;
-		// var maxZ = 1;
-		// var minZ = 0;
-		MapSpace._buildCellMatrix(maxX,minX,maxY,minY,maxZ,minZ);
-		
-		TerrainManager = DimMaster.GetManager<TerrainManager>();
-		var terrainNoise = new FastNoiseLite();
-		
-		terrainNoise.Seed = DateTime.Now.Millisecond;
-		
-		terrainNoise.Frequency = (float)0.05;
-		var hightNoise = new FastNoiseLite();
-		hightNoise.Seed = terrainNoise.Seed + 1;
-		hightNoise.Frequency = (float)0.02;
-		
-		for(int x = minX; x <= maxX; x++)
-		for (int y = minY; y <= maxY; y++)
-		{
-			if(x == 1 && y == 1)
-				continue;
-			var terrainVal = terrainNoise.GetNoise2D(x, y);
-			var index = 0;
-			if (terrainVal > 0)
-				index = 1;
-
-			var hightVal = hightNoise.GetNoise2D(x, y);
-			var hight = (int)(hightVal * (maxZ - minZ + 1));
-			if (minZ == 0 && maxZ == 0)
-				hight = 1;
-			if (minZ == 0 && maxZ == 1)
-				hight = 1;
-			
-			var terrainInst = TerrainManager._terrainInsts.Values.ToList()[index];
-			for(int z = minZ; z < hight; z++)
-				MapSpace.SetTerrainAtSpot(terrainInst, new MapSpot(x, y, z));
-			
-			if(index == 0)
-				CreateGrassNode(new MapSpot(x, y, hight));
-		}
+		// var maxZ = 9;
+		// var minZ = -9;
+		// MapSpace._buildCellMatrix(maxX,minX,maxY,minY,maxZ,minZ);
+		//
+		// TerrainManager = DimMaster.GetManager<TerrainManager>();
+		// var terrainNoise = new FastNoiseLite();
+		//
+		// terrainNoise.Seed = DateTime.Now.Millisecond;
+		//
+		// terrainNoise.Frequency = (float)0.05;
+		// var hightNoise = new FastNoiseLite();
+		// hightNoise.Seed = terrainNoise.Seed + 1;
+		// hightNoise.Frequency = (float)0.02;
+		//
+		// for(int x = minX; x <= maxX; x++)
+		// for (int y = minY; y <= maxY; y++)
+		// {
+		// 	if(x == 1 && y == 1)
+		// 		continue;
+		// 	var terrainVal = terrainNoise.GetNoise2D(x, y);
+		// 	var index = 0;
+		// 	if (terrainVal > 0)
+		// 		index = 1;
+		//
+		// 	// var hightVal = hightNoise.GetNoise2D(x, y);
+		// 	// var hight = (int)(hightVal * (maxZ - minZ + 1));
+		// 	var hight = x + y;
+		// 	// if (minZ == 0 && maxZ == 0)
+		// 	// 	hight = 1;
+		// 	// if (minZ == 0 && maxZ == 1)
+		// 	// 	hight = 1;
+		// 	
+		// 	var terrainInst = TerrainManager._terrainInsts.Values.ToList()[index];
+		// 	for(int z = minZ; z <= hight; z++)
+		// 		MapSpace.SetTerrainAtSpot(terrainInst, new MapSpot(x, y, z));
+		// 	
+		// 	// if(index == 0)
+		// 	// 	CreateGrassNode(new MapSpot(x, y, hight+1));
+		// }
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -161,65 +162,6 @@ public partial class MapNode : Node2D
 		if(mapSpot.HasValue)
 			return mapSpot.Value;
 		return new MapSpot();
-		// var x = Mathf.FloorToInt(relativePos.X / (float)TILE_WIDTH);
-		//
-		// var maxZ = ZLayers.Keys.Max();
-		// var minZ = ZLayers.Keys.Min();
-		//
-		// for (int z = VisibleZLayer; z >= minZ; z--)
-		// {
-		// 	var y = Mathf.FloorToInt((relativePos.Y + (float)((z+1) * TILE_HIGHT))  / (float)TILE_WIDTH);
-		// 	MapSpot spot = default(MapSpot);
-		// 	switch (ViewRotation)
-		// 	{
-		// 		case RotationFlag.North:
-		// 			spot = new MapSpot(x, y, z);
-		// 			break;
-		// 		case RotationFlag.East:
-		// 			spot = new MapSpot(-y, x, z);
-		// 			break;
-		// 		case RotationFlag.South:
-		// 			spot = new MapSpot(-x, -y, z);
-		// 			break;
-		// 		case RotationFlag.West:
-		// 			spot = new MapSpot(y, -x, z);
-		// 			break;
-		// 	}
-		// 	
-		// 	// Check if top of cell
-		// 	if (TerrainManager.GetTerrainAtSpot(MapSpace, spot) != null)
-		// 	{
-		// 		// Console.WriteLine($"TopFound: Mouse: {relativePos} | Spot: {spot}");
-		// 		return spot;
-		// 	}
-		// 	
-		// 	// Check if front of cell
-		// 	var backSpot = spot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
-		// 	if (TerrainManager.GetTerrainAtSpot(MapSpace,backSpot) != null)
-		// 	{
-		// 		// Console.WriteLine($"FrontFound: Mouse: {relativePos} | Spot: {backSpot}");
-		// 		return backSpot;
-		// 	}
-		//
-		// 	// There is a gap between the bottom of where a tile top would be and where the bottom of the front sprite really is
-		// 	// We need to correct for this with an extra check
-		// 	var diff = relativePos.Y - ((y * TILE_WIDTH) - (z * TILE_HIGHT));
-		// 	if(z ==0)
-		// 		// Console.WriteLine($"Diff: {diff}");
-		// 	if ( diff < (TILE_HIGHT - TILE_WIDTH))
-		// 	{
-		// 		var doubleBackSpot = backSpot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
-		// 		// Console.WriteLine($"Edge Case: Mouse: {relativePos}Checking Spot: {spot} | FrontSpot: {backSpot} | DoubleCheck: {doubleBackSpot} | Diff: {diff}");
-		// 		if (TerrainManager.GetTerrainAtSpot(MapSpace,doubleBackSpot) != null)
-		// 		{
-		// 			return doubleBackSpot;
-		// 		}
-		// 	}
-		//
-		// }
-		//
-		// // Console.WriteLine($"NO RESULT!!! relativePos: {relativePos} | mainCamera.Position: {mainCamera.Position}");
-		// return new MapSpot(0, 0, 0);
 	}
 
 	public Vector2 MapSpotToWorldPos(MapSpot spot)

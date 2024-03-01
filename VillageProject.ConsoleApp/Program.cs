@@ -8,10 +8,10 @@ using VillageProject.Core.DIM;
 using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
+using VillageProject.Core.Map.MapGeneration;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.MapStructures.Constructables;
 using VillageProject.Core.Map.Terrain;
-
 Console.WriteLine("Hello, World!");
 
 string GetDefPath()
@@ -27,11 +27,14 @@ string GetDefPath()
     throw new NotImplementedException($"No DefPath set for user: '{Environment.UserName}'");
 }
 
-MakeAndSaveNewDef();
+// MakeAndSaveNewDef();
 
 
 DimMaster.StartUp();
 
+var mapSpace = BasicMapGenerator.GenerateTestMap();
+
+var t = true;
 
 void MakeAndSaveNewDef()
 {

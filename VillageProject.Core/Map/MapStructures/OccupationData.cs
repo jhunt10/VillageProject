@@ -12,24 +12,20 @@ public class OccupationData
     public MapSpot? AnchorSpot { get; }
     public RotationFlag Rotation { get; }
 
-    internal Dictionary<MapSpot, List<OccupationFlags>> _occupiedSpots;
+    public Dictionary<MapSpot, List<OccupationFlags>> OccupationDict { get; }
 
     public OccupationData(
         Dictionary<MapSpot, List<OccupationFlags>> occupiedSpots,
-        MapSpot? anchorSpot = null, RotationFlag rotationFlag = RotationFlag.North,
-        bool applyRotation = true)
+        MapSpot? anchorSpot = null, RotationFlag rotationFlag = RotationFlag.North)
     {
         AnchorSpot = anchorSpot;
         Rotation = rotationFlag;
-        if (applyRotation)
-            _occupiedSpots = RotateOccupationDict(anchorSpot ?? new MapSpot(), rotationFlag, occupiedSpots);
-        else
-            _occupiedSpots = occupiedSpots;
+        OccupationDict = _RotateOccupationDict(anchorSpot ?? new MapSpot(), rotationFlag, occupiedSpots);
     }
 
     public IEnumerable<MapSpot> ListOccupiedSpots()
     {
-        foreach (var spot in _occupiedSpots.Keys)
+        foreach (var spot in OccupationDict.Keys)
         {
             yield return spot;
         }
@@ -37,14 +33,14 @@ public class OccupationData
 
     public IEnumerable<OccupationFlags> ListOccupationAtSpot(MapSpot spot)
     {
-        if(_occupiedSpots.ContainsKey(spot))
-            foreach (var occ in _occupiedSpots[spot])
+        if(OccupationDict.ContainsKey(spot))
+            foreach (var occ in OccupationDict[spot])
             {
                 yield return occ;
             }
     }
 
-    public Dictionary<MapSpot, List<OccupationFlags>> RotateOccupationDict(
+    private Dictionary<MapSpot, List<OccupationFlags>> _RotateOccupationDict(
         MapSpot anchor,
         RotationFlag rotation, 
         Dictionary<MapSpot,List<OccupationFlags>> occupiedSpots)

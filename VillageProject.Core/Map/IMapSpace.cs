@@ -11,9 +11,7 @@ public interface IMapSpace
 
     public IEnumerable<IInst>? ListInstsAtSpot(MapSpot spot, string? layer = null);
     
-    public Result TryAddInstToSpot(MapSpot spot, string layer, IInst inst);
-    public Result TryAddInstsToSpot(List<MapSpot> spot, string layer, IInst inst);
+    public Result TryAddInstToSpots(IInst inst, List<MapSpot> spot, string layer);
 
-    public void RemoveInstFromSpot(MapSpot spot, IInst inst);
-    public void RemoveInstFromSpots(MapSpot spot, IInst inst);
+    public void RemoveInst(IInst inst);
 }

@@ -16,38 +16,38 @@ namespace VillageProject.Core.Enums;
 public enum OccupationFlags
 {
     None = 0,
-    Inner = 0,
-    Middle = 1,
-    Outer = 2,
+    Inner = 1,
+    Middle = 2,
+    Outer = 4,
     
-    Top = 4,
-    Center = 8,
-    Bottom = 16,
+    Top = 8,
+    Center = 16,
+    Bottom = 32,
     
-    TopBack = 32,
-    TopRight = 64,
-    TopFront = 128,
-    TopLeft = 256,
-    TopBackLeft = 512,
-    TopBackRight = 1024,
-    TopFrontRight = 2048,
-    TopFrontLeft = 4096,
-    Back = 8192,
-    Right = 16384,
-    Front = 32768,
-    Left = 65536,
-    BackLeft = 131072,
-    BackRight = 262144,
-    FrontRight = 524288,
-    FrontLeft = 1048576,
-    BottomBack = 2097152,
-    BottomRight = 4194304,
-    BottomFront = 8388608,
-    BottomLeft = 16777216,
-    BottomBackLeft = 33554432,
-    BottomBackRight = 67108864,
-    BottomFrontRight = 134217728,
-    BottomFrontLeft = 268435456,
+    TopBack = 64,
+    TopRight = 128,
+    TopFront = 256,
+    TopLeft = 512,
+    TopBackLeft = 1024,
+    TopBackRight = 2048,
+    TopFrontRight = 4096,
+    TopFrontLeft = 8192,
+    Back = 16384,
+    Right = 32768,
+    Front = 65536,
+    Left = 131072,
+    BackLeft = 262144,
+    BackRight = 524288,
+    FrontRight = 1048576,
+    FrontLeft = 2097152,
+    BottomBack = 4194304,
+    BottomRight = 8388608,
+    BottomFront = 16777216,
+    BottomLeft = 33554432,
+    BottomBackLeft = 67108864,
+    BottomBackRight = 134217728,
+    BottomFrontRight = 268435456,
+    BottomFrontLeft = 536870912,
 }
 
 public static class OccupationExtentions
@@ -58,9 +58,39 @@ public static class OccupationExtentions
     /// <param name="flag">This OccupationFlags</param>
     /// <param name="check">OccupationFlag to check for</param>
     /// <returns>True if contains, otherwise False</returns>
-    public static bool HasFlag(this OccupationFlags flag, OccupationFlags check)
+    public static bool ContainsFlag(this OccupationFlags flag, OccupationFlags check)
     {
         return ((flag & check) == check);
+    }
+
+    /// <summary>
+    /// Remove the provided flag if this flag contains it
+    /// </summary>
+    /// <param name="flag">This OccupationFlags</param>
+    /// <param name="toRemove">OccupationFlag to be removed</param>
+    /// <returns></returns>
+    public static OccupationFlags RemoveFlag(this OccupationFlags flag, OccupationFlags toRemove)
+    {
+        if (flag.ContainsFlag(toRemove))
+            return (OccupationFlags)((int)flag - (int)toRemove);
+        return flag;
+    }
+
+    public static bool OverlapsFlags(this OccupationFlags flag, OccupationFlags check)
+    {
+        if ((flag.ContainsFlag(OccupationFlags.Inner) != check.ContainsFlag(OccupationFlags.Inner))
+            || (flag.ContainsFlag(OccupationFlags.Middle) != check.ContainsFlag(OccupationFlags.Middle))
+            || (flag.ContainsFlag(OccupationFlags.Outer) != check.ContainsFlag(OccupationFlags.Outer)))
+            return false;
+        
+        var rawOccA = flag.RemoveFlag(OccupationFlags.Inner)
+            .RemoveFlag(OccupationFlags.Middle)
+            .RemoveFlag(OccupationFlags.Outer);
+        var rawOccB = check.RemoveFlag(OccupationFlags.Inner)
+            .RemoveFlag(OccupationFlags.Middle)
+            .RemoveFlag(OccupationFlags.Outer);
+
+        return (rawOccA & rawOccB) > 0;
     }
     
     /// <summary>
@@ -80,28 +110,30 @@ public static class OccupationExtentions
         
         var bitSets = new int[]
         {
-            5, // Top Cardinal
-            9, // Top Diagonal
-            13, // Mid Cardinal
-            17, // Mid Diagonal
-            21, // Bottom Caridnal
-            25 // Bottom Diaginal
+            6, // Top Cardinal
+            10, // Top Diagonal
+            14, // Mid Cardinal
+            18, // Mid Diagonal
+            22, // Bottom Caridnal
+            26 // Bottom Diaginal
 
         };
         
         var orgBitVector = new BitArray(new int[] { (int)occupation});
         var newBitVector = new BitArray(32);
 
-        // Middle Flag
+        // Inner Flag
         newBitVector.Set(0, orgBitVector.Get(0));
-        // Outer Flag
+        // Middle Flag
         newBitVector.Set(1, orgBitVector.Get(1));
-        // Top
+        // Outer Flag
         newBitVector.Set(2, orgBitVector.Get(2));
-        // Center
+        // Top
         newBitVector.Set(3, orgBitVector.Get(3));
-        // Bottom
+        // Center
         newBitVector.Set(4, orgBitVector.Get(4));
+        // Bottom
+        newBitVector.Set(5, orgBitVector.Get(5));
         
         foreach (var index in bitSets)
         {

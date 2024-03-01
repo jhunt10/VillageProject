@@ -13,6 +13,17 @@ public class MapSpace : IMapSpace
     public int MinZ { get; private set; }
     public int MaxZ { get; private set; }
 
+    public MapSpace(int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
+    {
+        MinX = minX;
+        MaxX = maxX;
+        MinY = minY;
+        MaxY = maxY;
+        MinZ = minZ;
+        MaxZ = maxZ;
+        _buildCellMatrix(MaxX, MinX, MaxY, MinY, MaxZ, MinZ);
+    }
+    
     /// <summary>
     /// Matrix if cells ordered in [z][x][y]
     /// </summary>
@@ -20,7 +31,7 @@ public class MapSpace : IMapSpace
     
     private Dictionary<string, List<MapSpot>> _inst_to_spots = new Dictionary<string, List<MapSpot>>();
 
-    public void _buildCellMatrix(int maxX, int minX, int maxY, int minY, int maxZ, int minZ)
+    private void _buildCellMatrix(int maxX, int minX, int maxY, int minY, int maxZ, int minZ)
     {
         MaxX = maxX; MinX = minX;
         MaxY = maxY; MinY = minY;
@@ -67,41 +78,65 @@ public class MapSpace : IMapSpace
             yield return new MapSpot(x, y, z);
     }
 
-    public IEnumerable<IInst>? ListInstsAtSpot(MapSpot spot, string? layer = null)
+    public IEnumerable<IInst> ListInstsAtSpot(MapSpot spot, string? layer = null)
     {
         var cell = _getCellAtSpot(spot);
         if(cell != null)
-        foreach (var instId in cell.ListInstIds(layer))
-        {
-            var inst = DimMaster.GetInstById(instId);
-            if (inst == null)
+            foreach (var instId in cell.ListInstIds(layer))
             {
-                //TODO: handle lost insts
-                continue;
+                var inst = DimMaster.GetInstById(instId);
+                if (inst == null)
+                {
+                    //TODO: handle lost insts
+                    continue;
+                }
+
+                yield return inst;
             }
+    }
 
-            yield return inst;
+    public Result TryAddInstToSpots(IInst inst, List<MapSpot> spots, string layer)
+    {
+        if (_inst_to_spots.ContainsKey(inst.Id))
+            return new Result(false, $"Inst {inst.Def.DefName}:{inst.Id} already added to MapSpace.");
+        _inst_to_spots.Add(inst.Id, new List<MapSpot>());
+        Result? failedRes = null;
+        foreach (var spot in spots)
+        {
+            if (InBounds(spot))
+            {
+                var cell = _getCellAtSpot(spot);
+                cell.AddInst(layer, inst);
+                _inst_to_spots[inst.Id].Add(spot);
+            }
+            else
+            {
+                failedRes = new Result(false, $"Spot {spot} is out of bounds.");
+                break;
+            }
         }
-    }
-    
-    public Result TryAddInstToSpot(MapSpot spot, string layer, IInst inst)
-    {
-        throw new NotImplementedException();
+
+        if (failedRes != null)
+        {
+            RemoveInst(inst);
+            return failedRes;
+        }
+
+        return new Result(true);
     }
 
-    public Result TryAddInstsToSpot(List<MapSpot> spot, string layer, IInst inst)
+    public void RemoveInst(IInst inst)
     {
-        throw new NotImplementedException();
-    }
-
-    public void RemoveInstFromSpot(MapSpot spot, IInst inst)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void RemoveInstFromSpots(MapSpot spot, IInst inst)
-    {
-        throw new NotImplementedException();
+        if(!_inst_to_spots.ContainsKey(inst.Id))
+            return;
+        foreach (var spot in _inst_to_spots[inst.Id])
+        {
+            var cell = _getCellAtSpot(spot);
+            if(cell != null)
+                cell.RemoveInst(inst);
+        }
+        _inst_to_spots[inst.Id].Clear();
+        _inst_to_spots.Remove(inst.Id);
     }
 
     // public void RemoveInstFromSpots(MapSpot spot, IInst inst)
@@ -129,15 +164,15 @@ public class MapSpace : IMapSpace
     //     return terrainInst;
     // }
     //
-    public void SetTerrainAtSpot(IInst terrain, MapSpot spot)
-    {
-        var terrainName = terrain.Def.DefName;
-        
-        var cell = _getCellAtSpot(spot);
-        if(cell == null)
-            return;
-        cell.AddInst(TerrainManager.TERRAIN_LAYER, terrain);
-    }
+    // public void SetTerrainAtSpot(IInst terrain, MapSpot spot)
+    // {
+    //     var terrainName = terrain.Def.DefName;
+    //     
+    //     var cell = _getCellAtSpot(spot);
+    //     if(cell == null)
+    //         return;
+    //     cell.AddInst(TerrainManager.TERRAIN_LAYER, terrain);
+    // }
     
     private class MapCell
     {
@@ -159,14 +194,16 @@ public class MapSpace : IMapSpace
                 _layers[layer].Add(inst.Id);
         }
 
-        public void RemoveInst(string layer, IInst inst)
+        public void RemoveInst(IInst inst)
         {
-            if(!_layers.ContainsKey(layer))
-                return;
-            if (_layers[layer].Contains(inst.Id))
-                _layers[layer].Remove(inst.Id);
-            if (!_layers[layer].Any())
-                _layers.Remove(layer);
+            foreach (var pair in _layers)
+            {
+                var layer = pair.Value;
+                if (layer.Contains(inst.Id))
+                    layer.Remove(inst.Id);
+                if (!layer.Any())
+                    _layers.Remove(pair.Key);
+            }
 
         }
 

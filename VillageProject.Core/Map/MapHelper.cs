@@ -9,7 +9,6 @@ public static class MapHelper
     /// Assumes the coordinates are centered on bottom back left corner of cell at (0,0,0).
     /// ZLayers 
     /// </summary>
-    /// <returns></returns>
     public static MapSpot? WorldPositionToMapSpot(
         MapSpace mapSpace, float worldX, float worldY, 
         int? visibleZLayer = null,
@@ -23,57 +22,45 @@ public static class MapHelper
         for (int z = visibleZLayer ?? mapSpace.MaxZ; z >= mapSpace.MinZ; z--)
         {
             var zOffset = z * cellHight;
-            var y = Convert.ToInt32(Math.Floor((-worldY + zOffset) / cellDepth));
-            MapSpot spot = default(MapSpot);
-            switch (mapFaceing)
-            {
-                case RotationFlag.North:
-                    spot = new MapSpot(x, y, z);
-                    break;
-                case RotationFlag.East:
-                    spot = new MapSpot(y, -x, z);
-                    break;
-                case RotationFlag.South:
-                    spot = new MapSpot(-x, -y, z);
-                    break;
-                case RotationFlag.West:
-                    spot = new MapSpot(-y, x, z);
-                    break;
-            }
-
-            return spot;
-
-            /*// Check if top of cell
-            if (TerrainManager.GetTerrainAtSpot(MapSpace, spot) != null)
-            {
-                // Console.WriteLine($"TopFound: Mouse: {relativePos} | Spot: {spot}");
+            
+            // Fist check if we're over the top of a cell
+            var y = Convert.ToInt32(Math.Floor((-worldY - zOffset - cellHight) / cellDepth));
+            MapSpot spot = _getRotatedSpot(x, y, z, mapFaceing);
+            if (mapSpace.ListInstsAtSpot(spot).Any())
                 return spot;
-            }
-			
-            // Check if front of cell
-            var backSpot = spot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
-            if (TerrainManager.GetTerrainAtSpot(MapSpace,backSpot) != null)
-            {
-                // Console.WriteLine($"FrontFound: Mouse: {relativePos} | Spot: {backSpot}");
-                return backSpot;
-            }
-
-            // There is a gap between the bottom of where a tile top would be and where the bottom of the front sprite really is
-            // We need to correct for this with an extra check
-            var diff = relativePos.Y - ((y * TILE_WIDTH) - (z * TILE_HIGHT));
-            if(z ==0)
-                // Console.WriteLine($"Diff: {diff}");
-                if ( diff < (TILE_HIGHT - TILE_WIDTH))
-                {
-                    var doubleBackSpot = backSpot.DirectionToSpot(DirectionFlags.Back, ViewRotation);
-                    // Console.WriteLine($"Edge Case: Mouse: {relativePos}Checking Spot: {spot} | FrontSpot: {backSpot} | DoubleCheck: {doubleBackSpot} | Diff: {diff}");
-                    if (TerrainManager.GetTerrainAtSpot(MapSpace,doubleBackSpot) != null)
-                    {
-                        return doubleBackSpot;
-                    }
-                }*/
+            
+            // Next, check we're on the front face of the cell behind us
+            spot = spot.DirectionToSpot(DirectionFlags.Back, mapFaceing);
+            if (mapSpace.ListInstsAtSpot(spot).Any())
+                return spot;
+            
+            // Finnaly, check if we're in the bottom tile of a cell
+            y = Convert.ToInt32(Math.Floor((-worldY - zOffset) / cellDepth));
+            spot = _getRotatedSpot(x, y, z, mapFaceing);
+            if (mapSpace.ListInstsAtSpot(spot).Any())
+                return spot;
         }
-        return new MapSpot();
+        return null;
+    }
+
+    private static MapSpot _getRotatedSpot(int x, int y, int z, RotationFlag rotation)
+    {
+        switch (rotation)
+        {
+            case RotationFlag.North:
+                return new MapSpot(x, y, z);
+            case RotationFlag.East:
+                return new MapSpot(y, -x, z);
+                break;
+            case RotationFlag.South:
+                return new MapSpot(-x, -y, z);
+                break;
+            case RotationFlag.West:
+                return new MapSpot(-y, x, z);
+                break;
+        }
+
+        throw new Exception($"Unknown RotationFlag: {rotation}");
     }
 
     /// <summary>

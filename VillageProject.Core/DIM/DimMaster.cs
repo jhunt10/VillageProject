@@ -78,8 +78,11 @@ public class DimMaster
         if (def == null)
             throw new Exception($"Failed to deserialize def '{filePath}'.");
         def.LoadPath = Path.GetDirectoryName(filePath);
+        def.CompDefs = def.CompDefs.Where(x => x != null).ToList();
         foreach (var compDef in def.CompDefs)
         {
+            if(compDef == null)
+                continue;
             ((BaseCompDef)compDef).ParentDef = def;
         }
         return def;

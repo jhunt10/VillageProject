@@ -15,37 +15,67 @@ public class MapManager : BaseManager
         return _mainMapSpace;
     }
 
-    public Result CanPlaceDefOnMapSpace(MapSpace mapSpace, IDef def, MapSpot anchorSpot, RotationFlag rotation, Dictionary<string, object>? args = null)
+    public Result CanPlaceInstOnMapSpace(
+        MapSpace mapSpace, 
+        IInst inst, 
+        MapSpot anchorSpot, 
+        RotationFlag rotation, 
+        Dictionary<string, object>? args = null)
     {
-        // var compArgs = args;
-        // if (compArgs == null)
-        //     compArgs = new Dictionary<string, object>();
-        //
-        // var spots = new List<MapSpot>{anchorSpot};
-        // // Let managers determine the full list of occupied spots
-        // foreach (var manager in DimMaster.ListManagersOfType<IMapPlacementValidator>())
-        // {
-        //     var name = manager.GetType().FullName;
-        //     var arg = compArgs.ContainsKey(name) ? compArgs[name] : null;
-        //     var extraSpots = manager.GetSpotsForDef(mapSpace, def, anchorSpot, rotation, arg);
-        //     foreach (var eSpot in extraSpots)
-        //     {
-        //         if(!spots.Contains(eSpot))
-        //             spots.Add(eSpot);
-        //     }
-        // }
-        //
-        // // Check that all managers allow for all occupied spots spots
-        // foreach (var manager in DimMaster.ListManagersOfType<IMapPlacementValidator>())
-        // {
-        //     var name = manager.GetType().FullName;
-        //     var arg = compArgs.ContainsKey(name) ? compArgs[name] : null;
-        //     var res = manager.CanPlaceDefOnMapSpace(mapSpace, def, anchorSpot, rotation, arg);
-        //     if (!res.Success)
-        //         return res;
-        // }
+        var compArgs = args;
+        if (compArgs == null)
+            compArgs = new Dictionary<string, object>();
+
+        if (!mapSpace.InBounds(anchorSpot))
+            return new Result(false, "Out of bounds");
+        
+        // Check that all managers allow for all occupied spots spots
+        foreach (var manager in DimMaster.ListManagersOfType<IMapPlacementValidator>())
+        {
+            var name = manager.GetType().FullName;
+            object? arg = (compArgs != null && compArgs.ContainsKey(name)) ? compArgs[name] : null;
+            var res = manager.CanPlaceInstOnMapSpace(mapSpace, inst, anchorSpot, rotation, arg);
+            if (!res.Success)
+                return res;
+        }
 
         return new Result();
     }
 
+    public Result TryPlaceInstOnMapSpace(
+        MapSpace mapSpace,
+        IInst inst,
+        MapSpot anchorSpot,
+        RotationFlag rotation,
+        Dictionary<string, object>? args = null)
+    {
+        var compArgs = args;
+        if (compArgs == null)
+            compArgs = new Dictionary<string, object>();
+        
+        var canRes = CanPlaceInstOnMapSpace(mapSpace, inst, anchorSpot, rotation, compArgs);
+        if (!canRes.Success)
+            return canRes;
+
+        Result? failedRes = null;
+        
+        foreach (var manager in DimMaster.ListManagersOfType<IMapPlacementValidator>())
+        {
+            var name = manager.GetType().FullName;
+            object? arg = (compArgs != null && compArgs.ContainsKey(name)) ? compArgs[name] : null;
+            var res = manager.TryPlaceInstOnMapSpace(mapSpace, inst, anchorSpot, rotation, arg);
+            if (!res.Success)
+            {
+                failedRes = res;
+            }
+        }
+
+        if (failedRes != null)
+        {
+            mapSpace.RemoveInst(inst);
+            return failedRes;
+        }
+
+        return new Result(true);
+    }
 }

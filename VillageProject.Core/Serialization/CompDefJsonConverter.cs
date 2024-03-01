@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using VillageProject.Core.DIM.Defs;
@@ -25,7 +26,11 @@ public class CompDefJsonConverter : JsonConverter<ICompDef>
         var className = jsonObj[nameof(ICompDef.CompDefClassName)].ToString();
         var type = GetTypeByName(className);
         if (type == null)
-            throw new Exception($"Failed to find CompDef type with name '{className}'.");
+        {
+            // throw new Exception($"Failed to find CompDef type with name '{className}'.");
+            Console.WriteLine($"Failed to find CompDef type with name '{className}'.");
+            return null;
+        }
 
         var deserialize = JsonSerializer.Deserialize(fullText, type);
         var compDef = deserialize as ICompDef;
@@ -42,7 +47,7 @@ public class CompDefJsonConverter : JsonConverter<ICompDef>
 
     private Type? GetTypeByName(string name)
     {
-        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Reverse())
+        foreach (var assembly in GetAssemblies())// AppDomain.CurrentDomain.GetAssemblies().Reverse())
         {
             var tt = assembly.GetType(name);
             if (tt != null)
@@ -52,5 +57,30 @@ public class CompDefJsonConverter : JsonConverter<ICompDef>
         }
 
         return null;
+    }
+    
+    public static IEnumerable<Assembly> GetAssemblies()
+    {
+        var list = new List<string>();
+        var stack = new Stack<Assembly>();
+
+        stack.Push(Assembly.GetEntryAssembly());
+
+        do
+        {
+            var asm = stack.Pop();
+
+            yield return asm;
+
+            foreach (var reference in asm.GetReferencedAssemblies())
+                if (!list.Contains(reference.FullName))
+                {
+                    stack.Push(Assembly.Load(reference));
+                    list.Add(reference.FullName);
+                }
+
+        }
+        while (stack.Count > 0);
+
     }
 }

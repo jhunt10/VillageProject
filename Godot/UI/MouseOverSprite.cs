@@ -28,7 +28,7 @@ public partial class MouseOverSprite : Sprite2D
 		if(mouseSpot == _lastSpot)
 			return;
 		
-		var node = mapNode.GetTerrainNodeAtSpot(mouseSpot);
+		var node = mapNode.GetMapNodeAtSpot(mouseSpot);
 		if(node == null)
 			return;
 		TextLabel.Text = mouseSpot.ToString();

@@ -47,7 +47,7 @@ public class CompDefJsonConverter : JsonConverter<ICompDef>
 
     private Type? GetTypeByName(string name)
     {
-        foreach (var assembly in GetAssemblies())// AppDomain.CurrentDomain.GetAssemblies().Reverse())
+        foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Reverse())
         {
             var tt = assembly.GetType(name);
             if (tt != null)

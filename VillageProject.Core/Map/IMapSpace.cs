@@ -14,4 +14,7 @@ public interface IMapSpace
     public Result TryAddInstToSpots(IInst inst, List<MapSpot> spot, string layer);
 
     public void RemoveInst(IInst inst);
+
+
+    public DataDict BuildSaveData();
 }

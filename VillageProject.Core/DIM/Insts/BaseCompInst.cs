@@ -4,6 +4,7 @@ namespace VillageProject.Core.DIM.Insts;
 
 public class BaseCompInst : ICompInst
 {
+    public string CompKey => CompDef.CompKey;
     public ICompDef CompDef { get; }
     public IInst Instance { get; }
 
@@ -21,5 +22,15 @@ public class BaseCompInst : ICompInst
             throw new Exception(
                 $"Failed to case CompDef type {CompDef.GetType().FullName} to {typeof(TCompDef).FullName}");
         return def;
+    }
+
+    public virtual DataDict? BuildSaveData()
+    {
+        return null;
+    }
+
+    public virtual void LoadSavedData(DataDict dataDict)
+    {
+        
     }
 }

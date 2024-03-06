@@ -6,6 +6,7 @@ namespace VillageProject.Core.Map;
 
 public class MapSpace : IMapSpace
 {
+    public string Id { get; private set; }
     public int MinX { get; private set; }
     public int MaxX { get; private set; }
     public int MinY { get; private set; }
@@ -13,8 +14,16 @@ public class MapSpace : IMapSpace
     public int MinZ { get; private set; }
     public int MaxZ { get; private set; }
 
+    /// <summary>
+    /// Matrix if cells ordered in [z][x][y]
+    /// </summary>
+    private MapCell[][][] _cellMatrix;
+    
+    private Dictionary<string, List<MapSpot>> _inst_to_spots = new Dictionary<string, List<MapSpot>>();
+    
     public MapSpace(int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
     {
+        Id = Guid.NewGuid().ToString();
         MinX = minX;
         MaxX = maxX;
         MinY = minY;
@@ -23,19 +32,39 @@ public class MapSpace : IMapSpace
         MaxZ = maxZ;
         _buildCellMatrix(MaxX, MinX, MaxY, MinY, MaxZ, MinZ);
     }
+
+    public MapSpace(DataDict data)
+    {
+        MinX = data.GetValueAs<int>("MinX");
+        MaxX = data.GetValueAs<int>("MaxX");
+        MinY = data.GetValueAs<int>("MinY");
+        MaxY = data.GetValueAs<int>("MaxY");
+        MinZ = data.GetValueAs<int>("MinZ");
+        MaxZ = data.GetValueAs<int>("MaxZ");
+        _inst_to_spots = new Dictionary<string, List<MapSpot>>();
+        _buildCellMatrix(MaxX, MinX, MaxY, MinY, MaxZ, MinZ);
+
+        var cellData = data.GetValueAs<Dictionary<string, Dictionary<string, List<string>>>>("CellData");
+        foreach (var pair in cellData)
+        {
+            var spot = new MapSpot(pair.Key);
+            var layerData = pair.Value;
+            var cell = _getCellAtSpot(spot);
+            foreach (var layer in layerData)
+            foreach (var instId in layer.Value)
+                cell.AddInstId(layer.Key, instId);
+        }
+    }
     
-    /// <summary>
-    /// Matrix if cells ordered in [z][x][y]
-    /// </summary>
-    private MapCell[][][] _cellMatrix;
-    
-    private Dictionary<string, List<MapSpot>> _inst_to_spots = new Dictionary<string, List<MapSpot>>();
 
     private void _buildCellMatrix(int maxX, int minX, int maxY, int minY, int maxZ, int minZ)
     {
-        MaxX = maxX; MinX = minX;
-        MaxY = maxY; MinY = minY;
-        MaxZ = maxZ; MinZ = minZ;
+        MaxX = maxX; 
+        MinX = minX;
+        MaxY = maxY; 
+        MinY = minY;
+        MaxZ = maxZ; 
+        MinZ = minZ;
         var width = maxX - minX + 1;
         var depth = maxY - minY + 1;
         var hight = maxZ - minZ + 1;
@@ -59,6 +88,28 @@ public class MapSpace : IMapSpace
         return _cellMatrix[spot.Z - MinZ][spot.X - MinX][spot.Y - MinY];
     }
     
+    
+    public DataDict BuildSaveData()
+    {
+        var data = new DataDict(Id);
+        var cellData = new Dictionary<string, Dictionary<string, List<string>>>();
+        foreach (var spot in EnumerateMapSpots())
+        {
+            var cellSave = _getCellAtSpot(spot).BuildSaveData();
+            if(cellSave != null)
+                cellData.Add(spot.ToString(),cellSave);
+        }
+
+        data.AddData("CellData", cellData);
+        data.AddData("MaxX", MaxX);
+        data.AddData("MinX", MinX);
+        data.AddData("MaxY", MaxY);
+        data.AddData("MinY", MinY);
+        data.AddData("MaxZ", MaxZ);
+        data.AddData("MinZ", MinZ);
+        return data;
+    }
+    
     public bool InBounds(MapSpot spot)
     {
         return InBounds(spot.X, spot.Y, spot.Z);
@@ -76,6 +127,15 @@ public class MapSpace : IMapSpace
         for(int x = MinX; x <= MaxX; x++)
         for (int y = MinY; y <= MaxY; y++)
             yield return new MapSpot(x, y, z);
+    }
+    
+    public IEnumerable<IInst> EnumerateAllInsts()
+    {
+        foreach (var instsId in _inst_to_spots.Keys)
+        {
+            var inst = DimMaster.GetInstById(instsId, errorIfNull:true);
+            yield return inst;
+        }
     }
 
     public IEnumerable<IInst> ListInstsAtSpot(MapSpot spot, string? layer = null)
@@ -98,8 +158,13 @@ public class MapSpace : IMapSpace
     public Result TryAddInstToSpots(IInst inst, List<MapSpot> spots, string layer)
     {
         if (_inst_to_spots.ContainsKey(inst.Id))
-            return new Result(false, $"Inst {inst.Def.DefName}:{inst.Id} already added to MapSpace.");
-        _inst_to_spots.Add(inst.Id, new List<MapSpot>());
+        {
+            // return new Result(false, $"Inst {inst.Def.DefName}:{inst.Id} already added to MapSpace.");
+        }
+        else
+        {
+            _inst_to_spots.Add(inst.Id, new List<MapSpot>());
+        }
         Result? failedRes = null;
         foreach (var spot in spots)
         {
@@ -122,6 +187,7 @@ public class MapSpace : IMapSpace
             return failedRes;
         }
 
+        Console.WriteLine($"Added Inst {inst._DebugId} to spot [{string.Join(", ", spots.Select(x => x.ToString()))}].");
         return new Result(true);
     }
 
@@ -178,6 +244,15 @@ public class MapSpace : IMapSpace
     {
         private Dictionary<string, List<string>> _layers = new Dictionary<string, List<string>>();
 
+        
+        public Dictionary<string, List<string>>? BuildSaveData()
+        {
+            if(_layers.Any())  
+                return _layers;
+            return null;
+
+        }
+        
         public bool HasInst(string layer, IInst inst)
         {
             if (!_layers.ContainsKey(layer))
@@ -192,6 +267,14 @@ public class MapSpace : IMapSpace
                 _layers.Add(layer, new List<string>());
             if(!_layers[layer].Contains(inst.Id))
                 _layers[layer].Add(inst.Id);
+        }
+        
+        internal void AddInstId(string layer, string instId)
+        {
+            if(!_layers.ContainsKey(layer))
+                _layers.Add(layer, new List<string>());
+            if(!_layers[layer].Contains(instId))
+                _layers[layer].Add(instId);
         }
 
         public void RemoveInst(IInst inst)
@@ -222,5 +305,9 @@ public class MapSpace : IMapSpace
                     yield return instId;
             }
         }
+    }
+    private class MyClass
+    {
+            
     }
 }

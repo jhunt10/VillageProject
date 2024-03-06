@@ -67,6 +67,13 @@ public partial class ZLayerPrefab : Node2D
 		LayerShadow.Visible = show;
 	}
 
+	public Node2D? GetCellNode(MapSpot spot)
+	{
+		if(_cellNodes.ContainsKey(spot))
+			return _cellNodes[spot];
+		return null;
+	}
+
 	public void ResyncRotation()
 	{
 		var terrainManager = DimMaster.GetManager<TerrainManager>();
@@ -128,48 +135,58 @@ public partial class ZLayerPrefab : Node2D
 		}
 	}
 
+	public Node2D CreateEmptyNode(MapSpot spot)
+	{
+		var pos = SpotToLocalPosition(spot, MapNode.ViewRotation);
+		var newNode = (MapStructureNode)MapStructureNodePrefab.Duplicate();
+		newNode.DirtySprite = true;
+		newNode.Position = pos;
+		CellsParentNode.AddChild(newNode);
+		_cellNodes.Add(spot, newNode);
+		return newNode;
+	}
+
 	public Node2D CreateMapStructureNode(IInst mapStructInst)
 	{
-		throw new  NotImplementedException();
-		// var mapStructureManager = DimMaster.GetManager<MapStructureManager>();
-		// var mapStructComp = mapStructInst.GetComponentOfType<MapStructCompInst>(errorIfNull: true);
-		//
-		// if (_cellNodes.ContainsKey(mapStructComp.MapSpot))
-		// 	return _cellNodes[mapStructComp.MapSpot];
-		//
-		// var spriteComp = mapStructInst.GetComponentOfType<GodotPatchCellSpriteComp>();
-		// var spriteDef = spriteComp.CompDef as IPatchSpriteCompDef;
-		// var sprite = spriteComp.GetPatchSprite(() =>
-		// {
-		// 	return mapStructureManager.GetAdjacency(mapStructInst, MapNode.MapSpace, mapStructComp.MapSpot, mapStructComp.Rotation);
-		// });
-		//
-		// var pos = SpotToLocalPosition(mapStructComp.MapSpot, MapNode.ViewRotation);
-		// var newNode = (MapStructureNode)MapStructureNodePrefab.Duplicate();
-		// newNode.Inst = mapStructInst;
-		// newNode.DirtySprite = true;
-		// newNode.Position = pos;
-		// CellsParentNode.AddChild(newNode);
-		// _cellNodes.Add(mapStructComp.MapSpot, newNode);
-		//
-		// foreach (var pair in mapStructComp.MapSpot.ListAdjacentSpots())
-		// {
-		// 	if (_cellNodes.ContainsKey(pair.Value))
-		// 		if(_cellNodes[pair.Value] is MapStructureNode)
-		// 			((MapStructureNode)_cellNodes[pair.Value]).DirtySprite = true;
-		// }
-		//
-		// return newNode;
+		var mapStructureManager = DimMaster.GetManager<MapStructureManager>();
+		var mapStructComp = mapStructInst.GetComponentOfType<MapStructCompInst>(errorIfNull: true);
+
+		if (!mapStructComp.MapSpot.HasValue)
+			return null;
+		var spot = mapStructComp.MapSpot.Value;
+		
+		if (_cellNodes.ContainsKey(spot))
+			return _cellNodes[spot];
+		
+		var spriteComp = mapStructInst.GetComponentOfType<GodotPatchCellSpriteComp>();
+		var spriteDef = spriteComp.CompDef as IPatchSpriteCompDef;
+		var sprite = spriteComp.GetPatchSprite(() =>
+		{
+			return mapStructureManager.GetAdjacency(mapStructInst, MapNode.MapSpace, spot, mapStructComp.Rotation);
+		});
+		
+		var pos = SpotToLocalPosition(spot, MapNode.ViewRotation);
+		var newNode = (MapStructureNode)MapStructureNodePrefab.Duplicate();
+		newNode.Inst = mapStructInst;
+		newNode.DirtySprite = true;
+		newNode.Position = pos;
+		CellsParentNode.AddChild(newNode);
+		_cellNodes.Add(spot, newNode);
+		
+		foreach (var pair in spot.ListAdjacentSpots())
+		{
+			if (_cellNodes.ContainsKey(pair.Value))
+				if(_cellNodes[pair.Value] is MapStructureNode)
+					((MapStructureNode)_cellNodes[pair.Value]).DirtySprite = true;
+		}
+		
+		return newNode;
 	}
 	
-	public Node2D CreateTerrainNode(MapSpot spot)
+	public Node2D CreateTerrainNode(MapSpot spot, IInst inst)
 	{
 		Init();
 		var terrainManager = DimMaster.GetManager<TerrainManager>();
-		
-		var inst = terrainManager.GetTerrainAtSpot(MapNode.MapSpace, spot);
-		if (inst == null)
-			return null;
 		
 		var topSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("TopSprite");
 		var topSpriteDef = topSpriteComp.CompDef as IPatchSpriteCompDef;

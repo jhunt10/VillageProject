@@ -4,6 +4,7 @@ namespace VillageProject.Core.DIM.Insts;
 
 public class Inst : IInst
 {
+    public string _DebugId => (Def?.Label ?? "NoDef") + ":" + Id;
     public string Id { get; }
     public IDef Def { get; }
 
@@ -12,6 +13,12 @@ public class Inst : IInst
     public Inst(IDef def)
     {
         Id = Guid.NewGuid().ToString();
+        Def = def;
+        Components = new List<ICompInst>();
+    }
+    public Inst(string id, IDef def)
+    {
+        Id = id;
         Def = def;
         Components = new List<ICompInst>();
     }
@@ -62,5 +69,22 @@ public class Inst : IInst
             throw new Exception(
                 $"Failed to find Component of type '{typeof(TComp).FullName}' on Inst '{Def.DefName}:{Id}'.");
         return default(TComp);
+    }
+
+    public DataDict BuildSaveData()
+    {
+        var data = new DataDict(Id);
+        foreach (var comp in Components)
+        {
+            var compData = comp.BuildSaveData();
+            if(compData != null)
+                data.AddData(comp.CompDef.CompKey, compData);
+        }
+        return data;
+    }
+
+    public void LoadSaveData(object? data)
+    {
+        
     }
 }

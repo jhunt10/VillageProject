@@ -47,18 +47,23 @@ public partial class MapStructureNode : Node2D
 	
 	private void SetSprite()
 	{
-		throw new NotImplementedException();
-		// var mapStructComp = Inst.GetComponentOfType<MapStructCompInst>(errorIfNull: true);
-		//
-		// var spriteComp = Inst.GetComponentOfType<GodotPatchCellSpriteComp>();
-		// var spriteDef = spriteComp.CompDef as IPatchSpriteCompDef;
-		// var sprite = spriteComp.GetPatchSprite(() =>
-		// {
-		// 	return DimMaster.GetManager<MapStructureManager>()
-		// 		.GetAdjacency(Inst, GameMaster.MapNode.MapSpace, mapStructComp.MapSpot, GameMaster.MapNode.ViewRotation);
-		// });
-		// var imageText = (ImageTexture)sprite.Sprite;
-		// this.Spite.Texture = imageText;
-		// this.Spite.Offset = new Vector2(0, -imageText.GetHeight());
+		if(Inst == null)
+			return;
+		
+		var mapStructComp = Inst.GetComponentOfType<MapStructCompInst>(errorIfNull: true);
+		if(!mapStructComp.MapSpot.HasValue)
+			return;
+		var spot = mapStructComp.MapSpot.Value;
+		
+		var spriteComp = Inst.GetComponentOfType<GodotPatchCellSpriteComp>();
+		var spriteDef = spriteComp.CompDef as IPatchSpriteCompDef;
+		var sprite = spriteComp.GetPatchSprite(() =>
+		{
+			return DimMaster.GetManager<MapStructureManager>()
+				.GetAdjacency(Inst, GameMaster.MapNode.MapSpace, spot, GameMaster.MapNode.ViewRotation);
+		});
+		var imageText = (ImageTexture)sprite.Sprite;
+		this.Spite.Texture = imageText;
+		this.Spite.Offset = new Vector2(0, -imageText.GetHeight());
 	}
 }

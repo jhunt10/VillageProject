@@ -4,9 +4,9 @@
     "CompDefs": [
         {
             "MapLayer": "Default",
-            "FootPrint": {
+            "OccupationData": {
                 "(0,0,0)": [
-                    0
+                    1073741823
                 ]
             },
             "CompDefClassName": "VillageProject.Core.Map.MapStructures.MapStructCompDef",

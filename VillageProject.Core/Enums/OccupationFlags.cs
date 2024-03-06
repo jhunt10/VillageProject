@@ -48,6 +48,13 @@ public enum OccupationFlags
     BottomBackRight = 134217728,
     BottomFrontRight = 268435456,
     BottomFrontLeft = 536870912,
+    
+    Full = OccupationFlags.Inner | OccupationFlags.Middle | OccupationFlags.Outer | OccupationFlags.Top | OccupationFlags.Center | OccupationFlags.Bottom 
+           | OccupationFlags.TopBack | OccupationFlags.TopRight | OccupationFlags.TopFront | OccupationFlags.TopLeft | OccupationFlags.TopBackLeft 
+           | OccupationFlags.TopBackRight | OccupationFlags.TopFrontRight | OccupationFlags.TopFrontLeft | OccupationFlags.Back | OccupationFlags.Right 
+           | OccupationFlags.Front | OccupationFlags.Left | OccupationFlags.BackLeft | OccupationFlags.BackRight | OccupationFlags.FrontRight 
+           | OccupationFlags.FrontLeft | OccupationFlags.BottomBack | OccupationFlags.BottomRight | OccupationFlags.BottomFront | OccupationFlags.BottomLeft 
+           | OccupationFlags.BottomBackLeft | OccupationFlags.BottomBackRight | OccupationFlags.BottomFrontRight | OccupationFlags.BottomFrontLeft,
 }
 
 public static class OccupationExtentions

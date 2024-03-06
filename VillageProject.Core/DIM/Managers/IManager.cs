@@ -7,4 +7,7 @@ public interface IManager
 {
     public void Init();
     ICompInst CreateCompInst(ICompDef compDef, IInst newInst, object? args);
+    ICompInst LoadSavedCompInst(ICompDef compDef, IInst newInst, DataDict? data);
+    public DataDict BuildSaveData();
+    public void LoadSaveData(DataDict data);
 }

@@ -40,6 +40,11 @@ public class OccupationData
             }
     }
 
+    public OccupationData BuildNewOccupationData(MapSpot anchor, RotationFlag rotationFlag)
+    {
+        return new OccupationData(this.OccupationDict, anchor, Rotation);
+    }
+
     private Dictionary<MapSpot, List<OccupationFlags>> _RotateOccupationDict(
         MapSpot anchor,
         RotationFlag rotation, 
@@ -51,7 +56,7 @@ public class OccupationData
         {
             var spot = pair.Key;
             var occs = pair.Value;
-            var newSpot = spot.RotateSpot(rotDir);
+            var newSpot = spot.RotateSpot(rotDir) + anchor;
             var newOccs = new List<OccupationFlags>();
             foreach (var occ in occs)
             {

@@ -10,6 +10,10 @@ public class MapManager : BaseManager
 
     private MapSpace _mainMapSpace;
 
+    public void SetMainMapSpace(MapSpace space)
+    {
+        _mainMapSpace = space;
+    }
     public MapSpace GetMainMapSpace()
     {
         return _mainMapSpace;
@@ -77,5 +81,16 @@ public class MapManager : BaseManager
         }
 
         return new Result(true);
+    }
+
+    public override DataDict BuildSaveData()
+    {
+        return _mainMapSpace.BuildSaveData();
+    }
+
+    public override void LoadSaveData(DataDict data)
+    {
+        var mapSpace = new MapSpace(data);
+        SetMainMapSpace(mapSpace);
     }
 }

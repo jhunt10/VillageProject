@@ -37,6 +37,8 @@ public class GodotPatchCellSpriteComp : BasePatchCellSpriteComp, ISpriteComp
         {
             var path = Path.Combine(def.ParentDef.LoadPath, def.SpriteSheet);
             _image = Image.LoadFromFile(path);
+            if (_image == null)
+                throw new Exception($"Failed to load image from '{path}'.");
         }
         var width = def.SpriteWidth;
         var hight = def.SpriteHight;
@@ -53,11 +55,11 @@ public class GodotPatchCellSpriteComp : BasePatchCellSpriteComp, ISpriteComp
         if (index > _cache.Length)
             throw new Exception("Atlas Co outside of bounds.");
         if (_cache[index] != null)
-            return new SpriteData(_cache[index]);
+            return new SpriteData(_cache[index], new SpriteDataDef("", 32, 32, 0, 0));
         
 
         var subImage = _image.GetRegion(new Rect2I(x * width, y * hight, width, hight));
         _cache[index] = ImageTexture.CreateFromImage(subImage);
-        return new SpriteData(_cache[index]);
+        return new SpriteData(_cache[index], new SpriteDataDef("", 32, 32, 0, 0));
     }
 }

@@ -19,9 +19,6 @@
     <ProjectReference Include="VillageProject.Core\VillageProject.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Godot\" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System.Private.CoreLib">
     </Reference>
   </ItemGroup>

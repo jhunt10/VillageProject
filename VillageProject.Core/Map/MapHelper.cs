@@ -15,6 +15,8 @@ public static class MapHelper
         RotationFlag mapFaceing = RotationFlag.North, 
         int cellWidth = 32, int cellDepth = 32, int cellHight = 40)
     {
+        if (mapSpace == null)
+            return null;
         var x = Convert.ToInt32(Math.Floor(worldX / cellWidth));;
         if (x > mapSpace.MaxX || x < mapSpace.MinX)
             return null;

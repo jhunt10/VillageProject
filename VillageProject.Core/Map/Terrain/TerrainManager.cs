@@ -1,6 +1,7 @@
 ﻿using VillageProject.Core.DIM;
 using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
+using VillageProject.Core.Map.MapStructures;
 
 namespace VillageProject.Core.Map.Terrain;
 
@@ -16,7 +17,7 @@ public enum TerrainAdjacency
 /// </summary>
 public class TerrainManager : BaseManager
 {
-    public const string TERRAIN_LAYER = "Terrain";
+    public const string TERRAIN_LAYER = MapStructureManager.DEFAULT_MAP_LAYER;
     public Dictionary<string, IInst> _terrainInsts;
     
     public TerrainManager()

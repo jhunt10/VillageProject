@@ -9,12 +9,13 @@ public class MapSpotJsonConverter : JsonConverter<MapSpot>
 {
     public override MapSpot Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType != JsonTokenType.StartObject)
+        if (reader.TokenType != JsonTokenType.String)
         {
             throw new JsonException();
         }
 
-        return new MapSpot();
+        var val = reader.GetString();
+        return new MapSpot(val);
 
     }
 

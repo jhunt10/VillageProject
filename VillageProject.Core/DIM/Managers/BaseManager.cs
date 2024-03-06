@@ -9,7 +9,7 @@ public abstract class BaseManager : IManager
     {
         
     }
-    public virtual ICompInst CreateCompInst(ICompDef compDef, IInst newInst, object args)
+    public virtual ICompInst CreateCompInst(ICompDef compDef, IInst newInst, object? args)
     {
         var type = DimMaster.GetTypeByName(compDef.CompInstClassName);
         if(type == null)
@@ -24,5 +24,35 @@ public abstract class BaseManager : IManager
             throw new Exception($"Failed cast Manager of type '{type.FullName}' to IManager.");
 
         return iCompInst;
+    }
+    
+    public virtual ICompInst LoadSavedCompInst(ICompDef compDef, IInst newInst, DataDict? dataDict)
+    {
+        var type = DimMaster.GetTypeByName(compDef.CompInstClassName);
+        if(type == null)
+            throw new Exception($"Failed to find CompInst type '{compDef.CompInstClassName}'.");
+        
+        var compInst = Activator.CreateInstance(type, new object[] {compDef, newInst});
+        if (compInst == null)
+            throw new Exception($"Failed to instantiate Manager of type '{type.FullName}'.");
+
+        var iCompInst = compInst as ICompInst;
+        if (iCompInst == null)
+            throw new Exception($"Failed cast Manager of type '{type.FullName}' to IManager.");
+
+        if(dataDict != null)
+            iCompInst.LoadSavedData(dataDict);
+        
+        return iCompInst;
+    }
+
+    public virtual DataDict BuildSaveData()
+    {
+        return null;
+    }
+
+    public virtual void LoadSaveData(DataDict data)
+    {
+        
     }
 }

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using VillageProject.Core.DIM;
+using VillageProject.Core.DIM.Defs;
+using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Map.MapStructures.Constructables;
 using VillageProject.Core.Sprites.Interfaces;
 
@@ -13,9 +15,13 @@ public partial class BuildBar : Control
 	public const int BUTTON_WIDTH = 72;
 	public const int BUTTON_GAP = 8;
 
+	public ConstructablePreview ConstructablePreview;
 	public NinePatchRect Background;
 	public TextureButton ButtonPrefab;
 	public List<TextureButton> Buttons;
+
+	public IInst ConructionInst;
+	private List<IDef> _constructableDefs = new List<IDef>(); 
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -24,6 +30,7 @@ public partial class BuildBar : Control
 		Buttons = new List<TextureButton>();
 		ButtonPrefab = GetNode<TextureButton>("BuildableDefButtonPrefab");
 		ButtonPrefab.Visible = false;
+		ConstructablePreview = GetNode<ConstructablePreview>("ConstructablePreview");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -41,7 +48,7 @@ public partial class BuildBar : Control
 			this.RemoveChild(but);
 		}
 		Buttons.Clear();
-		
+		_constructableDefs.Clear();
 		var defs = DimMaster.GetAllDefsWithCompDefType<ConstructableCompDef>();
 		foreach (var def in defs)
 		{
@@ -59,6 +66,7 @@ public partial class BuildBar : Control
 			newButton.GetNode<TextureRect>("TextureRect").Texture = ImageTexture.CreateFromImage(image);
 			newButton.Visible = true;
 			Buttons.Add(newButton);
+			_constructableDefs.Add(def);
 
 		}
 
@@ -73,6 +81,8 @@ public partial class BuildBar : Control
 	private void _on_def_button_press(int index)
 	{
 		var button = Buttons[index];
-		GameMaster.MouseOverSprite.Texture = button.GetNode<TextureRect>("TextureRect").Texture;
+		// GameMaster.MouseOverSprite.Texture = button.GetNode<TextureRect>("TextureRect").Texture;
+		ConstructablePreview.SetConstructableDef(_constructableDefs[index]);
+
 	}
 }

@@ -25,13 +25,14 @@ public class MapStructureManager : BaseManager, IMapStructureManager
     {
         
     }
+    
 
     public ICompInst CreateCompInst(ICompDef compDef, IInst newInst, object? args)
     {
-        var mapStructArgs = args as MapStructCompArgs;
-        if (mapStructArgs == null)
-            throw new Exception($"Failed to cast CompArgs to type '{typeof(MapStructCompArgs).FullName}'.");
-        
+        // var mapStructArgs = args as MapStructCompArgs;
+        // if (mapStructArgs == null)
+        //     throw new Exception($"Failed to cast CompArgs to type '{typeof(MapStructCompArgs).FullName}'.");
+        //
         var compInst = base.CreateCompInst(compDef, newInst, args);
         var mapStructCompInst = compInst as MapStructCompInst;
         if (mapStructCompInst == null)
@@ -41,6 +42,7 @@ public class MapStructureManager : BaseManager, IMapStructureManager
         //     throw new Exception("Failed to place new MapStructure.");
         return compInst;
     }
+
 
     public Result CanPlaceInstOnMapSpace(MapSpace mapSpace, IInst inst, MapSpot anchorSpot, RotationFlag rotation, object args)
     {
@@ -72,9 +74,10 @@ public class MapStructureManager : BaseManager, IMapStructureManager
             return new Result(true);
 
         var mapStructCompDef = (MapStructCompDef)mapStrutCompInst.CompDef;
-        var occupation = new OccupationData(mapStructCompDef.OccupationData.OccupationDict, anchorSpot, rotation);
+        var occupation = mapStructCompDef.OccupationData.BuildNewOccupationData(anchorSpot, rotation);
         var occSpots = occupation.ListOccupiedSpots().ToList();
         var res = mapSpace.TryAddInstToSpots(inst, occSpots, mapStructCompDef.MapLayer);
+        mapStrutCompInst.SetMapSpot(mapSpace, anchorSpot, rotation);
         return res;
     }
     
@@ -196,39 +199,39 @@ public class MapStructureManager : BaseManager, IMapStructureManager
     //
     // }
 
-    // public AdjacencyFlags GetAdjacency(
-    //     IInst inst,
-    //     IMapSpace mapSpace,
-    //     MapSpot spot,
-    //     RotationFlag rotation = RotationFlag.North,
-    //     AdjacencyHelper.InstAdjacencyMatch? matchDelegate = null)
-    // {
-    //     var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(errorIfNull:true);
-    //     var mapStructCompDef = mapStructComp.CompDef as MapStructCompDef;
-    //     
-    //     var adjacency = AdjacencyFlags.None;
-    //
-    //     // foreach (var adjPair in spot.ListAdjacentSpots(rotation))
-    //     // {
-    //     //     var direction = adjPair.Key;
-    //     //     var adjSpot = adjPair.Value;
-    //     //     if(!_cells.ContainsKey(adjSpot))
-    //     //         continue;
-    //     //     foreach (var thing in _cells[adjSpot].ListInst(mapStructCompDef.MapLayer))
-    //     //     {
-    //     //         var match = false;
-    //     //         if (matchDelegate != null)
-    //     //             match = matchDelegate(inst, thing);
-    //     //         else
-    //     //             match = AdjacencyHelper.MatchSameDefDelegate(inst, thing);
-    //     //         if (match)
-    //     //         {
-    //     //             adjacency = adjacency | MapHelper.DirectionToAdjacency(direction);
-    //     //             break;
-    //     //         }
-    //     //     }
-    //     // }
-    //
-    //     return adjacency;
-    // }
+    public AdjacencyFlags GetAdjacency(
+        IInst inst,
+        IMapSpace mapSpace,
+        MapSpot spot,
+        RotationFlag rotation = RotationFlag.North,
+        AdjacencyHelper.InstAdjacencyMatch? matchDelegate = null)
+    {
+        var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(errorIfNull:true);
+        var mapStructCompDef = mapStructComp.CompDef as MapStructCompDef;
+        
+        var adjacency = AdjacencyFlags.None;
+    
+        foreach (var adjPair in spot.ListAdjacentSpots(rotation))
+        {
+            var direction = adjPair.Key;
+            var adjSpot = adjPair.Value;
+            if(!mapSpace.InBounds(adjSpot))
+                continue;
+            foreach (var thing in mapSpace.ListInstsAtSpot(adjSpot, mapStructCompDef.MapLayer))
+            {
+                var match = false;
+                if (matchDelegate != null)
+                    match = matchDelegate(inst, thing);
+                else
+                    match = AdjacencyHelper.MatchSameDefDelegate(inst, thing);
+                if (match)
+                {
+                    adjacency = adjacency | MapHelper.DirectionToAdjacency(direction);
+                    break;
+                }
+            }
+        }
+    
+        return adjacency;
+    }
 }

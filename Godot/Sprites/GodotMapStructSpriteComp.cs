@@ -28,6 +28,11 @@ public class GodotMapStructSpriteComp : BaseSpriteComp, IMapStructureSpriteProvi
         throw new System.NotImplementedException();
     }
 
+    public SpriteData GetConstructablePreviewSprite(MapSpace mapSpace, MapSpot spot, RotationFlag rotation)
+    {
+        throw new System.NotImplementedException();
+    }
+
     public SpriteData GetConstructablePreviewSprite(RotationFlag rotationFlag)
     {
         throw new System.NotImplementedException();

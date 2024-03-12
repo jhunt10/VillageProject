@@ -1,6 +1,7 @@
 ﻿using VillageProject.Core.DIM;
 using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
+using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Map.MapStructures;
 
 namespace VillageProject.Core.Map.Terrain;
@@ -101,7 +102,7 @@ public class TerrainManager : BaseManager
     /// <summary>
     /// Returns adjacency for front of block, but translated to horizontal adjacency for PatchSprites
     /// </summary>
-    public AdjacencyFlags GetVerticalAdjacencyAsHorizontal(MapSpace mapSpace, MapSpot spot, RotationFlag rotation = RotationFlag.North, bool matchAny = false)
+    public AdjacencyFlags GetVerticalAdjacencyAsHorizontal(IMapSpace mapSpace, MapSpot spot, RotationFlag rotation = RotationFlag.North, bool matchAny = false)
     {
         var terrain = GetTerrainAtSpot(mapSpace, spot);
         var adjacency = AdjacencyFlags.None;

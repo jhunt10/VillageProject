@@ -1,12 +1,12 @@
 ﻿using VillageProject.Core.DIM;
+using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.DIM.Insts;
-using VillageProject.Core.Map.Terrain;
 
-namespace VillageProject.Core.Map;
+namespace VillageProject.Core.Map.MapSpaces;
 
-public class MapSpace : IMapSpace
+public class MapSpaceCompInst : BaseCompInst, IMapSpace
 {
-    public string Id { get; private set; }
+    public string MapSpaceId => Instance.Id;
     public int MinX { get; private set; }
     public int MaxX { get; private set; }
     public int MinY { get; private set; }
@@ -20,31 +20,63 @@ public class MapSpace : IMapSpace
     private MapCell[][][] _cellMatrix;
     
     private Dictionary<string, List<MapSpot>> _inst_to_spots = new Dictionary<string, List<MapSpot>>();
-    
-    public MapSpace(int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
+
+    public MapSpaceCompInst(ICompDef def, IInst inst) : base(def, inst)
     {
-        Id = Guid.NewGuid().ToString();
-        MinX = minX;
-        MaxX = maxX;
-        MinY = minY;
-        MaxY = maxY;
-        MinZ = minZ;
-        MaxZ = maxZ;
+        var compDef = (MapSpaceCompDef)def;
+        MinX = compDef.MinX;
+        MaxX = compDef.MaxX;
+        MinY = compDef.MinY;
+        MaxY = compDef.MaxY;
+        MinZ = compDef.MinZ;
+        MaxZ = compDef.MaxZ;
         _buildCellMatrix(MaxX, MinX, MaxY, MinY, MaxZ, MinZ);
     }
+    
+    // public MapSpaceCompInst(int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
+    // {
+    //     Id = Guid.NewGuid().ToString();
+    //     MinX = minX;
+    //     MaxX = maxX;
+    //     MinY = minY;
+    //     MaxY = maxY;
+    //     MinZ = minZ;
+    //     MaxZ = maxZ;
+    //     _buildCellMatrix(MaxX, MinX, MaxY, MinY, MaxZ, MinZ);
+    // }
 
-    public MapSpace(DataDict data)
+    public override DataDict? BuildSaveData()
     {
-        MinX = data.GetValueAs<int>("MinX");
-        MaxX = data.GetValueAs<int>("MaxX");
-        MinY = data.GetValueAs<int>("MinY");
-        MaxY = data.GetValueAs<int>("MaxY");
-        MinZ = data.GetValueAs<int>("MinZ");
-        MaxZ = data.GetValueAs<int>("MaxZ");
+        var data = new DataDict(MapSpaceId);
+        var cellData = new Dictionary<string, Dictionary<string, List<string>>>();
+        foreach (var spot in EnumerateMapSpots())
+        {
+            var cellSave = _getCellAtSpot(spot).BuildSaveData();
+            if(cellSave != null)
+                cellData.Add(spot.ToString(),cellSave);
+        }
+        data.AddData("CellData", cellData);
+        data.AddData("MaxX", MaxX);
+        data.AddData("MinX", MinX);
+        data.AddData("MaxY", MaxY);
+        data.AddData("MinY", MinY);
+        data.AddData("MaxZ", MaxZ);
+        data.AddData("MinZ", MinZ);
+        return data;
+    }
+
+    public override void LoadSavedData(DataDict dataDict)
+    {
+        MinX = dataDict.GetValueAs<int>("MinX");
+        MaxX = dataDict.GetValueAs<int>("MaxX");
+        MinY = dataDict.GetValueAs<int>("MinY");
+        MaxY = dataDict.GetValueAs<int>("MaxY");
+        MinZ = dataDict.GetValueAs<int>("MinZ");
+        MaxZ = dataDict.GetValueAs<int>("MaxZ");
         _inst_to_spots = new Dictionary<string, List<MapSpot>>();
         _buildCellMatrix(MaxX, MinX, MaxY, MinY, MaxZ, MinZ);
 
-        var cellData = data.GetValueAs<Dictionary<string, Dictionary<string, List<string>>>>("CellData");
+        var cellData = dataDict.GetValueAs<Dictionary<string, Dictionary<string, List<string>>>>("CellData");
         foreach (var pair in cellData)
         {
             var spot = new MapSpot(pair.Key);
@@ -54,8 +86,9 @@ public class MapSpace : IMapSpace
             foreach (var instId in layer.Value)
                 cell.AddInstId(layer.Key, instId);
         }
+        base.LoadSavedData(dataDict);
     }
-    
+
 
     private void _buildCellMatrix(int maxX, int minX, int maxY, int minY, int maxZ, int minZ)
     {
@@ -87,29 +120,7 @@ public class MapSpace : IMapSpace
             return null;
         return _cellMatrix[spot.Z - MinZ][spot.X - MinX][spot.Y - MinY];
     }
-    
-    
-    public DataDict BuildSaveData()
-    {
-        var data = new DataDict(Id);
-        var cellData = new Dictionary<string, Dictionary<string, List<string>>>();
-        foreach (var spot in EnumerateMapSpots())
-        {
-            var cellSave = _getCellAtSpot(spot).BuildSaveData();
-            if(cellSave != null)
-                cellData.Add(spot.ToString(),cellSave);
-        }
 
-        data.AddData("CellData", cellData);
-        data.AddData("MaxX", MaxX);
-        data.AddData("MinX", MinX);
-        data.AddData("MaxY", MaxY);
-        data.AddData("MinY", MinY);
-        data.AddData("MaxZ", MaxZ);
-        data.AddData("MinZ", MinZ);
-        return data;
-    }
-    
     public bool InBounds(MapSpot spot)
     {
         return InBounds(spot.X, spot.Y, spot.Z);
@@ -155,36 +166,31 @@ public class MapSpace : IMapSpace
             }
     }
 
+    /// <summary>
+    /// Try registering the given instance to the map cells defined by spots.
+    /// Does not check for any mananged logic. Instead use MapManager.TryPlaceInstOnMapSpace()
+    /// </summary>
+    /// <param name="inst"></param>
+    /// <param name="spots"></param>
+    /// <param name="layer"></param>
+    /// <returns></returns>
     public Result TryAddInstToSpots(IInst inst, List<MapSpot> spots, string layer)
     {
-        if (_inst_to_spots.ContainsKey(inst.Id))
-        {
-            // return new Result(false, $"Inst {inst.Def.DefName}:{inst.Id} already added to MapSpace.");
-        }
-        else
-        {
+        if (!_inst_to_spots.ContainsKey(inst.Id))
             _inst_to_spots.Add(inst.Id, new List<MapSpot>());
-        }
+        
         Result? failedRes = null;
         foreach (var spot in spots)
         {
-            if (InBounds(spot))
+            if (!InBounds(spot))
             {
-                var cell = _getCellAtSpot(spot);
-                cell.AddInst(layer, inst);
-                _inst_to_spots[inst.Id].Add(spot);
+                RemoveInst(inst);
+                return new Result(false, $"Spot {spot} is out of bounds.");
             }
-            else
-            {
-                failedRes = new Result(false, $"Spot {spot} is out of bounds.");
-                break;
-            }
-        }
 
-        if (failedRes != null)
-        {
-            RemoveInst(inst);
-            return failedRes;
+            var cell = _getCellAtSpot(spot);
+            cell.AddInst(layer, inst);
+            _inst_to_spots[inst.Id].Add(spot);
         }
 
         Console.WriteLine($"Added Inst {inst._DebugId} to spot [{string.Join(", ", spots.Select(x => x.ToString()))}].");

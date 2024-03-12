@@ -2,12 +2,13 @@
 using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
+using VillageProject.Core.Map.MapSpaces;
 
 namespace VillageProject.Core.Map.MapStructures;
 
 public class MapStructCompInst : BaseCompInst
 {
-    public MapSpace MapSpace { get; protected set; }
+    public string? MapSpaceId { get; protected set; }
     public MapSpot? MapSpot { get; protected set; }
     public RotationFlag Rotation { get; protected set; }
 
@@ -27,6 +28,7 @@ public class MapStructCompInst : BaseCompInst
         var data = new DataDict(CompKey);
         data.AddData("MapSpot", MapSpot);
         data.AddData("Rotation", Rotation);
+        data.AddData("MapSpaceId", MapSpaceId);
         return data;
     }
 
@@ -35,11 +37,34 @@ public class MapStructCompInst : BaseCompInst
         MapSpot = dataDict.GetValueAs<MapSpot>("MapSpot");
         Rotation = dataDict.GetValueAs<RotationFlag>("Rotation");
         OccupationData = MapStructDef.OccupationData.BuildNewOccupationData(MapSpot.Value, Rotation);
+
+        MapSpaceId = dataDict.GetValueAs<string>("MapSpaceId");
+        var mapManager = DimMaster.GetManager<MapManager>();
+        var mapSpace = mapManager.GetMapSpaceById(MapSpaceId, errorIfNull: false);
+        if(mapSpace == null)
+            Console.WriteLine("Failed to find MapSpace");
+        else
+        {
+            var res = mapSpace.TryAddInstToSpots(Instance, OccupationData.ListOccupiedSpots().ToList(), Layer);
+            if (!res.Success)
+                throw new Exception("Failed to place self in spot: " + res.Message);
+            
+        }
     }
 
-    public void SetMapSpot(MapSpace mapSpace, MapSpot spot, RotationFlag rotation)
+    private void NotifyWatchers()
     {
-        if(MapSpace == mapSpace && MapSpot == spot && Rotation == rotation)
+        var watchers = Instance.GetComponentsOfType<IMapPlacementWatcherComp>();
+        foreach (var watcherComp in watchers)
+        {
+            var mapSpace = DimMaster.GetManager<MapManager>().GetMapSpaceById(MapSpaceId);
+            watcherComp.MapPositionSet(mapSpace, MapSpot.Value, Rotation);
+        }
+    }
+
+    public void SetMapSpot(IMapSpace mapSpace, MapSpot spot, RotationFlag rotation)
+    {
+        if(mapSpace.MapSpaceId == MapSpaceId && MapSpot == spot && Rotation == rotation)
             return;
         
         // Validate that the map knows we are here
@@ -53,9 +78,11 @@ public class MapStructCompInst : BaseCompInst
             }
         }
 
-        MapSpace = mapSpace;
+        MapSpaceId = mapSpace.MapSpaceId;
         MapSpot = spot;
         Rotation = rotation;
         OccupationData = newOcc;
+
+        NotifyWatchers();
     }
 }

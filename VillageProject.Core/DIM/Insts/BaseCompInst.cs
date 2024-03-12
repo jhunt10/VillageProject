@@ -33,4 +33,9 @@ public class BaseCompInst : ICompInst
     {
         
     }
+
+    public virtual void Update()
+    {
+        
+    }
 }

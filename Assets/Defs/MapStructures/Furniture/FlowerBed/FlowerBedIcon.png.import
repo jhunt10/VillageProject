@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://crki7tfvjjy6j"
-path="res://.godot/imported/planter_tiles.png-c3fd90301b29803d05ce186f057983cc.ctex"
+uid="uid://bla2nhdlm1ix0"
+path="res://.godot/imported/FlowerBedIcon.png-d52bdd3b01b6884ee5dd96341e943dde.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Defs/MapStructures/Decorations/planter_tiles.png"
-dest_files=["res://.godot/imported/planter_tiles.png-c3fd90301b29803d05ce186f057983cc.ctex"]
+source_file="res://Assets/Defs/MapStructures/Furniture/FlowerBed/FlowerBedIcon.png"
+dest_files=["res://.godot/imported/FlowerBedIcon.png-d52bdd3b01b6884ee5dd96341e943dde.ctex"]
 
 [params]
 

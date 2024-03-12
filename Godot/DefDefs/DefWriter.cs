@@ -25,7 +25,8 @@ public static class DefWriter
     
     public static void SaveAllDefs()
     {
-        var defs = TerrainDefs.Defs.Values.ToList();
+        var defs = MapDefs.Defs.Values.ToList();
+        defs.AddRange(TerrainDefs.Defs.Values.ToList());
         defs.AddRange(FurnitureDefs.Defs.Values.ToList());
         foreach (var def in defs)
         {
@@ -45,8 +46,9 @@ public static class DefWriter
 
     static string BuildSavePath(IDef def)
     {
-        var tokens = def.DefName.Split(DimMaster.PATH_SEPERATOR);
-        var relativePath = Path.Combine(tokens) + ".json";
+        var tokens = def.DefName.Split(DimMaster.PATH_SEPERATOR).ToList();
+        tokens.Add(tokens.Last());
+        var relativePath = Path.Combine(tokens.ToArray()) + ".json";
         return Path.Combine(GetDefPath(), relativePath);
     }
 }

@@ -12,7 +12,7 @@ public interface IDef
     
     TComp? GetComponentWithKey<TComp>(string key);
     
-    TComp? GetComponentOfType<TComp>(bool errorIfNull = false);
+    TComp? GetComponentDefOfType<TComp>(bool errorIfNull = false);
     
     IEnumerable<TComp> GetComponentsOfType<TComp>();
 }

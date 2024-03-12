@@ -1,4 +1,5 @@
 ﻿using VillageProject.Core.Enums;
+using VillageProject.Core.Map.MapSpaces;
 
 namespace VillageProject.Core.Map;
 
@@ -10,11 +11,12 @@ public static class MapHelper
     /// ZLayers 
     /// </summary>
     public static MapSpot? WorldPositionToMapSpot(
-        MapSpace mapSpace, float worldX, float worldY, 
+        IMapSpace mapSpace, float worldX, float worldY, 
         int? visibleZLayer = null,
         RotationFlag mapFaceing = RotationFlag.North, 
         int cellWidth = 32, int cellDepth = 32, int cellHight = 40)
     {
+        // Console.WriteLine($"MapHelper.WorldPositionToMapSpot: worldX:{worldX} worldY:{worldY} ");
         if (mapSpace == null)
             return null;
         var x = Convert.ToInt32(Math.Floor(worldX / cellWidth));;
@@ -72,7 +74,7 @@ public static class MapHelper
     /// </summary>
     /// <returns>int[x,y]</returns>
     public static int[] MapSpotToWorldPosition(
-        MapSpace mapSpace, MapSpot spot,
+        IMapSpace mapSpace, MapSpot spot,
         RotationFlag mapRotation = RotationFlag.North,
         int celleWidth = 32, int cellDepth = 32, int cellHight = 40,
         bool invertY = true)
@@ -97,9 +99,9 @@ public static class MapHelper
                 break;
             case RotationFlag.East:
                 if(invertY)
-                    pos = new int[]{-yPos, -xPos + zOffset};
+                    pos = new int[]{-yPos, -xPos - zOffset};
                 else
-                    pos = new int[]{-yPos, xPos - zOffset};
+                    pos = new int[]{-yPos, xPos + zOffset};
                 break;
             case RotationFlag.South:
                 if(invertY)
@@ -109,9 +111,9 @@ public static class MapHelper
                 break;
             case RotationFlag.West:
                 if(invertY)
-                    pos = new int[]{yPos, xPos + zOffset};
+                    pos = new int[]{yPos, xPos - zOffset};
                 else
-                    pos = new int[]{yPos, -xPos - zOffset};
+                    pos = new int[]{yPos, -xPos + zOffset};
                 break;
         }
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bsoa8te4kqxte"
-path="res://.godot/imported/BedNorth.png-5f7ce2a09901bb197298fcf8443f188e.ctex"
+uid="uid://dt4orw08phevj"
+path="res://.godot/imported/BedSouth.png-3227c102c64bff94d351afefe143e08b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Defs/MapStructures/Furniture/BedNorth.png"
-dest_files=["res://.godot/imported/BedNorth.png-5f7ce2a09901bb197298fcf8443f188e.ctex"]
+source_file="res://Assets/Defs/MapStructures/Furniture/Bed/BedSouth.png"
+dest_files=["res://.godot/imported/BedSouth.png-3227c102c64bff94d351afefe143e08b.ctex"]
 
 [params]
 

@@ -6,6 +6,7 @@ using VillageProject.Core.DIM;
 using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
+using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.Terrain;
 using VillageProject.Core.Sprites.PatchSprites;
@@ -22,10 +23,9 @@ public partial class ZLayerPrefab : Node2D
 	// public Node2D MapStructureNodes;
 	// public Node2D TerrainShadowNodes;
 
-	public TerrainNode TerrainNodePrefab;
-	public MapStructureNode MapStructureNodePrefab;
+	// public MapStructureNode MapStructureNodePrefab;
 	
-	private Dictionary<MapSpot, Node2D> _cellNodes = new Dictionary<MapSpot, Node2D>();
+	private Dictionary<MapSpot, MapCellNode> _cellNodes = new Dictionary<MapSpot, MapCellNode>();
 	// private Dictionary<MapSpot, MapStructureNode> _mapStructNodes = new Dictionary<MapSpot, MapStructureNode>();
 	
 	
@@ -47,27 +47,45 @@ public partial class ZLayerPrefab : Node2D
 			return;
 		this.YSortEnabled = true;
 		CellsParentNode = GetNode<Node2D>("CellNodes");
-		// TerrainShadowNodes = GetNode<Node2D>("TerrainShadows");
 		LayerShadow = GetNode<Sprite2D>("LayerShadow");
-		TerrainNodePrefab = GetNode<TerrainNode>("PrefabNodes/TerrainNodePrefab");
-		MapStructureNodePrefab = GetNode<MapStructureNode>("PrefabNodes/MapStructureNodePrefab");
+		// TerrainShadowNodes = GetNode<Node2D>("TerrainShadows");
+		// MapStructureNodePrefab = GetNode<MapStructureNode>("PrefabNodes/MapStructureNodePrefab");
 		_init = true;
 	}
 	
 	public void SetShow(bool show, bool showShadows = false)
 	{
-		foreach (var node in _cellNodes.Values)
-		{
-			if(node is TerrainNode)
-				((TerrainNode)node).SetShow(show, showShadows);
-			
-			if(node is MapStructureNode)
-				((MapStructureNode)node).SetShow(show | showShadows);
-		}
+		// foreach (var node in _cellNodes.Values)
+		// {
+		// 	if(node is TerrainNode)
+		// 		((TerrainNode)node).SetShow(show, showShadows);
+		// 	
+		// 	if(node is MapStructureNode)
+		// 		((MapStructureNode)node).SetShow(show | showShadows);
+		// }
 		LayerShadow.Visible = show;
 	}
 
-	public Node2D? GetCellNode(MapSpot spot)
+	public void BuildMapCells(IMapSpace mapSpace, int zLayer)
+	{
+		if(!_init)
+			Init();
+		
+		for(int y = mapSpace.MaxY; y >= mapSpace.MinY; y--)
+		for (int x = mapSpace.MinX; x <= mapSpace.MaxX; x++)
+		{
+			var spot = new MapSpot(x, y, zLayer);
+			var pos = SpotToLocalPosition(spot, MapNode.ViewRotation);
+			var newNode = (MapCellNode)MapControllerNode.MapCellPrefab.Duplicate();
+			newNode.Position = pos;
+			newNode.MapNode = MapNode;
+			CellsParentNode.AddChild(newNode);
+			_cellNodes.Add(spot, newNode);
+			newNode.Visible = true;
+		}
+	}
+
+	public MapCellNode? GetCellNode(MapSpot spot)
 	{
 		if(_cellNodes.ContainsKey(spot))
 			return _cellNodes[spot];
@@ -77,7 +95,7 @@ public partial class ZLayerPrefab : Node2D
 	public void ResyncRotation()
 	{
 		var terrainManager = DimMaster.GetManager<TerrainManager>();
-		var spots = _cellNodes.Keys.ToList().OrderBy(x => -x.Y);
+		var spots = _cellNodes.Keys.ToList().OrderBy(x => x.Y);
 		switch (MapNode.ViewRotation)
 		{
 			case RotationFlag.North:
@@ -95,130 +113,40 @@ public partial class ZLayerPrefab : Node2D
 		}
 		foreach (var spot in spots)
 		{
-
-			if (_cellNodes[spot] is TerrainNode)
-			{
-				var inst = terrainManager.GetTerrainAtSpot(MapNode.MapSpace, spot);
-				var topSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("TopSprite");
-				var topSprite = topSpriteComp.GetPatchSprite(() =>
-				{
-					return terrainManager.GetHorizontalAdjacency(MapNode.MapSpace, spot, MapNode.ViewRotation, true);
-				});
-
-				var frontSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
-				var frontSprite = frontSpriteComp.GetPatchSprite(() =>
-				{
-					return terrainManager.GetVerticalAdjacencyAsHorizontal(MapNode.MapSpace, spot, MapNode.ViewRotation, true);
-				});
-
-				// var shadowSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("TopSprite");
-				// var shadowSprite = shadowSpriteComp.GetPatchSprite(() =>
-				// {
-				// 	return terrainManager.GetHorizontalAdjacency(mapSpace, spot, rotation, true );
-				// });
-				var node = (TerrainNode)_cellNodes[spot];
-				node.TopSprite.Texture = (ImageTexture)topSprite.Sprite;
-				node.FrontSprite.Texture = (ImageTexture)frontSprite.Sprite;
-				// _terrainNodes[spot].ShadowSprite.Texture = (ImageTexture)shadowSprite.Sprite;
-				_cellNodes[spot].Position = SpotToLocalPosition(spot, MapNode.ViewRotation);
-
-			}
-
-			if (_cellNodes[spot] is MapStructureNode)
-			{
-				((MapStructureNode)_cellNodes[spot]).DirtySprite = true;
-				_cellNodes[spot].Position = SpotToLocalPosition(spot, MapNode.ViewRotation);
-			}
-
-			CellsParentNode.RemoveChild(_cellNodes[spot]);
-			CellsParentNode.AddChild(_cellNodes[spot]);
+			var mapCell = _cellNodes[spot];
+			mapCell.UpdateSprites(MapNode.MapSpace, spot, MapNode.ViewRotation);
+			mapCell.Position = SpotToLocalPosition(spot, MapNode.ViewRotation);
+			CellsParentNode.RemoveChild(mapCell);
+			CellsParentNode.AddChild(mapCell);
 		}
 	}
 
-	public Node2D CreateEmptyNode(MapSpot spot)
-	{
-		var pos = SpotToLocalPosition(spot, MapNode.ViewRotation);
-		var newNode = (MapStructureNode)MapStructureNodePrefab.Duplicate();
-		newNode.DirtySprite = true;
-		newNode.Position = pos;
-		CellsParentNode.AddChild(newNode);
-		_cellNodes.Add(spot, newNode);
-		return newNode;
-	}
+	// public Node2D CreateEmptyNode(MapSpot spot)
+	// {
+	// 	var pos = SpotToLocalPosition(spot, MapNode.ViewRotation);
+	// 	var newNode = (MapStructureNode)MapStructureNodePrefab.Duplicate();
+	// 	newNode.DirtySprite = true;
+	// 	newNode.Position = pos;
+	// 	CellsParentNode.AddChild(newNode);
+	// 	_cellNodes.Add(spot, newNode);
+	// 	newNode.Visible = true;
+	// 	return newNode;
+	// }
 
-	public Node2D CreateMapStructureNode(IInst mapStructInst)
-	{
-		var mapStructureManager = DimMaster.GetManager<MapStructureManager>();
-		var mapStructComp = mapStructInst.GetComponentOfType<MapStructCompInst>(errorIfNull: true);
-
-		if (!mapStructComp.MapSpot.HasValue)
-			return null;
-		var spot = mapStructComp.MapSpot.Value;
-		
-		if (_cellNodes.ContainsKey(spot))
-			return _cellNodes[spot];
-		
-		var spriteComp = mapStructInst.GetComponentOfType<GodotPatchCellSpriteComp>();
-		var spriteDef = spriteComp.CompDef as IPatchSpriteCompDef;
-		var sprite = spriteComp.GetPatchSprite(() =>
-		{
-			return mapStructureManager.GetAdjacency(mapStructInst, MapNode.MapSpace, spot, mapStructComp.Rotation);
-		});
-		
-		var pos = SpotToLocalPosition(spot, MapNode.ViewRotation);
-		var newNode = (MapStructureNode)MapStructureNodePrefab.Duplicate();
-		newNode.Inst = mapStructInst;
-		newNode.DirtySprite = true;
-		newNode.Position = pos;
-		CellsParentNode.AddChild(newNode);
-		_cellNodes.Add(spot, newNode);
-		
-		foreach (var pair in spot.ListAdjacentSpots())
-		{
-			if (_cellNodes.ContainsKey(pair.Value))
-				if(_cellNodes[pair.Value] is MapStructureNode)
-					((MapStructureNode)_cellNodes[pair.Value]).DirtySprite = true;
-		}
-		
-		return newNode;
-	}
+	// public Node2D CreateMapStructureNode(IInst mapStructInst)
+	// {
+	//
+	// }
 	
 	public Node2D CreateTerrainNode(MapSpot spot, IInst inst)
 	{
 		Init();
-		var terrainManager = DimMaster.GetManager<TerrainManager>();
-		
-		var topSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("TopSprite");
-		var topSpriteDef = topSpriteComp.CompDef as IPatchSpriteCompDef;
-		var topSprite = topSpriteComp.GetPatchSprite(() =>
-		{
-			return terrainManager.GetHorizontalAdjacency(MapNode.MapSpace, spot, matchAny:true);
-		});
-
-		var frontSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
-		var frontSpriteDef = frontSpriteComp.CompDef as IPatchSpriteCompDef;
-		var frontSprite = frontSpriteComp.GetPatchSprite(() =>
-		{
-			return terrainManager.GetVerticalAdjacencyAsHorizontal(MapNode.MapSpace, spot, matchAny:true);
-		});
-		
-		var shadowSpriteComp = inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
-		var shadowSpriteDef = topSpriteComp.CompDef as IPatchSpriteCompDef;
-		var shadowSprite = frontSpriteComp.GetPatchSprite(() =>
-		{
-			return terrainManager.GetVerticalAdjacencyAsHorizontal(MapNode.MapSpace, spot, matchAny:true);
-		});
-		
-		var pos = SpotToLocalPosition(spot, MapNode.ViewRotation);
-		var newNode = (TerrainNode)TerrainNodePrefab.Duplicate(); // Create a new Sprite2D.
-
+		var newNode = (TerrainNode)MapControllerNode.TerrainNodePrefab.Duplicate(); // Create a new Sprite2D.
+		newNode.TerrainInst = inst;
 		newNode.Visible = true;
-		newNode.TopSprite.Texture = (ImageTexture)topSprite.Sprite; 
-		newNode.FrontSprite.Texture = (ImageTexture)frontSprite.Sprite;
-		newNode.Position = pos;
-		CellsParentNode.AddChild(newNode);
-		_cellNodes.Add(spot, newNode);
-		
+		var cellNode = GetCellNode(spot);
+		cellNode.AddMapObjectNode(newNode);
+		newNode.SetMapPosition(MapNode.MapSpace, spot, RotationFlag.North);
 		return newNode;
 	}
 

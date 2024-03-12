@@ -2,25 +2,86 @@
 using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
+using VillageProject.Core.Map.MapSpaces;
 
 namespace VillageProject.Core.Map;
 
 public class MapManager : BaseManager
 {
+    private Dictionary<string, MapSpaceCompInst> _mapSpaces = new Dictionary<string, MapSpaceCompInst>();
+    
+    // public void SetMainMapSpace(MapSpaceCompInst space)
+    // {
+    //     if(!_mapSpaces.ContainsKey(space.MapSpaceId))
+    //         _mapSpaces.Add(space.MapSpaceId, space);
+    //     _mainMapSpaceCompInst = spaceCompInst;
+    // }
+    // public MapSpaceCompInst GetMainMapSpace()
+    // {
+    //     return _mainMapSpaceCompInst;
+    // }
 
-    private MapSpace _mainMapSpace;
-
-    public void SetMainMapSpace(MapSpace space)
+    public IMapSpace? GetMapSpaceById(string id, bool errorIfNull = true)
     {
-        _mainMapSpace = space;
+        if (_mapSpaces.ContainsKey(id))
+            return _mapSpaces[id];
+        if (errorIfNull)
+            throw new Exception($"Failed to find MapSpace with id '{id}'.");
+        return null;
     }
-    public MapSpace GetMainMapSpace()
+
+    public override ICompInst CreateCompInst(ICompDef compDef, IInst newInst, object? args)
     {
-        return _mainMapSpace;
+        var newComp = base.CreateCompInst(compDef, newInst, args);
+        var newMapComp = newComp as MapSpaceCompInst;
+        if (newMapComp == null)
+            throw new Exception("Failed to cast new comp to type MapSpaceCompInst");
+        if(!_mapSpaces.ContainsKey(newMapComp.MapSpaceId))
+            _mapSpaces.Add(newMapComp.MapSpaceId, newMapComp);
+        return newMapComp;
+    }
+
+    public override ICompInst LoadSavedCompInst(ICompDef compDef, IInst newInst, DataDict? dataDict)
+    {
+        var newComp = base.LoadSavedCompInst(compDef, newInst, dataDict);
+        var newMapComp = newComp as MapSpaceCompInst;
+        if (newMapComp == null)
+            throw new Exception("Failed to cast new comp to type MapSpaceCompInst");
+        if(!_mapSpaces.ContainsKey(newMapComp.MapSpaceId))
+            _mapSpaces.Add(newMapComp.MapSpaceId, newMapComp);
+        return newMapComp;
+    }
+    
+    public Result CouldPlaceDefOnMapSpace(
+        IMapSpace mapSpace, 
+        IDef def, 
+        MapSpot anchorSpot, 
+        RotationFlag rotation, 
+        Dictionary<string, object>? args = null)
+    {
+        Console.WriteLine($"CouldPlaceDefOnMapSpace: {anchorSpot} {rotation}");
+        var compArgs = args;
+        if (compArgs == null)
+            compArgs = new Dictionary<string, object>();
+
+        if (!mapSpace.InBounds(anchorSpot))
+            return new Result(false, "Out of bounds");
+        
+        // Check that all managers allow for all occupied spots spots
+        foreach (var manager in DimMaster.ListManagersOfType<IMapPlacementValidator>())
+        {
+            var name = manager.GetType().FullName;
+            object? arg = (compArgs != null && compArgs.ContainsKey(name)) ? compArgs[name] : null;
+            var res = manager.CouldPlaceDefOnMapSpace(mapSpace, def, anchorSpot, rotation, arg);
+            if (!res.Success)
+                return res;
+        }
+
+        return new Result();
     }
 
     public Result CanPlaceInstOnMapSpace(
-        MapSpace mapSpace, 
+        IMapSpace mapSpace, 
         IInst inst, 
         MapSpot anchorSpot, 
         RotationFlag rotation, 
@@ -47,7 +108,7 @@ public class MapManager : BaseManager
     }
 
     public Result TryPlaceInstOnMapSpace(
-        MapSpace mapSpace,
+        IMapSpace mapSpace,
         IInst inst,
         MapSpot anchorSpot,
         RotationFlag rotation,
@@ -81,16 +142,5 @@ public class MapManager : BaseManager
         }
 
         return new Result(true);
-    }
-
-    public override DataDict BuildSaveData()
-    {
-        return _mainMapSpace.BuildSaveData();
-    }
-
-    public override void LoadSaveData(DataDict data)
-    {
-        var mapSpace = new MapSpace(data);
-        SetMainMapSpace(mapSpace);
     }
 }

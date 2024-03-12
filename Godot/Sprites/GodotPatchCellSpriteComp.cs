@@ -25,6 +25,11 @@ public class GodotPatchCellSpriteComp : BasePatchCellSpriteComp, ISpriteComp
         
     }
 
+    protected override SpriteData _UpdateSprite()
+    {
+        throw new NotImplementedException();
+    }
+
     public override SpriteData GetSprite()
     {
         throw new NotImplementedException();

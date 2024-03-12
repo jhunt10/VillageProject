@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://e7edxn2xufwb"
-path="res://.godot/imported/dirt_tiles_front.png-da939f0cb922140cbabd8ac3dd06b304.ctex"
+uid="uid://bafrhp861yv8r"
+path="res://.godot/imported/BedIcon.png-954143c5700cffa45f8f9fc58528d448.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Defs/MapStructures/Terrain/dirt_tiles_front.png"
-dest_files=["res://.godot/imported/dirt_tiles_front.png-da939f0cb922140cbabd8ac3dd06b304.ctex"]
+source_file="res://Assets/Defs/MapStructures/Furniture/Bed/BedIcon.png"
+dest_files=["res://.godot/imported/BedIcon.png-954143c5700cffa45f8f9fc58528d448.ctex"]
 
 [params]
 

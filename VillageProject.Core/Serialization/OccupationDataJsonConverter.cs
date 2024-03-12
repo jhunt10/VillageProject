@@ -25,7 +25,6 @@ public class OccupationDataJsonConverter : JsonConverter<OccupationData>
         {
             if (reader.TokenType == JsonTokenType.PropertyName)
             {
-                Console.WriteLine($"PropName: {reader.GetString()}");
                 currentSpot = new MapSpot(reader.GetString());
             }
 

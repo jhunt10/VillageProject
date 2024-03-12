@@ -2,6 +2,7 @@
 using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
+using VillageProject.Core.Map.MapSpaces;
 
 namespace VillageProject.Core.Map.MapStructures;
 
@@ -17,7 +18,7 @@ public class MapStructCompArgs
     }
 }
 
-public class MapStructureManager : BaseManager, IMapStructureManager
+public class MapStructureManager : BaseManager, IMapPlacementValidator
 {
     public const string DEFAULT_MAP_LAYER = "Default";
 
@@ -25,32 +26,14 @@ public class MapStructureManager : BaseManager, IMapStructureManager
     {
         
     }
-    
 
-    public ICompInst CreateCompInst(ICompDef compDef, IInst newInst, object? args)
+    public Result CouldPlaceDefOnMapSpace(IMapSpace mapSpace, IDef def, MapSpot anchorSpot, RotationFlag rotation, object args)
     {
-        // var mapStructArgs = args as MapStructCompArgs;
-        // if (mapStructArgs == null)
-        //     throw new Exception($"Failed to cast CompArgs to type '{typeof(MapStructCompArgs).FullName}'.");
-        //
-        var compInst = base.CreateCompInst(compDef, newInst, args);
-        var mapStructCompInst = compInst as MapStructCompInst;
-        if (mapStructCompInst == null)
-            throw new Exception($"Failed to cast new CompInst to type '{typeof(MapStructCompInst).FullName}'.");
-        newInst.AddComponent(compInst);
-        // if(!TryPlaceMapStructure(newInst, mapStructArgs.Spot, mapStructArgs.Rotation))
-        //     throw new Exception("Failed to place new MapStructure.");
-        return compInst;
-    }
-
-
-    public Result CanPlaceInstOnMapSpace(MapSpace mapSpace, IInst inst, MapSpot anchorSpot, RotationFlag rotation, object args)
-    {
-        var mapStrutCompInst = inst.GetComponentOfType<MapStructCompInst>();
-        if (mapStrutCompInst == null)
+        var mapStructCompDef = def.GetComponentDefOfType<MapStructCompDef>();
+        if (mapStructCompDef == null)
             return new Result(true);
-
-        var mapStructCompDef = (MapStructCompDef)mapStrutCompInst.CompDef;
+        
+        Console.WriteLine($"CouldPlaceDefOnMapSpace: Checking Occupation");
         var occupation = new OccupationData(mapStructCompDef.OccupationData.OccupationDict, anchorSpot, rotation);
         foreach (var occSpot in occupation.ListOccupiedSpots())
         {
@@ -60,6 +43,7 @@ public class MapStructureManager : BaseManager, IMapStructureManager
             foreach (var existingOcc in AggregateOccupationAtSpot(mapSpace, occSpot))
             foreach (var newOcc in occupation.ListOccupationAtSpot(occSpot))
             {
+                Console.WriteLine($"CouldPlaceDefOnMapSpace: {occSpot} [{newOcc}] [{existingOcc}]");
                 if (newOcc.OverlapsFlags(existingOcc))
                     return new Result(false, "Occupation Collision");
             }
@@ -67,7 +51,15 @@ public class MapStructureManager : BaseManager, IMapStructureManager
         return new Result(true);
     }
 
-    public Result TryPlaceInstOnMapSpace(MapSpace mapSpace, IInst inst, MapSpot anchorSpot, RotationFlag rotation, object args)
+    Result IMapPlacementValidator.CanPlaceInstOnMapSpace(IMapSpace mapSpace, IInst inst, MapSpot anchorSpot, RotationFlag rotation, object args)
+    {
+        var mapStrutCompInst = inst.GetComponentOfType<MapStructCompInst>();
+        if (mapStrutCompInst == null)
+            return new Result(true);
+        return CouldPlaceDefOnMapSpace(mapSpace, inst.Def, anchorSpot, rotation, args);
+    }
+
+    Result IMapPlacementValidator.TryPlaceInstOnMapSpace(IMapSpace mapSpace, IInst inst, MapSpot anchorSpot, RotationFlag rotation, object args)
     {
         var mapStrutCompInst = inst.GetComponentOfType<MapStructCompInst>();
         if (mapStrutCompInst == null)
@@ -81,7 +73,7 @@ public class MapStructureManager : BaseManager, IMapStructureManager
         return res;
     }
     
-    public List<OccupationFlags> AggregateOccupationAtSpot(MapSpace mapSpace, MapSpot spot)
+    public List<OccupationFlags> AggregateOccupationAtSpot(IMapSpace mapSpace, MapSpot spot)
     {
         var innerOccupation = OccupationFlags.Inner;
         var midOccupation = OccupationFlags.Middle;
@@ -115,27 +107,27 @@ public class MapStructureManager : BaseManager, IMapStructureManager
         return new List<OccupationFlags>() { innerOccupation, midOccupation, outerOccupation };
     }
 
-    public IInst CreateMapStructureFromDef(IDef def, MapSpot spot, RotationFlag rotation,
-        Dictionary<string, object>? otherArgs = null)
-    {   
-        var managedCompDefs = def.CompDefs
-            .Where(x => x.ManagerClassName == this.GetType().FullName).ToList();
-        
-        if(!managedCompDefs.Any())
-            throw new Exception($"No managed compdefs found on def '{def.DefName}'.");
-        if (managedCompDefs.Count() > 1)
-            throw new Exception($"Multiple managed compdefs found on def '{def.DefName}'.");
-
-        var compDef = managedCompDefs.Single();
-        var args = otherArgs ?? new Dictionary<string, object>();
-        var compArgs = new MapStructCompArgs(spot, rotation);
-        if (args.ContainsKey(compDef.CompKey))
-            throw new Exception($"Key conflict between args provided and generated for comp '{compDef.CompKey}'.");
-        args.Add(compDef.CompKey, compArgs);
-
-        var inst = DimMaster.InstantiateDef(def, args);
-        return inst;
-    }
+    // public IInst CreateMapStructureFromDef(IDef def, MapSpot spot, RotationFlag rotation,
+    //     Dictionary<string, object>? otherArgs = null)
+    // {   
+    //     var managedCompDefs = def.CompDefs
+    //         .Where(x => x.ManagerClassName == this.GetType().FullName).ToList();
+    //     
+    //     if(!managedCompDefs.Any())
+    //         throw new Exception($"No managed compdefs found on def '{def.DefName}'.");
+    //     if (managedCompDefs.Count() > 1)
+    //         throw new Exception($"Multiple managed compdefs found on def '{def.DefName}'.");
+    //
+    //     var compDef = managedCompDefs.Single();
+    //     var args = otherArgs ?? new Dictionary<string, object>();
+    //     var compArgs = new MapStructCompArgs( spot, rotation);
+    //     if (args.ContainsKey(compDef.CompKey))
+    //         throw new Exception($"Key conflict between args provided and generated for comp '{compDef.CompKey}'.");
+    //     args.Add(compDef.CompKey, compArgs);
+    //
+    //     var inst = DimMaster.InstantiateDef(def, args);
+    //     return inst;
+    // }
 
     // public IEnumerable<IInst> ListInstsAtSpot(MapSpot spot, string? layer = null)
     // {

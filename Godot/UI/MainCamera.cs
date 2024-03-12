@@ -7,8 +7,8 @@ using VillageProject.Core.Map.Terrain;
 
 public partial class MainCamera : Camera2D
 {
-	private MapSpot CenterMapSpot;
-	private RotationFlag FacingDirection;
+	public MapSpot CenterMapSpot { get; private set; }
+	public RotationFlag FacingDirection { get; private set; }
 
 	private bool _started = false;
 	
@@ -117,8 +117,19 @@ public partial class MainCamera : Camera2D
 
 		if (@event is InputEventMouseButton eventMouseButton)
 		{
+			if(!MouseOverSprite.MosueOverSpot.HasValue)
+				return;
 			GD.Print("Mouse Click/Unclick at: ", eventMouseButton.Position);
-			GameMaster.MapNode.CreateGrassNode(MouseOverSprite.MosueOverSpot + new MapSpot(0,0,1));
+			if (eventMouseButton.Pressed)
+			{
+				var def = DimMaster.GetDefByName("Defs.MapStructures.Furniture.Bed");
+				GameMaster.CreateInstAtSpot(
+					def,
+					GameMaster.MapNode.MapSpace,
+					MouseOverSprite.MosueOverSpot.Value + new MapSpot(0, 0, 1),
+					GameMaster.MapNode.ViewRotation);
+				// GameMaster.MapNode.CreateGrassNode(MouseOverSprite.MosueOverSpot + new MapSpot(0,0,1));
+			}
 		}
 			
 	}

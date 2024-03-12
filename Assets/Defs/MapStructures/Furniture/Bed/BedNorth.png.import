@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://drajnxf8mwbqq"
-path="res://.godot/imported/stone_tiles.png-00d6c8880e123b1ad5994844db9d86e0.ctex"
+uid="uid://bsoa8te4kqxte"
+path="res://.godot/imported/BedNorth.png-312ce45d77a2eca5873a0100ce5618d0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Defs/MapStructures/Terrain/stone_tiles.png"
-dest_files=["res://.godot/imported/stone_tiles.png-00d6c8880e123b1ad5994844db9d86e0.ctex"]
+source_file="res://Assets/Defs/MapStructures/Furniture/Bed/BedNorth.png"
+dest_files=["res://.godot/imported/BedNorth.png-312ce45d77a2eca5873a0100ce5618d0.ctex"]
 
 [params]
 

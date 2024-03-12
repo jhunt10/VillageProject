@@ -27,6 +27,17 @@ public static class RotationExtensions
     /// <param name="rotation">Current Rotation</param>
     /// <param name="direction">Direction to turn</param>
     /// <returns>Resulting Rotation</returns>
+    public static RotationFlag AddRotation(this RotationFlag rotation, RotationFlag addRotation)
+    {
+        return (RotationFlag)(((int)rotation + (int)addRotation) % 4); 
+    }
+    
+    /// <summary>
+    /// Turn this rotation in the provided direction.
+    /// </summary>
+    /// <param name="rotation">Current Rotation</param>
+    /// <param name="direction">Direction to turn</param>
+    /// <returns>Resulting Rotation</returns>
     public static RotationFlag ApplyRotationDirection(this RotationFlag rotation, RotationDirection direction)
     {
         return (RotationFlag)(((int)rotation + (int)direction) % 4); 

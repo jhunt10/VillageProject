@@ -10,4 +10,5 @@ public interface ICompInst
 
     DataDict? BuildSaveData();
     void LoadSavedData(DataDict dataDict);
+    void Update();
 }

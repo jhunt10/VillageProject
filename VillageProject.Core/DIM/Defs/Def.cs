@@ -56,7 +56,7 @@ public class Def : IDef
         }
     }
     
-    public TComp? GetComponentOfType<TComp>(bool errorIfNull = false)
+    public TComp? GetComponentDefOfType<TComp>(bool errorIfNull = false)
     {
         foreach (var comp in CompDefs)
         {

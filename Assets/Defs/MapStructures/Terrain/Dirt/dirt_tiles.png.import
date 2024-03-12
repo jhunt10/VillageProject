@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://brdq1srqp046u"
-path="res://.godot/imported/FakeGrassIcon.png-e5de9e91c57ac4316c8e271521c6b814.ctex"
+uid="uid://rxwnq2ltocr4"
+path="res://.godot/imported/dirt_tiles.png-223ff1e78c2984b39d59681e0afc4aed.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Defs/MapStructures/Decorations/FakeGrassIcon.png"
-dest_files=["res://.godot/imported/FakeGrassIcon.png-e5de9e91c57ac4316c8e271521c6b814.ctex"]
+source_file="res://Assets/Defs/MapStructures/Terrain/Dirt/dirt_tiles.png"
+dest_files=["res://.godot/imported/dirt_tiles.png-223ff1e78c2984b39d59681e0afc4aed.ctex"]
 
 [params]
 

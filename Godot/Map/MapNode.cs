@@ -9,6 +9,7 @@ using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapGeneration;
+using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.Terrain;
 using VillageProject.Core.Sprites.PatchSprites;
@@ -21,9 +22,12 @@ public partial class MapNode : Node2D
 	private TerrainManager TerrainManager;
 
 	
-	public MapSpace MapSpace;
+	public IMapSpace MapSpace;
 	public RotationFlag ViewRotation;
 	public int VisibleZLayer = 0;
+
+	// Max and Min bounds for MapSpace in world
+	private Rect2 _worldBounds;
 
 	// private Dictionary<MapSpot, Node2D> TerrainNodes = new Dictionary<MapSpot, Node2D>();
 	private Dictionary<int, ZLayerPrefab> ZLayers = new Dictionary<int, ZLayerPrefab>();
@@ -32,14 +36,9 @@ public partial class MapNode : Node2D
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		var mapManager = DimMaster.GetManager<MapManager>();
-		mapManager.SetMainMapSpace(BasicMapGenerator.GenerateTestMap());
-		LoadMap(mapManager.GetMainMapSpace());
 
-			
-		
 		// ShowZLayer(0);
-		
+
 	}
 
 	public void ClearMap()
@@ -53,13 +52,19 @@ public partial class MapNode : Node2D
 		MapSpace = null;
 	}
 
-	public void LoadMap(MapSpace mapSpace)
+	public void LoadMap(IMapSpace mapSpace)
 	{
 		MapSpace = mapSpace;
 		foreach (var spot in MapSpace.EnumerateMapSpots().OrderBy(x => -x.Y))
 		{
 			CreateMapNode(spot);
 		}
+
+		var topLeft = new Vector2(MapSpace.MinX * TILE_WIDTH,
+			(-MapSpace.MaxY * TILE_WIDTH) - ((MapSpace.MaxZ+1) * TILE_HIGHT));
+		var bottomRight = new Vector2(MapSpace.MaxX * TILE_WIDTH,
+			(-MapSpace.MinX * TILE_WIDTH) + (-MapSpace.MinZ * TILE_HIGHT));
+		_worldBounds = new Rect2( topLeft, (-topLeft) + bottomRight);
 		RotateMap(RotationFlag.North);
 	}
 
@@ -98,25 +103,32 @@ public partial class MapNode : Node2D
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		var mouseOverSpot = GetMouseOverMapSpot();
-		var mouseOverPos = MapSpotToWorldPos(mouseOverSpot);
+		// var mouseOverSpot = GetMouseOverMapSpot();
+		// if(mouseOverSpot.HasValue)
+		// 	var mouseOverPos = MapSpotToWorldPos(mouseOverSpot.Value);
 		
 	}
 
-	public MapSpot GetMouseOverMapSpot()
+	public MapSpot? GetMouseOverMapSpot()
 	{
 		var mainCamera = GameMaster.MainCamera;
 		if (mainCamera == null)
-			return new MapSpot(0, 0, 0);
+			return null;
 
 		var mousePos = GetViewport().GetMousePosition();
+
 		var relativePos = mousePos + mainCamera.Position;
+		if (!_worldBounds.HasPoint(relativePos))
+		{
+			// Console.WriteLine($"Out of world bounds: {_worldBounds} | {relativePos}");
+			return null;
+		}
+
 		var mapSpot = MapHelper.WorldPositionToMapSpot(
 			MapSpace, (int)relativePos.X, (int)relativePos.Y,
-			VisibleZLayer, ViewRotation);
-		if(mapSpot.HasValue)
-			return mapSpot.Value;
-		return new MapSpot();
+			VisibleZLayer + 1, ViewRotation);
+
+		return mapSpot;
 	}
 
 	public Vector2 MapSpotToWorldPos(MapSpot spot)
@@ -133,11 +145,7 @@ public partial class MapNode : Node2D
 		if(!ZLayers.ContainsKey(spot.Z))
 			CreateZLayer(spot.Z);
 		var insts = MapSpace.ListInstsAtSpot(spot).ToList();
-		if (!insts.Any())
-		{
-			var newNode = ZLayers[spot.Z].CreateEmptyNode(spot);
-			return;
-		}
+		
 		foreach (var inst in MapSpace.ListInstsAtSpot(spot))
 		{
 			var terrainComp = inst.GetComponentOfType<TerrainCompInst>();
@@ -145,13 +153,6 @@ public partial class MapNode : Node2D
 			{
 				var newNode = ZLayers[spot.Z].CreateTerrainNode(spot, inst);
 				break;
-			}
-
-			var mapStructComp = inst.GetComponentOfType<MapStructCompInst>();
-			if (mapStructComp != null)
-			{
-				var def = inst.Def;
-				var newNode = CreateMapStructNode(spot, inst);
 			}
 		}
 	}
@@ -163,6 +164,7 @@ public partial class MapNode : Node2D
 		var newLayer = (ZLayerPrefab)prefab.Duplicate();
 		newLayer.MapNode = this;
 		newLayer.Position = new Vector2(0, -40 * z);
+		newLayer.BuildMapCells(MapSpace, z);
 		ZLayers.Add(z, newLayer);
 		this.AddChild(newLayer);
 		var zLayers = ZLayers.OrderBy(x => x.Key).Select(x => x.Value);
@@ -188,39 +190,34 @@ public partial class MapNode : Node2D
 	}
 
 
-	public Node2D GetMapNodeAtSpot(MapSpot spot)
+	public MapCellNode GetMapNodeAtSpot(MapSpot spot)
 	{
 		if (ZLayers.ContainsKey(spot.Z))
 			return ZLayers[spot.Z].GetCellNode(spot);
 		return null;
 	}
 
-	public Node2D CreateMapStructNode(MapSpot spot, IInst inst)
-	{
-		
-		var mapManager = DimMaster.GetManager<MapManager>();
-		var res = mapManager.TryPlaceInstOnMapSpace(MapSpace, inst, spot, RotationFlag.North);
-		if(!res.Success)
-			Console.WriteLine($"Failed to place grass at {spot}: {res.Message}");
-		else
-		{
-		
-			if(!ZLayers.ContainsKey(spot.Z))
-				CreateZLayer(spot.Z);
-			var newNode = ZLayers[spot.Z]
-				.CreateMapStructureNode(inst);
-			return newNode;
-		}
+	// public Node2D CreateMapStructNode(MapSpot spot, IInst inst)
+	// {
+	// 	
+	// 	var mapManager = DimMaster.GetManager<MapManager>();
+	// 	var res = mapManager.TryPlaceInstOnMapSpace(MapSpace, inst, spot, RotationFlag.North);
+	// 	if(!res.Success)
+	// 		Console.WriteLine($"Failed to place grass at {spot}: {res.Message}");
+	// 	else
+	// 	{
+	// 	
+	// 		if(!ZLayers.ContainsKey(spot.Z))
+	// 			CreateZLayer(spot.Z);
+	// 		var newNode = ZLayers[spot.Z]
+	// 			.CreateMapStructureNode(inst);
+	// 		if (newNode == null)
+	// 			throw new Exception("Failed to create new MapStructure node.");
+	// 		return newNode;
+	// 	}
+	//
+	// 	return null;
+	// }
 
-		return null;
-	}
-
-	public void CreateGrassNode(MapSpot spot)
-	{
-		var def = DimMaster.GetDefByName("Defs.MapStructures.Decorations.FakeGrass");
-		var mapStructManager = DimMaster.GetManager<MapStructureManager>();
-		var newInst = mapStructManager.CreateMapStructureFromDef(def, spot, RotationFlag.North);
-		CreateMapStructNode(spot, newInst);
-		
-	}
+	
 }

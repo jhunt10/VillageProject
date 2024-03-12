@@ -15,7 +15,7 @@ public partial class BuildBar : Control
 	public const int BUTTON_WIDTH = 72;
 	public const int BUTTON_GAP = 8;
 
-	public ConstructablePreview ConstructablePreview;
+	// public ConstructablePreview ConstructablePreview;
 	public NinePatchRect Background;
 	public TextureButton ButtonPrefab;
 	public List<TextureButton> Buttons;
@@ -30,7 +30,6 @@ public partial class BuildBar : Control
 		Buttons = new List<TextureButton>();
 		ButtonPrefab = GetNode<TextureButton>("BuildableDefButtonPrefab");
 		ButtonPrefab.Visible = false;
-		ConstructablePreview = GetNode<ConstructablePreview>("ConstructablePreview");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -53,8 +52,8 @@ public partial class BuildBar : Control
 		foreach (var def in defs)
 		{
 			var index = Buttons.Count;
-			var constrDef = def.GetComponentOfType<ConstructableCompDef>();
-			var imagePath = Path.Combine(def.LoadPath, constrDef.IconSprite);
+			var constrDef = def.GetComponentDefOfType<ConstructableCompDef>();
+			var imagePath = Path.Combine(def.LoadPath, constrDef.IconSprite.SpriteName);
 			var image = Image.LoadFromFile(imagePath);
 
 			var newButton = (TextureButton)ButtonPrefab.Duplicate();
@@ -82,7 +81,7 @@ public partial class BuildBar : Control
 	{
 		var button = Buttons[index];
 		// GameMaster.MouseOverSprite.Texture = button.GetNode<TextureRect>("TextureRect").Texture;
-		ConstructablePreview.SetConstructableDef(_constructableDefs[index]);
+		GameMaster.MapControllerNode.ConstructablePreview.SetConstructableDef(_constructableDefs[index]);
 
 	}
 }

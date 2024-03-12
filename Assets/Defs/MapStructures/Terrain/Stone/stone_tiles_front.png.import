@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cndk0j45xy4i8"
-path="res://.godot/imported/stone_tiles_front.png-f0c0585332271a1b20d9351510bda177.ctex"
+path="res://.godot/imported/stone_tiles_front.png-e3a25f15a982d225d7d9b5f67567c9ff.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Defs/MapStructures/Terrain/stone_tiles_front.png"
-dest_files=["res://.godot/imported/stone_tiles_front.png-f0c0585332271a1b20d9351510bda177.ctex"]
+source_file="res://Assets/Defs/MapStructures/Terrain/Stone/stone_tiles_front.png"
+dest_files=["res://.godot/imported/stone_tiles_front.png-e3a25f15a982d225d7d9b5f67567c9ff.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://rxwnq2ltocr4"
-path="res://.godot/imported/dirt_tiles.png-63a52e53c886f487746ac7cc17d7eae7.ctex"
+uid="uid://crki7tfvjjy6j"
+path="res://.godot/imported/planter_tiles.png-50f57cd63a4e1f2103ae91dd480e7770.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://Assets/Defs/MapStructures/Terrain/dirt_tiles.png"
-dest_files=["res://.godot/imported/dirt_tiles.png-63a52e53c886f487746ac7cc17d7eae7.ctex"]
+source_file="res://Assets/Defs/MapStructures/Furniture/FlowerBed/planter_tiles.png"
+dest_files=["res://.godot/imported/planter_tiles.png-50f57cd63a4e1f2103ae91dd480e7770.ctex"]
 
 [params]
 

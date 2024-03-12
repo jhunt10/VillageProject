@@ -29,7 +29,8 @@ public class DimMaster
     private static SaveLoader _saveLoader;
     private static Dictionary<string, IInst> _insts;
     private static Dictionary<string, IDef> _defs;
-    
+
+    private static List<IInstWatcher> _instWatchers = new List<IInstWatcher>();
     
     private static bool _startup_completed = false;
 
@@ -119,40 +120,6 @@ public class DimMaster
         return def;
     }
 
-    public static IInst InstantiateDef(IDef def, Dictionary<string, object>? compArgs = null)
-    {
-        var inst = new Inst(def);
-        foreach (var compDef in def.CompDefs)
-        {
-            var managerName = compDef.ManagerClassName;
-            var manager = GetManagerByName(managerName);
-            var args = default(object?);
-            if (compArgs != null && compArgs.ContainsKey(compDef.CompKey))
-                args = compArgs[compDef.CompKey];
-            var compInst = manager.CreateCompInst(compDef, inst, args);
-            if(!inst.Components.Contains(compInst))
-                inst.AddComponent(compInst);
-        }
-        _insts.Add(inst.Id, inst);
-        return inst;
-    }
-
-    public static IInst LoadSavedInst(IDef def, DataDict saveData)
-    {
-        var inst = new Inst(saveData.Id, def);
-        foreach (var compDef in def.CompDefs)
-        {
-            var managerName = compDef.ManagerClassName;
-            var manager = GetManagerByName(managerName);
-            var compSaveData = saveData.GetValueAs<DataDict>(compDef.CompKey, errorIfMissing: false);
-            var compInst = manager.LoadSavedCompInst(compDef, inst, compSaveData);
-            if(!inst.Components.Contains(compInst))
-                inst.AddComponent(compInst);
-        }
-        _insts.Add(inst.Id, inst);
-        return inst;
-    }
-
     #endregion
     
 
@@ -222,6 +189,56 @@ public class DimMaster
 
 
     #region Insts
+    
+    public static IInst InstantiateDef(IDef def, Dictionary<string, object>? compArgs = null)
+    {
+        var inst = new Inst(def);
+        foreach (var compDef in def.CompDefs)
+        {
+            // Get manager responsible for creating each component
+            var managerName = compDef.ManagerClassName;
+            var manager = GetManagerByName(managerName);
+            
+            // Get args base off CompKey if args were provided
+            var args = default(object?);
+            if (compArgs != null && compArgs.ContainsKey(compDef.CompKey))
+                args = compArgs[compDef.CompKey];
+            
+            // Manager creates new instance of the Component
+            var compInst = manager.CreateCompInst(compDef, inst, args);
+            inst.AddComponent(compInst);
+        }
+        _insts.Add(inst.Id, inst);
+        
+        // Notify watchers of new Instance created
+        foreach (var watcher in _instWatchers)
+        {
+            watcher.OnNewInstCreated(inst);
+        }
+        
+        Console.WriteLine($"Instantiated Def '{def.DefName}' to '{inst._DebugId}'.");
+        return inst;
+    }
+
+    public static IInst LoadSavedInst(IDef def, DataDict saveData)
+    {
+        var inst = new Inst(saveData.Id, def);
+        foreach (var compDef in def.CompDefs)
+        {
+            var managerName = compDef.ManagerClassName;
+            var manager = GetManagerByName(managerName);
+            var compSaveData = saveData.GetValueAs<DataDict>(compDef.CompKey, errorIfMissing: false);
+            var compInst = manager.LoadSavedCompInst(compDef, inst, compSaveData);
+            if(!inst.Components.Contains(compInst))
+                inst.AddComponent(compInst);
+        }
+        _insts.Add(inst.Id, inst);
+        foreach (var watcher in _instWatchers)
+        {
+            watcher.OnInstLoaded(inst);
+        }
+        return inst;
+    }
 
     public static IInst? GetInstById(string id, bool errorIfNull = false)
     {
@@ -241,8 +258,13 @@ public class DimMaster
     }
 
     #endregion
-    
-    
+
+    public static void AddInstWatcher(IInstWatcher watcher)
+    {
+        if(_instWatchers.Contains(watcher))
+            return;
+        _instWatchers.Add(watcher);
+    }
     
     public static Type? GetTypeByName(string name)
     {

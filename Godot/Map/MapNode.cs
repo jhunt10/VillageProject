@@ -13,27 +13,26 @@ using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.Terrain;
 using VillageProject.Core.Sprites.PatchSprites;
+using VillageProject.Godot;
+using VillageProject.Godot.Map;
 using VillageProject.Godot.Sprites;
 
-public partial class MapNode : Node2D
+public partial class MapNode : Node2D, IInstNode
 {
+	private const string _MAP_NODE_WATCHER_KEY = "MapNodeMapSpaceWatcher";
 	public const int TILE_WIDTH = 32;
 	public const int TILE_HIGHT = 40;
 	private TerrainManager TerrainManager;
 
-	
+
+	public IInst Inst => MapSpace?.Instance;
 	public IMapSpace MapSpace;
 	public RotationFlag ViewRotation;
 	public int VisibleZLayer = 0;
 
 	// Max and Min bounds for MapSpace in world
-	private Rect2 _worldBounds;
-
-	// private Dictionary<MapSpot, Node2D> TerrainNodes = new Dictionary<MapSpot, Node2D>();
+	private Rect2 _worldBounds { get; set; }
 	private Dictionary<int, ZLayerPrefab> ZLayers = new Dictionary<int, ZLayerPrefab>();
-	// private Dictionary<int, Sprite2D> ZLayerShadows = new Dictionary<int, Sprite2D>();
-	// private Dictionary<int, Node2D> ZTerrainShadows = new Dictionary<int, Node2D>();
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 
@@ -41,6 +40,11 @@ public partial class MapNode : Node2D
 
 	}
 
+	public bool InWorldBounds(Vector2 relativePos)
+	{
+		return _worldBounds.HasPoint(relativePos);
+	}
+	
 	public void ClearMap()
 	{
 		foreach (var layer in ZLayers.Values)
@@ -55,6 +59,7 @@ public partial class MapNode : Node2D
 	public void LoadMap(IMapSpace mapSpace)
 	{
 		MapSpace = mapSpace;
+		MapSpace.Instance.AddComponentWatcher<IMapSpace>(_MAP_NODE_WATCHER_KEY);
 		foreach (var spot in MapSpace.EnumerateMapSpots().OrderBy(x => -x.Y))
 		{
 			CreateMapNode(spot);
@@ -66,6 +71,25 @@ public partial class MapNode : Node2D
 			(-MapSpace.MinX * TILE_WIDTH) + (-MapSpace.MinZ * TILE_HIGHT));
 		_worldBounds = new Rect2( topLeft, (-topLeft) + bottomRight);
 		RotateMap(RotationFlag.North);
+		if(GameMaster.MainCamera != null)
+			GameMaster.MainCamera.FollowMap(mapSpace.MapSpaceId);
+	}
+	
+	private void _ResyncMap()
+	{
+		foreach (var spot in MapSpace.EnumerateMapSpots().OrderBy(x => -x.Y))
+		{
+			foreach (var inst in MapSpace.ListInstsAtSpot(spot))
+			{
+				if (inst.GetComponentOfType<TerrainCompInst>() != null)
+				{
+					var node = GetMapCellNodeAtSpot(spot);
+					if(node.MapObjectNodes.All(x => x.Inst.Id != inst.Id))
+						CreateMapNode(spot);
+				}
+				
+			}
+		}
 	}
 
 	public void ShowZLayer(int zLayer)
@@ -84,7 +108,12 @@ public partial class MapNode : Node2D
 		for (int z = minZ; z <= maxZ; z++)
 			if (ZLayers.ContainsKey(z))
 			{
-				ZLayers[z].SetShow(z <= VisibleZLayer, z == VisibleZLayer + 1);
+				if(z > VisibleZLayer + 1)
+					ZLayers[z].SetLayerVisibility(LayerVisibility.None);
+				else if (z == VisibleZLayer + 1)
+					ZLayers[z].SetLayerVisibility(LayerVisibility.Shadow);
+				else
+					ZLayers[z].SetLayerVisibility(LayerVisibility.Full);
 			}
 	}
 
@@ -103,32 +132,15 @@ public partial class MapNode : Node2D
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+		if(Inst == null)
+			return;
 		// var mouseOverSpot = GetMouseOverMapSpot();
 		// if(mouseOverSpot.HasValue)
 		// 	var mouseOverPos = MapSpotToWorldPos(mouseOverSpot.Value);
-		
-	}
-
-	public MapSpot? GetMouseOverMapSpot()
-	{
-		var mainCamera = GameMaster.MainCamera;
-		if (mainCamera == null)
-			return null;
-
-		var mousePos = GetViewport().GetMousePosition();
-
-		var relativePos = mousePos + mainCamera.Position;
-		if (!_worldBounds.HasPoint(relativePos))
+		if (Inst.GetWatchedChange(_MAP_NODE_WATCHER_KEY))
 		{
-			// Console.WriteLine($"Out of world bounds: {_worldBounds} | {relativePos}");
-			return null;
+			_ResyncMap();
 		}
-
-		var mapSpot = MapHelper.WorldPositionToMapSpot(
-			MapSpace, (int)relativePos.X, (int)relativePos.Y,
-			VisibleZLayer + 1, ViewRotation);
-
-		return mapSpot;
 	}
 
 	public Vector2 MapSpotToWorldPos(MapSpot spot)
@@ -190,34 +202,15 @@ public partial class MapNode : Node2D
 	}
 
 
-	public MapCellNode GetMapNodeAtSpot(MapSpot spot)
+	public MapCellNode GetMapCellNodeAtSpot(MapSpot spot)
 	{
 		if (ZLayers.ContainsKey(spot.Z))
 			return ZLayers[spot.Z].GetCellNode(spot);
 		return null;
 	}
-
-	// public Node2D CreateMapStructNode(MapSpot spot, IInst inst)
-	// {
-	// 	
-	// 	var mapManager = DimMaster.GetManager<MapManager>();
-	// 	var res = mapManager.TryPlaceInstOnMapSpace(MapSpace, inst, spot, RotationFlag.North);
-	// 	if(!res.Success)
-	// 		Console.WriteLine($"Failed to place grass at {spot}: {res.Message}");
-	// 	else
-	// 	{
-	// 	
-	// 		if(!ZLayers.ContainsKey(spot.Z))
-	// 			CreateZLayer(spot.Z);
-	// 		var newNode = ZLayers[spot.Z]
-	// 			.CreateMapStructureNode(inst);
-	// 		if (newNode == null)
-	// 			throw new Exception("Failed to create new MapStructure node.");
-	// 		return newNode;
-	// 	}
-	//
-	// 	return null;
-	// }
-
 	
+	public void Delete()
+	{
+		this.QueueFree();
+	}
 }

@@ -31,6 +31,7 @@ public class DimMaster
     private static Dictionary<string, IDef> _defs;
 
     private static List<IInstWatcher> _instWatchers = new List<IInstWatcher>();
+    private static List<string> _deletionQue = new List<string>();
     
     private static bool _startup_completed = false;
 
@@ -52,8 +53,10 @@ public class DimMaster
 
     public static void ClearGameState()
     {
-        // TODO: Real cleanup
-        _insts.Clear();
+        foreach (var inst in _insts.Values)
+        {
+            DeleteInst(inst);
+        }
     }
     
     public static void LoadGameState(string saveName)
@@ -257,6 +260,27 @@ public class DimMaster
         }
     }
 
+    public static void DeleteInst(IInst inst)
+    {
+        // If already being deleted, ignore
+        if(_deletionQue.Contains(inst.Id))
+            return;
+        Console.WriteLine($"DimMaster Deleting Inst: {inst._DebugId}.");
+        _deletionQue.Add(inst.Id);
+        inst.Delete();
+        foreach (var manager in Managers.Values)
+        {
+            manager.OnInstDelete(inst);
+        }
+
+        foreach (var watcher in _instWatchers)
+        {
+            watcher.OnInstDeleted(inst);
+        }
+
+        _insts.Remove(inst.Id);
+    }
+    
     #endregion
 
     public static void AddInstWatcher(IInstWatcher watcher)

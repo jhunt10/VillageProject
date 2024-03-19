@@ -3,6 +3,7 @@ using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Map.MapSpaces;
+using VillageProject.Core.Map.MapStructures;
 
 namespace VillageProject.Core.Map;
 
@@ -51,7 +52,22 @@ public class MapManager : BaseManager
             _mapSpaces.Add(newMapComp.MapSpaceId, newMapComp);
         return newMapComp;
     }
-    
+
+    public override void OnInstDelete(IInst inst)
+    {
+        base.OnInstDelete(inst);
+        var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(errorIfNull:false);
+        if (mapStructComp != null)
+        {
+            if (!string.IsNullOrEmpty(mapStructComp.MapSpaceId) && _mapSpaces.ContainsKey(mapStructComp.MapSpaceId))
+            {
+                var mapSpace = _mapSpaces[mapStructComp.MapSpaceId];
+                mapSpace.RemoveInst(inst);
+            }
+        }
+        
+    }
+
     public Result CouldPlaceDefOnMapSpace(
         IMapSpace mapSpace, 
         IDef def, 

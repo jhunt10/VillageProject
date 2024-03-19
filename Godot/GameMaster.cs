@@ -17,14 +17,14 @@ using Timer = Godot.Timer;
 public partial class GameMaster : Node2D, IInstWatcher
 {
 	private bool inited = false;
-	public static MapNode MapNode;
 	public static MainCamera MainCamera;
 	public static MapControllerNode MapControllerNode;
-	// public static MouseOverSprite MouseOverSprite;
 	public static Dictionary<string, IInstNode> InstNodes = new Dictionary<string, IInstNode>();
 
 	public TextureButton SaveButton;
 	public TextureButton LoadButton;
+	public TextureButton ClearButton;
+
 
 	
 	public override void _EnterTree()
@@ -34,6 +34,7 @@ public partial class GameMaster : Node2D, IInstWatcher
 			DimMaster.AddInstWatcher(this);
 			DefWriter.SaveAllDefs();
 			DimMaster.StartUp();
+			MapControllerNode = GetNode<MapControllerNode>("MapControllerNode");
 			inited = true;
 		}
 	}
@@ -41,22 +42,20 @@ public partial class GameMaster : Node2D, IInstWatcher
 	// Called when the node enters the scene tree for the first time.
 	public override async void _Ready()
 	{
-		if (MapNode == null)
+		if (MainCamera == null)
 		{
-			MapNode = (MapNode)FindChild("MapNode");
-			if(MapNode == null)
-				Console.WriteLine("Failed to find MapNode.");
 			MainCamera = GetNode<MainCamera>("MainCamera");
 			if(MainCamera == null)
 				Console.WriteLine("Failed to find MainCamera.");
 			// MouseOverSprite = GetNode<MouseOverSprite>("MouseOverSprite");
 			if(MainCamera == null)
 				Console.WriteLine("Failed to find MouseOverSprite.");
-			MapControllerNode = GetNode<MapControllerNode>("MapControllerNode");
 			SaveButton = GetNode<TextureButton>("CanvasLayer/SaveButton");
 			SaveButton.Pressed += () => SaveGame();
 			LoadButton = GetNode<TextureButton>("CanvasLayer/LoadButton");
 			LoadButton.Pressed += () => LoadGame();
+			ClearButton = GetNode<TextureButton>("CanvasLayer/ClearButton");
+			ClearButton.Pressed += () => ClearGame();
 		}
 	}
 
@@ -75,6 +74,11 @@ public partial class GameMaster : Node2D, IInstWatcher
 		DimMaster.LoadGameState("test_save");
 	}
 
+	public void ClearGame()
+	{
+		DimMaster.ClearGameState();
+	}
+
 	public void OnNewInstCreated(IInst inst)
 	{
 		// Skip terrain to be handled by MapNode
@@ -86,15 +90,24 @@ public partial class GameMaster : Node2D, IInstWatcher
 		var mapSpaceComp = inst.GetComponentOfType<MapSpaceCompInst>(errorIfNull:false);
 		if (mapSpaceComp != null)
 		{
-			if(MapControllerNode != null)
-				MapControllerNode.LoadMap(mapSpaceComp);
+			if (MapControllerNode != null)
+			{
+				var newMap = MapControllerNode.LoadMap(mapSpaceComp);
+				if(newMap != null)
+					InstNodes.Add(inst.Id, newMap);
+			}
 		}
 		
 		var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(errorIfNull:false);
 		if (mapStructComp != null)
 		{
-			if(MapControllerNode != null)
-				MapControllerNode.CreateNewMapStructureNode(inst);
+			if (MapControllerNode != null)
+			{
+				var newNode = MapControllerNode.CreateNewMapStructureNode(inst);
+				if(newNode != null)
+					InstNodes.Add(inst.Id, newNode);
+				
+			}
 		}
 	}
 
@@ -109,21 +122,42 @@ public partial class GameMaster : Node2D, IInstWatcher
 		var mapSpaceComp = inst.GetComponentOfType<MapSpaceCompInst>(errorIfNull:false);
 		if (mapSpaceComp != null)
 		{
-			if(MapControllerNode != null)
-				MapControllerNode.LoadMap(mapSpaceComp);
+			if (MapControllerNode != null)
+			{
+				var newMap = MapControllerNode.LoadMap(mapSpaceComp);
+				if(newMap != null)
+					InstNodes.Add(inst.Id, newMap);
+			}
 		}
 		
 		var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(errorIfNull:false);
 		if (mapStructComp != null)
 		{
-			if(MapControllerNode != null)
-				MapControllerNode.CreateNewMapStructureNode(inst);
+			if (MapControllerNode != null)
+			{
+				var newNode = MapControllerNode.CreateNewMapStructureNode(inst);
+				if(newNode != null)
+					InstNodes.Add(inst.Id, newNode);
+				
+			}
 		}
 	}
 
-	public void OnInstDestoryed(IInst inst)
+	public void OnInstDeleted(IInst inst)
 	{
-		throw new NotImplementedException();
+		Console.WriteLine($"GameMaster asked to delete {inst._DebugId}.");
+		MapControllerNode.NotifyOfDeletedInst(inst);
+		if (InstNodes.ContainsKey(inst.Id))
+		{
+			var instNode = InstNodes[inst.Id];
+			instNode.Delete();
+			Console.WriteLine($"\tGameMaster deleted {inst._DebugId}.");
+
+		}
+		else
+		{
+			Console.WriteLine($"\tNo node found for inst {inst._DebugId}.");
+		}
 	}
 
 	public static Result CreateInstAtSpot(IDef def, IMapSpace mapSpace, MapSpot mapSpot, RotationFlag rotation)

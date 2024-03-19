@@ -81,7 +81,7 @@ public partial class BuildBar : Control
 	{
 		var button = Buttons[index];
 		// GameMaster.MouseOverSprite.Texture = button.GetNode<TextureRect>("TextureRect").Texture;
-		GameMaster.MapControllerNode.ConstructablePreview.SetConstructableDef(_constructableDefs[index]);
+		GameMaster.MapControllerNode.MouseOverSprite.ConstructablePreview.SetConstructableDef(_constructableDefs[index]);
 
 	}
 }

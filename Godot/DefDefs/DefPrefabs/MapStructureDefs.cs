@@ -9,7 +9,7 @@ using VillageProject.Godot.Sprites;
 
 namespace VillageProject.Godot.DefDefs.DefPrefabs;
 
-public class FurnitureDefs
+public class MapStructureDefs
 {
 
     public static IDef Bed = new Def
@@ -27,7 +27,10 @@ public class FurnitureDefs
                         new MapSpot(0, 0, 0), new List<OccupationFlags>
                         {
                             OccupationFlags.Inner | OccupationFlags.Center | OccupationFlags.Bottom | OccupationFlags.Front |
-                            OccupationFlags.BottomFront
+                            OccupationFlags.BottomFront,
+                            OccupationFlags.Middle | OccupationFlags.Front,
+                            OccupationFlags.Outer | OccupationFlags.Front,
+                            
                         }
                     },
 
@@ -35,7 +38,9 @@ public class FurnitureDefs
                         new MapSpot(0, -1, 0), new List<OccupationFlags>
                         {
                             OccupationFlags.Inner | OccupationFlags.Center | OccupationFlags.Bottom | OccupationFlags.Back |
-                            OccupationFlags.BottomBack
+                            OccupationFlags.BottomBack,
+                            OccupationFlags.Middle | OccupationFlags.Back,
+                            OccupationFlags.Outer | OccupationFlags.Back,
                         }
                     }
                 })
@@ -44,24 +49,24 @@ public class FurnitureDefs
             new ConstructableCompDef()
             {
                 IconSprite  = new SpriteDataDef("BedIcon.png", 64, 64, 0, 0),
-                DefaultSprite = new SpriteDataDef("BedNorth.png", 32, 64, 0, -(32+40)),
+                DefaultSprite = new SpriteDataDef("BedNorth.png", 32, 104, 0, 32),
                 RotationSprites = new Dictionary<RotationFlag, SpriteDataDef>
                 {
-                    { RotationFlag.North, new SpriteDataDef("BedNorth.png", 32, 64, 0, -(32+40))},
-                    { RotationFlag.East, new SpriteDataDef("BedEast.png", 32, 64, -32, -72)},
-                    { RotationFlag.South, new SpriteDataDef("BedSouth.png", 32, 64, 0, -104)},
-                    { RotationFlag.West, new SpriteDataDef("BedWest.png", 32, 64, 0, -72)},
+                    { RotationFlag.North, new SpriteDataDef("BedNorth.png", 32, 104, 0, 32)},
+                    { RotationFlag.East, new SpriteDataDef("BedEast.png", 64, 72, -32, 0)},
+                    { RotationFlag.South, new SpriteDataDef("BedSouth.png", 32, 104, 0, 0)},
+                    { RotationFlag.West, new SpriteDataDef("BedWest.png", 64, 72, 0, 0)},
                 }
             },
             new GodotMapStructSpriteCompDef()
             {
-                DefaultSprite = new SpriteDataDef("BedNorth.png", 32, 64, 0, -(32+40)),
+                DefaultSprite = new SpriteDataDef("BedNorth.png", 32, 104, 0, 32),
                 RotationSprites = new Dictionary<RotationFlag, SpriteDataDef>
                 {
-                    { RotationFlag.North, new SpriteDataDef("BedNorth.png", 32, 64, 0, -(32+40))},
-                    { RotationFlag.West, new SpriteDataDef("BedEast.png", 32, 64, -32, -72)},
-                    { RotationFlag.South, new SpriteDataDef("BedSouth.png", 32, 64, 0, -104)},
-                    { RotationFlag.East, new SpriteDataDef("BedWest.png", 32, 64, 0, -72)},
+                    { RotationFlag.North, new SpriteDataDef("BedNorth.png", 32, 104, 0, 32)},
+                    { RotationFlag.East, new SpriteDataDef("BedEast.png", 64, 72, -32, 0)},
+                    { RotationFlag.South, new SpriteDataDef("BedSouth.png", 32, 104, 0, 0)},
+                    { RotationFlag.West, new SpriteDataDef("BedWest.png", 64, 72, 0, 0)},
                 }
             }
         }
@@ -108,10 +113,10 @@ public class FurnitureDefs
         }
     };
 
-    public static IDef Wall = new Def
+    public static IDef BrickWall = new Def
     {
-        DefName = "Defs.MapStructures.Furniture.Wall",
-        Label = "Wall",
+        DefName = "Defs.MapStructures.Walls.BrickWall",
+        Label = "BrickWall",
         CompDefs = new System.Collections.Generic.List<ICompDef>
         {
             new MapStructCompDef
@@ -124,17 +129,33 @@ public class FurnitureDefs
                         {
                             OccupationFlags.Outer | OccupationFlags.Back
                         }
-                    },
-
-                    {
-                        new MapSpot(0, 1, 0), new List<OccupationFlags>
-                        {
-                            OccupationFlags.Outer | OccupationFlags.Front
-                        }
                     }
                 })
 
             },
+            new ConstructableCompDef()
+            {
+                IconSprite  = new SpriteDataDef("BrickWallNorth.png", 64, 64, 0, 0),
+                DefaultSprite = new SpriteDataDef("BrickWallNorth.png", 32, 72, 0, 0),
+                RotationSprites = new Dictionary<RotationFlag, SpriteDataDef>
+                {
+                    { RotationFlag.North, new SpriteDataDef("BrickWallNorth.png", 32, 72, 0, 0)},
+                    { RotationFlag.East, new SpriteDataDef("BrickWallEast.png", 32, 72, 0, 0)},
+                    { RotationFlag.South, new SpriteDataDef("BrickWallSouth.png", 32, 72, 0, 0)},
+                    { RotationFlag.West, new SpriteDataDef("BrickWallWest.png", 32, 72, 0, 0)},
+                }
+            },
+            new GodotMapStructSpriteCompDef()
+            {
+                DefaultSprite = new SpriteDataDef("BrickWallNorth.png", 32, 72, 0, 0),
+                RotationSprites = new Dictionary<RotationFlag, SpriteDataDef>
+                {
+                    { RotationFlag.North, new SpriteDataDef("BrickWallNorth.png", 32, 72, 0, 0)},
+                    { RotationFlag.East, new SpriteDataDef("BrickWallEast.png", 32, 72, 0, 0)},
+                    { RotationFlag.South, new SpriteDataDef("BrickWallSouth.png", 32, 72, 0, 0)},
+                    { RotationFlag.West, new SpriteDataDef("BrickWallWest.png", 32, 72, 0, 0)},
+                }
+            }
         }
     };
     
@@ -142,7 +163,8 @@ public class FurnitureDefs
     public static Dictionary<string, IDef> Defs = new Dictionary<string, IDef>
     {
         { "Bed", Bed },
-        {"FlowerBed", FlowerBed }
+        {"FlowerBed", FlowerBed },
+        {"BrickWall", BrickWall}
     };
 }
 

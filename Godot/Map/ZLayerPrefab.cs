@@ -10,26 +10,18 @@ using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.Terrain;
 using VillageProject.Core.Sprites.PatchSprites;
+using VillageProject.Godot.Map;
 using VillageProject.Godot.Sprites;
 
 public partial class ZLayerPrefab : Node2D
 {
 	public Sprite2D LayerShadow;
-
 	public Node2D CellsParentNode;
 
 	public MapNode MapNode;
-	// public Node2D TerrainNodes;
-	// public Node2D MapStructureNodes;
-	// public Node2D TerrainShadowNodes;
-
-	// public MapStructureNode MapStructureNodePrefab;
-	
 	private Dictionary<MapSpot, MapCellNode> _cellNodes = new Dictionary<MapSpot, MapCellNode>();
-	// private Dictionary<MapSpot, MapStructureNode> _mapStructNodes = new Dictionary<MapSpot, MapStructureNode>();
-	
-	
 	private bool _init;
+	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -48,22 +40,20 @@ public partial class ZLayerPrefab : Node2D
 		this.YSortEnabled = true;
 		CellsParentNode = GetNode<Node2D>("CellNodes");
 		LayerShadow = GetNode<Sprite2D>("LayerShadow");
-		// TerrainShadowNodes = GetNode<Node2D>("TerrainShadows");
-		// MapStructureNodePrefab = GetNode<MapStructureNode>("PrefabNodes/MapStructureNodePrefab");
 		_init = true;
 	}
 	
-	public void SetShow(bool show, bool showShadows = false)
+	public void SetLayerVisibility(LayerVisibility visibility)
 	{
-		// foreach (var node in _cellNodes.Values)
-		// {
-		// 	if(node is TerrainNode)
-		// 		((TerrainNode)node).SetShow(show, showShadows);
-		// 	
-		// 	if(node is MapStructureNode)
-		// 		((MapStructureNode)node).SetShow(show | showShadows);
-		// }
-		LayerShadow.Visible = show;
+		foreach (var node in _cellNodes.Values)
+		{
+			foreach (var mapObj in node.MapObjectNodes)
+			{
+				mapObj.SetLayerVisibility(visibility);
+			}
+			
+		}
+		LayerShadow.Visible = visibility != LayerVisibility.None;
 	}
 
 	public void BuildMapCells(IMapSpace mapSpace, int zLayer)
@@ -120,23 +110,6 @@ public partial class ZLayerPrefab : Node2D
 			CellsParentNode.AddChild(mapCell);
 		}
 	}
-
-	// public Node2D CreateEmptyNode(MapSpot spot)
-	// {
-	// 	var pos = SpotToLocalPosition(spot, MapNode.ViewRotation);
-	// 	var newNode = (MapStructureNode)MapStructureNodePrefab.Duplicate();
-	// 	newNode.DirtySprite = true;
-	// 	newNode.Position = pos;
-	// 	CellsParentNode.AddChild(newNode);
-	// 	_cellNodes.Add(spot, newNode);
-	// 	newNode.Visible = true;
-	// 	return newNode;
-	// }
-
-	// public Node2D CreateMapStructureNode(IInst mapStructInst)
-	// {
-	//
-	// }
 	
 	public Node2D CreateTerrainNode(MapSpot spot, IInst inst)
 	{

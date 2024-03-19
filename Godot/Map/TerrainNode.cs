@@ -14,6 +14,7 @@ public partial class TerrainNode : Node2D, IMapObjectNode
 {
 	public MapNode MapNode { get; set; }
 	public IInst TerrainInst { get; set; }
+	public IInst Inst => TerrainInst;
 	public void DirtySprite()
 	{
 		throw new NotImplementedException();
@@ -23,6 +24,8 @@ public partial class TerrainNode : Node2D, IMapObjectNode
 	public MapSpot? MapSpot { get; set; }
 	public RotationFlag RealRotation { get; private set; }
 	public RotationFlag ViewRotation { get; private set; }
+	
+	public LayerVisibility LayerVisibility { get; private set; }
 
 	private bool _forceUpdate;
 	private Sprite2D _shadowSprite;
@@ -71,6 +74,11 @@ public partial class TerrainNode : Node2D, IMapObjectNode
 		
 		_inited = true;
 	}
+
+	public void Delete()
+	{
+		this.QueueFree();
+	}
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -101,6 +109,44 @@ public partial class TerrainNode : Node2D, IMapObjectNode
 		{
 			ViewRotation = viewRotation;
 			_forceUpdate = true;
+		}
+	}
+	
+	public void SetLayerVisibility(LayerVisibility visibility)
+	{
+		this.LayerVisibility = visibility;
+		switch (LayerVisibility)
+		{
+			case LayerVisibility.None:
+				this.Visible = false;
+				break;
+			case LayerVisibility.Shadow:
+				this.Visible = true;
+				if(_topSprite != null)
+					this._topSprite.Visible = false;
+				if(_frontSprite != null)
+					this._frontSprite.Visible = false;
+				if(_shadowSprite != null)
+					this._shadowSprite.Visible = true;
+				break;
+			case LayerVisibility.Half:
+				this.Visible = true;
+				if(_topSprite != null)
+					this._topSprite.Visible = true;
+				if(_frontSprite != null)
+					this._frontSprite.Visible = true;
+				if(_shadowSprite != null)
+					this._shadowSprite.Visible = false;
+				break;
+			case LayerVisibility.Full:
+				this.Visible = true;
+				if(_topSprite != null)
+					this._topSprite.Visible = true;
+				if(_frontSprite != null)
+					this._frontSprite.Visible = true;
+				if(_shadowSprite != null)
+					this._shadowSprite.Visible = false;
+				break;
 		}
 	}
 

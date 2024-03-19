@@ -8,6 +8,8 @@ public partial class MouseOverSprite : Sprite2D
 	private MapSpot? _lastSpot;
 	public Label TextLabel;
 	public CanvasLayer Canvas;
+
+	public ConstructablePreview ConstructablePreview;
 	
 	public static MapSpot? MosueOverSpot {get; private set; }
 	
@@ -16,37 +18,46 @@ public partial class MouseOverSprite : Sprite2D
 	{
 		Canvas = GetNode<CanvasLayer>("CanvasLayer");
 		TextLabel = GetNode<Label>("Label");
+		ConstructablePreview = GetNode<ConstructablePreview>("ConstructablePreview");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		var mapNode = GameMaster.MapNode;
-		if(mapNode == null)
-			return;
-		
-		var mouseSpot = mapNode.GetMouseOverMapSpot();
-		if(mouseSpot == _lastSpot)
-			return;
-		if (!mouseSpot.HasValue)
+		var mouseSpot = GameMaster.MapControllerNode?.GetMouseOverMapSpot();
+		var node = GameMaster.MapControllerNode?.GetMouseOverCell();
+		if(mouseSpot.HasValue && node != null)
 		{
-			this.Visible = false;
-			return;
+			if (mouseSpot == _lastSpot)
+				return;
+			this.Position = Vector2.Zero;
+			if (this.GetParent() != null)
+				this.Reparent(node, false);
+			else
+				node.AddChild(this);
+			_lastSpot = mouseSpot;
+			this.Visible = true;
+			MosueOverSpot = _lastSpot;
+			UpdateText();
 		}
-		
-		var node = mapNode.GetMapNodeAtSpot(mouseSpot.Value);
-		if(node == null)
-			return;
-		
-		this.Position = Vector2.Zero;
-		if (this.GetParent() != null)
-			this.Reparent(node, false);
 		else
-			node.AddChild(this);
-		_lastSpot = mouseSpot;
-		this.Visible = true;
-		MosueOverSpot = _lastSpot;
-		UpdateText();
+		{
+			_lastSpot = null;
+			TextLabel.Text = "";
+			
+			var parent = this.GetParent();
+			if (parent == null)
+			{
+				GameMaster.MapControllerNode?.AddChild(this);
+			}
+			else if (parent != GameMaster.MapControllerNode)
+			{
+				this.Reparent(GameMaster.MapControllerNode, false);
+			}
+
+			this.Position = GetViewport().GetMousePosition() + GameMaster.MainCamera.Position +
+			                new Vector2(0, MapNode.TILE_HIGHT);
+		}
 	}
 
 	public void UpdateText()
@@ -57,15 +68,17 @@ public partial class MouseOverSprite : Sprite2D
 			return;;
 		
 		var sb = TextLabel.Text;
-		var mapNode = GameMaster.MapNode;
-		var insts = mapNode.MapSpace.ListInstsAtSpot(MosueOverSpot.Value);
-		foreach (var inst in insts)
+		var mapNode = GameMaster.MapControllerNode.GetMouseOverMapNode();
+		if (mapNode != null)
 		{
-			sb += $"\n{inst._DebugId}";
-			var mapStructComp = inst.GetComponentOfType<MapStructCompInst>();
-			if (mapStructComp != null)
+			foreach (var inst in mapNode.MapSpace.ListInstsAtSpot(MosueOverSpot.Value))
 			{
-				sb += $"\n{mapStructComp.MapSpot} {mapStructComp.Rotation}";
+				sb += $"\n{inst._DebugId}";
+				var mapStructComp = inst.GetComponentOfType<MapStructCompInst>();
+				if (mapStructComp != null)
+				{
+					sb += $"\n{mapStructComp.MapSpot} {mapStructComp.Rotation}";
+				}
 			}
 		}
 

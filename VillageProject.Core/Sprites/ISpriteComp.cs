@@ -6,9 +6,10 @@ namespace VillageProject.Core.Sprites;
 
 public interface ISpriteComp : ICompInst
 {
+    public bool IsDirty { get; }
     public RotationFlag ViewRotation { get; }
     public void SetViewRotation(RotationFlag rotationFlag);
-    
+
     /// <summary>
     /// Flag sprite to be updated on next process cycle
     /// </summary>
@@ -19,6 +20,4 @@ public interface ISpriteComp : ICompInst
     /// </summary>
     public SpriteData GetSprite();
     
-
-    public void AddSpriteWatcher(ISpriteWatcher watcher);
 }

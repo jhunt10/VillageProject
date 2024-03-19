@@ -7,8 +7,11 @@ using VillageProject.Core.Map.Terrain;
 
 public partial class MainCamera : Camera2D
 {
+	public string CenterMapSpaceId { get; private set; }
 	public MapSpot CenterMapSpot { get; private set; }
 	public RotationFlag FacingDirection { get; private set; }
+
+	private string _followingMapNodeId;
 
 	private bool _started = false;
 	
@@ -24,20 +27,34 @@ public partial class MainCamera : Camera2D
 	{
 		if (!_started)
 		{
+			_followingMapNodeId = GameMaster.MapControllerNode.GetMainMapNode()?.MapSpace.MapSpaceId;
 			CenterViewOnSpot(new MapSpot(), RotationFlag.North);
 			_started = true;
 		}
 	}
 
+	public void FollowMap(string mapNodeId)
+	{
+		_followingMapNodeId = mapNodeId;
+	}
+
 	public void MoveCameraInDirection(DirectionFlags direction)
 	{
+		var mapNode = GameMaster.MapControllerNode.GetMapNode(_followingMapNodeId);
+		if (mapNode == null)
+		{
+			Console.WriteLine("Tried to move camera, but no map found");
+			return;
+		}
+		Console.WriteLine($"Main Camera moving {direction}.");
+
 		var newSpot = CenterMapSpot.DirectionToSpot(direction, FacingDirection);
-		newSpot.X = Math.Max(newSpot.X, GameMaster.MapNode.MapSpace.MinX);
-		newSpot.X = Math.Min(newSpot.X, GameMaster.MapNode.MapSpace.MaxX);
-		newSpot.Y = Math.Max(newSpot.Y, GameMaster.MapNode.MapSpace.MinY);
-		newSpot.Y = Math.Min(newSpot.Y, GameMaster.MapNode.MapSpace.MaxY);
-		newSpot.Z = Math.Max(newSpot.Z, GameMaster.MapNode.MapSpace.MinZ);
-		newSpot.Z = Math.Min(newSpot.Z, GameMaster.MapNode.MapSpace.MaxZ);
+		newSpot.X = Math.Max(newSpot.X, mapNode.MapSpace.MinX);
+		newSpot.X = Math.Min(newSpot.X, mapNode.MapSpace.MaxX);
+		newSpot.Y = Math.Max(newSpot.Y, mapNode.MapSpace.MinY);
+		newSpot.Y = Math.Min(newSpot.Y, mapNode.MapSpace.MaxY);
+		newSpot.Z = Math.Max(newSpot.Z, mapNode.MapSpace.MinZ);
+		newSpot.Z = Math.Min(newSpot.Z, mapNode.MapSpace.MaxZ);
 		CenterViewOnSpot(newSpot, FacingDirection);
 	}
 
@@ -55,22 +72,25 @@ public partial class MainCamera : Camera2D
 	
 	public void CenterViewOnSpot(MapSpot spot, RotationFlag rotation)
 	{
+		var mapNode = GameMaster.MapControllerNode.GetMapNode(_followingMapNodeId);
+		if(mapNode == null)
+			return;
 		if (rotation != FacingDirection)
 		{
 			var tempRot = ((int)rotation + 4) % 4;
 
 			FacingDirection = (RotationFlag)tempRot;
-			GameMaster.MapNode.RotateMap(FacingDirection);
+			mapNode.RotateMap(FacingDirection);
 		}
 
 		CenterMapSpot = spot;
 		var screenSize = GetViewport().GetWindow().Size;
 		var screenOffset = screenSize / 2;
-		var spotPos = GameMaster.MapNode.MapSpotToWorldPos(CenterMapSpot);
+		var spotPos = mapNode.MapSpotToWorldPos(CenterMapSpot);
 
 		this.Position = spotPos - screenOffset;
 		
-		GameMaster.MapNode.ShowZLayer(spot.Z);
+		mapNode.ShowZLayer(spot.Z);
 	}
 
 	public override void _UnhandledInput(InputEvent @event)
@@ -117,19 +137,7 @@ public partial class MainCamera : Camera2D
 
 		if (@event is InputEventMouseButton eventMouseButton)
 		{
-			if(!MouseOverSprite.MosueOverSpot.HasValue)
-				return;
 			GD.Print("Mouse Click/Unclick at: ", eventMouseButton.Position);
-			if (eventMouseButton.Pressed)
-			{
-				var def = DimMaster.GetDefByName("Defs.MapStructures.Furniture.Bed");
-				GameMaster.CreateInstAtSpot(
-					def,
-					GameMaster.MapNode.MapSpace,
-					MouseOverSprite.MosueOverSpot.Value + new MapSpot(0, 0, 1),
-					GameMaster.MapNode.ViewRotation);
-				// GameMaster.MapNode.CreateGrassNode(MouseOverSprite.MosueOverSpot + new MapSpot(0,0,1));
-			}
 		}
 			
 	}

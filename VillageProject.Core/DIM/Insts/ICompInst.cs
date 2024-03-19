@@ -10,5 +10,10 @@ public interface ICompInst
 
     DataDict? BuildSaveData();
     void LoadSavedData(DataDict dataDict);
+    
+    /// <summary>
+    /// Called when Instance is deleted
+    /// </summary>
+    void OnDeleteInst();
     void Update();
 }

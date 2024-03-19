@@ -3,7 +3,7 @@ using VillageProject.Core.DIM.Insts;
 
 namespace VillageProject.Core.Map.MapSpaces;
 
-public interface IMapSpace
+public interface IMapSpace : ICompInst
 {
     public string MapSpaceId { get; }
     public int MinX { get; }
@@ -22,7 +22,4 @@ public interface IMapSpace
     public Result TryAddInstToSpots(IInst inst, List<MapSpot> spot, string layer);
 
     public void RemoveInst(IInst inst);
-
-
-    public DataDict BuildSaveData();
 }

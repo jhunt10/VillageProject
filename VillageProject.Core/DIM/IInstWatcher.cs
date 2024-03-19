@@ -10,5 +10,5 @@ public interface IInstWatcher
 {
     public void OnNewInstCreated(IInst inst);
     public void OnInstLoaded(IInst inst);
-    public void OnInstDestoryed(IInst inst);
+    public void OnInstDeleted(IInst inst);
 }

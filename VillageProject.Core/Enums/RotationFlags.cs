@@ -31,6 +31,11 @@ public static class RotationExtensions
     {
         return (RotationFlag)(((int)rotation + (int)addRotation) % 4); 
     }
+    public static RotationFlag SubtractRotation(this RotationFlag rotation, RotationFlag addRotation)
+    {
+        return (RotationFlag)(((int)rotation - (int)addRotation + 4) % 4); 
+    }
+    
     
     /// <summary>
     /// Turn this rotation in the provided direction.

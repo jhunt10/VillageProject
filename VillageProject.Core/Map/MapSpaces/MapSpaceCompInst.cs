@@ -33,18 +33,6 @@ public class MapSpaceCompInst : BaseCompInst, IMapSpace
         _buildCellMatrix(MaxX, MinX, MaxY, MinY, MaxZ, MinZ);
     }
     
-    // public MapSpaceCompInst(int minX, int maxX, int minY, int maxY, int minZ, int maxZ)
-    // {
-    //     Id = Guid.NewGuid().ToString();
-    //     MinX = minX;
-    //     MaxX = maxX;
-    //     MinY = minY;
-    //     MaxY = maxY;
-    //     MinZ = minZ;
-    //     MaxZ = maxZ;
-    //     _buildCellMatrix(MaxX, MinX, MaxY, MinY, MaxZ, MinZ);
-    // }
-
     public override DataDict? BuildSaveData()
     {
         var data = new DataDict(MapSpaceId);
@@ -194,6 +182,7 @@ public class MapSpaceCompInst : BaseCompInst, IMapSpace
         }
 
         Console.WriteLine($"Added Inst {inst._DebugId} to spot [{string.Join(", ", spots.Select(x => x.ToString()))}].");
+        Instance.FlagWatchedChange(this);
         return new Result(true);
     }
 
@@ -209,43 +198,9 @@ public class MapSpaceCompInst : BaseCompInst, IMapSpace
         }
         _inst_to_spots[inst.Id].Clear();
         _inst_to_spots.Remove(inst.Id);
+        Instance.FlagWatchedChange(this);
     }
 
-    // public void RemoveInstFromSpots(MapSpot spot, IInst inst)
-    // {
-    //     throw new NotImplementedException();
-    // }
-    //
-    // public IInst? GetTerrainAtSpot(MapSpot spot)
-    // {
-    //     var cell = _getCellAtSpot(spot);
-    //     if (cell == null)
-    //         return null;
-    //     var terrainIndex = cell.TerrainIndex;
-    //     if (!terrainIndex.HasValue)
-    //         return null;
-    //
-    //     if (!_terrainLibrary.ContainsKey(terrainIndex.Value))
-    //         throw new Exception($"Unknown terrain index {terrainIndex.Value} at spot {spot}.");
-    //
-    //     var terrainName = _terrainLibrary[terrainIndex.Value];
-    //     var terrainManager = DimMaster.GetManager<TerrainManager>();
-    //     var terrainInst = terrainManager.GetTerrainByName(terrainName);
-    //     if(terrainInst == null)
-    //         throw new Exception($"No terrain found with name {terrainName}.");
-    //     return terrainInst;
-    // }
-    //
-    // public void SetTerrainAtSpot(IInst terrain, MapSpot spot)
-    // {
-    //     var terrainName = terrain.Def.DefName;
-    //     
-    //     var cell = _getCellAtSpot(spot);
-    //     if(cell == null)
-    //         return;
-    //     cell.AddInst(TerrainManager.TERRAIN_LAYER, terrain);
-    // }
-    
     private class MapCell
     {
         private Dictionary<string, List<string>> _layers = new Dictionary<string, List<string>>();

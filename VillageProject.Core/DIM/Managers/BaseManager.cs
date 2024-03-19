@@ -55,4 +55,9 @@ public abstract class BaseManager : IManager
     {
         
     }
+
+    public virtual void OnInstDelete(IInst inst)
+    {
+        
+    }
 }

@@ -16,11 +16,6 @@ public class GodotMapStructSpriteComp : BaseMapStructureSpriteComp
     {
     }
 
-    public override void Update()
-    {
-        base.Update();
-    }
-
     protected override SpriteData _UpdateSprite()
     {
         var mapStructComp = Instance.GetComponentOfType<MapStructCompInst>();
@@ -29,7 +24,7 @@ public class GodotMapStructSpriteComp : BaseMapStructureSpriteComp
         var def = (GodotMapStructSpriteCompDef)this.CompDef;
         var spriteDef = def.DefaultSprite;
 
-        var rotaion = mapStructComp.Rotation.AddRotation(ViewRotation);
+        var rotaion = mapStructComp.Rotation.SubtractRotation(ViewRotation);
         if (def.RotationSprites.ContainsKey(rotaion))
             spriteDef = def.RotationSprites[rotaion];
         

@@ -34,6 +34,11 @@ public class BaseCompInst : ICompInst
         
     }
 
+    public virtual void OnDeleteInst()
+    {
+        
+    }
+
     public virtual void Update()
     {
         

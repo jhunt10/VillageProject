@@ -10,4 +10,5 @@ public interface IManager
     ICompInst LoadSavedCompInst(ICompDef compDef, IInst newInst, DataDict? data);
     public DataDict BuildSaveData();
     public void LoadSaveData(DataDict data);
+    public void OnInstDelete(IInst inst);
 }

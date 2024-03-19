@@ -27,24 +27,17 @@ public partial class ConstructablePreview : Sprite2D
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		var mapNode = GameMaster.MapNode;
-		if(mapNode == null)
+		var spot = GameMaster.MapControllerNode?.GetMouseOverMapSpot();
+		// var node = GameMaster.MapControllerNode?.GetMouseOverCell();;
+		if (spot == null || spot == _currentSpot)
 			return;
 		
-		var mouseSpot = mapNode.GetMouseOverMapSpot() + new MapSpot(0,0,1);
-		if(!mouseSpot.HasValue || mouseSpot == _currentSpot)
-			return;
-		
-		var node = mapNode.GetMapNodeAtSpot(mouseSpot.Value);
-		if (node == null)
-			return;
-		
-		this.Position = Vector2.Zero;
-		if (this.GetParent() != null)
-			this.Reparent(node, false);
-		else
-			node.AddChild(this);
-		_currentSpot = mouseSpot.Value;
+		// this.Position = Vector2.Zero;
+		// if (this.GetParent() != null)
+		// 	this.Reparent(node, false);
+		// else
+		// 	node.AddChild(this);
+		_currentSpot = spot.Value;
 		UpdateSprite();
 	}
 	
@@ -56,6 +49,28 @@ public partial class ConstructablePreview : Sprite2D
 			{
 				_rotation = _rotation.ApplyRotationDirection(RotationDirection.Clockwise);
 				UpdateSprite();
+			}
+		}
+		// Create instance of constructable on mouse click
+		if (@event is InputEventMouseButton eventMouseButton)
+		{
+			if(!MouseOverSprite.MosueOverSpot.HasValue)
+				return;
+			if(_constructableDef == null)
+				return;
+			GD.Print("Mouse Click/Unclick at: ", eventMouseButton.Position);
+			if (eventMouseButton.Pressed)
+			{
+				var mapNode = GameMaster.MapControllerNode.GetMouseOverMapNode();
+				if (mapNode != null)
+				{
+					var realRot = _rotation.AddRotation(mapNode.ViewRotation);
+					GameMaster.CreateInstAtSpot(
+						_constructableDef,
+						mapNode.MapSpace,
+						_currentSpot,
+						realRot);
+				}
 			}
 		}
 			
@@ -77,22 +92,31 @@ public partial class ConstructablePreview : Sprite2D
 
 		var sprite = GetSpite();
 		this.Texture = (ImageTexture)sprite.Sprite;
-		this.Offset = new Vector2(sprite.XOffset, sprite.YOffset);
+		this.Offset = new Vector2(sprite.XOffset, (-sprite.Hight) + sprite.YOffset);
 		this.Visible = true;
 
-		var mapSpace = GameMaster.MapNode.MapSpace;
-		var realRot = _rotation.AddRotation(GameMaster.MapNode.ViewRotation);
-		var canPlace = DimMaster.GetManager<MapManager>()
-			.CouldPlaceDefOnMapSpace(mapSpace, _constructableDef, _currentSpot, realRot);
-		if (canPlace.Success)
+		var mapNode = GameMaster.MapControllerNode.GetMouseOverMapNode();
+		var canPlace = false;
+		var message = "";
+
+		if (mapNode != null)
+		{
+			var realRot = _rotation.AddRotation(mapNode.ViewRotation);
+			var res = DimMaster.GetManager<MapManager>()
+				.CouldPlaceDefOnMapSpace(mapNode.MapSpace, _constructableDef, _currentSpot, realRot);
+			canPlace = res.Success;
+			message = res.Message;
+
+		}
+		if (canPlace)
 		{
 			this.Modulate = Colors.Green;
-			Label.Text = "";
+			Label.Text = message;
 		}
 		else
 		{
 			this.Modulate = Colors.Red;
-			Label.Text = canPlace.Message;
+			Label.Text = message;
 		}
 	}
 

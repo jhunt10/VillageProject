@@ -12,15 +12,45 @@ using VillageProject.Core.Sprites.PatchSprites;
 using VillageProject.Godot.Map;
 using VillageProject.Godot.Sprites;
 
-public partial class MapStructureNode : Node2D, IMapObjectNode, ISpriteWatcher
+public partial class MapStructureNode : Node2D, IMapObjectNode
 {
 	public MapNode MapNode { get; set; }
 	public Sprite2D Spite;
-	public IInst Inst;
+	public IInst Inst { get; private set; }
 	public string? MapSpaceId { get; set; }
 	public MapSpot? MapSpot { get; set; }
 	public RotationFlag RealRotation { get; set; }
 	public RotationFlag ViewRotation { get; set; }
+	
+	public LayerVisibility LayerVisibility { get; private set; }
+
+	public void SetLayerVisibility(LayerVisibility visibility)
+	{
+		
+		this.LayerVisibility = visibility;
+		switch (LayerVisibility)
+		{
+			case LayerVisibility.None:
+				this.Visible = false;
+				break;
+			case LayerVisibility.Shadow:
+				this.Visible = true;
+				if(this.Spite != null)
+					this.Spite.Visible = false;
+				break;
+			case LayerVisibility.Half:
+				this.Visible = true;
+				if(this.Spite != null)
+					this.Spite.Visible = true;
+				break;
+			case LayerVisibility.Full:
+				this.Visible = true;
+				if(this.Spite != null)
+					this.Spite.Visible = true;
+				break;
+		}
+	}
+
 	public void SetViewRotation(RotationFlag viewRotation)
 	{
 		if (ViewRotation != viewRotation)
@@ -34,6 +64,7 @@ public partial class MapStructureNode : Node2D, IMapObjectNode, ISpriteWatcher
 
 	private bool _inited;
 	private bool _forceUpdate = false;
+	private const string SPRITE_WATCHER_KEY = "MapStructNodeSpriteWatcher";
 	
 	private void _init()
 	{
@@ -41,6 +72,11 @@ public partial class MapStructureNode : Node2D, IMapObjectNode, ISpriteWatcher
 			return;
 		Spite = GetNode<Sprite2D>("Sprite2D");
 		_inited = true;
+	}
+
+	public void Delete()
+	{
+		this.QueueFree();
 	}
 	
 	// Called when the node enters the scene tree for the first time.
@@ -53,11 +89,13 @@ public partial class MapStructureNode : Node2D, IMapObjectNode, ISpriteWatcher
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		if (_forceUpdate)
-		{
-			OnSpriteUpdate();
-			_forceUpdate = false;
-		}
+		if(Inst == null)
+			return;
+		
+		// Get sprite comp to check for updates
+		var spriteChange = Inst.GetWatchedChange(SPRITE_WATCHER_KEY);
+		if (spriteChange)
+			UpdateSprite();
 	}
 
 	public void SetShow(bool show)
@@ -71,20 +109,17 @@ public partial class MapStructureNode : Node2D, IMapObjectNode, ISpriteWatcher
 			throw new Exception("Inst already set");
 		_init();
 		Inst = inst;
+		Inst.AddComponentWatcher<GodotMapStructSpriteComp>(SPRITE_WATCHER_KEY);
 		Console.WriteLine($"Inst {inst._DebugId} assigned to Node {this.Name}.");
-		var spriteComps = Inst.GetComponentsOfType<ISpriteComp>();
-		foreach (var sprite in spriteComps)
-		{
-			sprite.AddSpriteWatcher(this);
-		}
 	}
 	
 	public void ForceUpdateSprite()
 	{
-		_forceUpdate = true;
+		var mapStructSpriteComp = Inst.GetComponentOfType<GodotMapStructSpriteComp>(errorIfNull: true);
+		mapStructSpriteComp?.DirtySprite();
 	}
 
-	public void OnSpriteUpdate()
+	public void UpdateSprite()
 	{
 		var mapStructComp = Inst.GetComponentOfType<MapStructCompInst>(errorIfNull: true);
 		var mapStructSpriteComp = Inst.GetComponentOfType<GodotMapStructSpriteComp>(errorIfNull: true);
@@ -101,7 +136,7 @@ public partial class MapStructureNode : Node2D, IMapObjectNode, ISpriteWatcher
 			var mapNode = GameMaster.MapControllerNode.GetMapNode(mapStructComp.MapSpaceId);
 			if (mapNode == null)
 				throw new Exception($"Failed to find MapNode for MapSpace '{mapStructComp.MapSpaceId}'.");
-			var cell = mapNode.GetMapNodeAtSpot(mapStructComp.MapSpot.Value);
+			var cell = mapNode.GetMapCellNodeAtSpot(mapStructComp.MapSpot.Value);
 			if (this.GetParent() != cell)
 			{
 				if(this.GetParent() != null)
@@ -123,6 +158,6 @@ public partial class MapStructureNode : Node2D, IMapObjectNode, ISpriteWatcher
 		var sprite = spriteComp.GetSprite();
 		var imageText = (ImageTexture)sprite.Sprite;
 		this.Spite.Texture = imageText;
-		this.Spite.Offset = new Vector2(sprite.XOffset, sprite.YOffset);
+		this.Spite.Offset = new Vector2(sprite.XOffset, -sprite.Hight + sprite.YOffset);
 	}
 }

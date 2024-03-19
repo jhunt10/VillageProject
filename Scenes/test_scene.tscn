@@ -64,6 +64,7 @@ script = ExtResource("13_os1mb")
 script = ExtResource("15_twn1v")
 
 [node name="MapNode" type="Node2D" parent="MapControllerNode"]
+visible = false
 script = ExtResource("2_6m56v")
 
 [node name="ZLayerPrefab" type="Node2D" parent="MapControllerNode/MapNode"]
@@ -77,15 +78,6 @@ texture = ExtResource("4_ep16e")
 [node name="CellNodes" type="Node2D" parent="MapControllerNode/MapNode/ZLayerPrefab"]
 
 [node name="TerrainShadows" type="Node2D" parent="MapControllerNode/MapNode/ZLayerPrefab"]
-
-[node name="ConstructablePreview" type="Sprite2D" parent="MapControllerNode"]
-texture = ExtResource("16_hakoq")
-centered = false
-script = ExtResource("12_eybiu")
-
-[node name="Label" type="Label" parent="MapControllerNode/ConstructablePreview"]
-offset_right = 40.0
-offset_bottom = 23.0
 
 [node name="MouseOverSprite" type="Sprite2D" parent="MapControllerNode"]
 texture = ExtResource("3_0lpvn")
@@ -102,6 +94,15 @@ offset_top = 3.0
 offset_right = 79.0
 offset_bottom = 26.0
 text = "(0,0,0)"
+
+[node name="ConstructablePreview" type="Sprite2D" parent="MapControllerNode/MouseOverSprite"]
+texture = ExtResource("16_hakoq")
+centered = false
+script = ExtResource("12_eybiu")
+
+[node name="Label" type="Label" parent="MapControllerNode/MouseOverSprite/ConstructablePreview"]
+offset_right = 40.0
+offset_bottom = 23.0
 
 [node name="MainCamera" type="Camera2D" parent="."]
 anchor_mode = 0
@@ -177,6 +178,21 @@ offset_right = 57.0
 offset_bottom = 48.0
 text = "Load"
 
+[node name="ClearButton" type="TextureButton" parent="CanvasLayer"]
+offset_left = 903.0
+offset_top = 551.0
+offset_right = 975.0
+offset_bottom = 623.0
+texture_normal = ExtResource("14_a3dvt")
+
+[node name="Label" type="Label" parent="CanvasLayer/ClearButton"]
+layout_mode = 0
+offset_left = 17.0
+offset_top = 25.0
+offset_right = 57.0
+offset_bottom = 48.0
+text = "Clear"
+
 [node name="MapLayer" type="Control" parent="CanvasLayer"]
 layout_mode = 3
 anchors_preset = 0
@@ -186,6 +202,7 @@ script = ExtResource("21_h24ff")
 
 [node name="Background" type="NinePatchRect" parent="CanvasLayer/MapLayer"]
 custom_minimum_size = Vector2(88, 39)
+layout_mode = 0
 offset_right = 317.0
 offset_bottom = 39.0
 texture = ExtResource("13_75ih2")

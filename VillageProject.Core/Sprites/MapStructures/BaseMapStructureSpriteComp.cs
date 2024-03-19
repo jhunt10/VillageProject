@@ -16,7 +16,6 @@ public abstract class BaseMapStructureSpriteComp : BaseSpriteComp, IMapPlacement
 
     public void MapPositionSet(IMapSpace mapSpaceCompInst, MapSpot mapSpot, RotationFlag rotation)
     {
-        UpdateSprite();
-        NotifyWatchers();
+        DirtySprite();
     }
 }

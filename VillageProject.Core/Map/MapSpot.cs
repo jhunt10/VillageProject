@@ -58,40 +58,40 @@ public struct MapSpot
     // AdjacencyToSpot doesn't make sense because one AdjacencyFlags contains references to multiple spots
     // public MapSpot AdjacencyToSpot(AdjacencyFlags flags, RotationFlag rotationFlag = RotationFlag.North)
 
-    public MapSpot DirectionToSpot(DirectionFlags direction, RotationFlag rotation = RotationFlag.North)
+    public MapSpot DirectionToSpot(DirectionFlag direction, RotationFlag rotation = RotationFlag.North)
     {
         var x = 0;
         var y = 0;
         var z = 0;
-        if   ( direction == DirectionFlags.Back || direction == DirectionFlags.BackLeft || direction == DirectionFlags.BackRight 
-            || direction == DirectionFlags.TopBack || direction == DirectionFlags.TopBackLeft || direction == DirectionFlags.TopBackRight
-            || direction == DirectionFlags.BottomBack || direction == DirectionFlags.BottomBackLeft || direction == DirectionFlags.BottomBackRight)
+        if   ( direction == DirectionFlag.Back || direction == DirectionFlag.BackLeft || direction == DirectionFlag.BackRight 
+            || direction == DirectionFlag.TopBack || direction == DirectionFlag.TopBackLeft || direction == DirectionFlag.TopBackRight
+            || direction == DirectionFlag.BottomBack || direction == DirectionFlag.BottomBackLeft || direction == DirectionFlag.BottomBackRight)
             y += 1;
         
-        if  ( direction == DirectionFlags.Front || direction == DirectionFlags.FrontLeft || direction == DirectionFlags.FrontRight 
-           || direction == DirectionFlags.TopFront || direction == DirectionFlags.TopFrontLeft || direction == DirectionFlags.TopFrontRight
-           || direction == DirectionFlags.BottomFront || direction == DirectionFlags.BottomFrontLeft || direction == DirectionFlags.BottomFrontRight)
+        if  ( direction == DirectionFlag.Front || direction == DirectionFlag.FrontLeft || direction == DirectionFlag.FrontRight 
+           || direction == DirectionFlag.TopFront || direction == DirectionFlag.TopFrontLeft || direction == DirectionFlag.TopFrontRight
+           || direction == DirectionFlag.BottomFront || direction == DirectionFlag.BottomFrontLeft || direction == DirectionFlag.BottomFrontRight)
             y -= 1;
         
         
-        if  ( direction == DirectionFlags.BackLeft || direction == DirectionFlags.Left || direction == DirectionFlags.FrontLeft 
-           || direction == DirectionFlags.TopBackLeft || direction == DirectionFlags.TopLeft || direction == DirectionFlags.TopFrontLeft
-           || direction == DirectionFlags.BottomBackLeft || direction == DirectionFlags.BottomLeft || direction == DirectionFlags.BottomFrontLeft)
+        if  ( direction == DirectionFlag.BackLeft || direction == DirectionFlag.Left || direction == DirectionFlag.FrontLeft 
+           || direction == DirectionFlag.TopBackLeft || direction == DirectionFlag.TopLeft || direction == DirectionFlag.TopFrontLeft
+           || direction == DirectionFlag.BottomBackLeft || direction == DirectionFlag.BottomLeft || direction == DirectionFlag.BottomFrontLeft)
             x -= 1;
         
-        if ( direction == DirectionFlags.BackRight || direction == DirectionFlags.Right || direction == DirectionFlags.FrontRight 
-          || direction == DirectionFlags.TopBackRight || direction == DirectionFlags.TopRight || direction == DirectionFlags.TopFrontRight
-          || direction == DirectionFlags.BottomBackRight || direction == DirectionFlags.BottomRight || direction == DirectionFlags.BottomFrontRight)
+        if ( direction == DirectionFlag.BackRight || direction == DirectionFlag.Right || direction == DirectionFlag.FrontRight 
+          || direction == DirectionFlag.TopBackRight || direction == DirectionFlag.TopRight || direction == DirectionFlag.TopFrontRight
+          || direction == DirectionFlag.BottomBackRight || direction == DirectionFlag.BottomRight || direction == DirectionFlag.BottomFrontRight)
             x += 1;
         
-        if( direction == DirectionFlags.TopBackLeft || direction == DirectionFlags.TopBack || direction == DirectionFlags.TopBackRight 
-        || direction == DirectionFlags.TopLeft || direction == DirectionFlags.Top || direction == DirectionFlags.TopRight
-        || direction == DirectionFlags.TopFrontLeft || direction == DirectionFlags.TopFront || direction == DirectionFlags.TopFrontRight)
+        if( direction == DirectionFlag.TopBackLeft || direction == DirectionFlag.TopBack || direction == DirectionFlag.TopBackRight 
+        || direction == DirectionFlag.TopLeft || direction == DirectionFlag.Top || direction == DirectionFlag.TopRight
+        || direction == DirectionFlag.TopFrontLeft || direction == DirectionFlag.TopFront || direction == DirectionFlag.TopFrontRight)
             z += 1;
         
-        if( direction == DirectionFlags.BottomBackLeft || direction == DirectionFlags.BottomBack || direction == DirectionFlags.BottomBackRight 
-        || direction == DirectionFlags.BottomLeft || direction == DirectionFlags.Bottom || direction == DirectionFlags.BottomRight
-        || direction == DirectionFlags.BottomFrontLeft || direction == DirectionFlags.BottomFront || direction == DirectionFlags.BottomFrontRight)
+        if( direction == DirectionFlag.BottomBackLeft || direction == DirectionFlag.BottomBack || direction == DirectionFlag.BottomBackRight 
+        || direction == DirectionFlag.BottomLeft || direction == DirectionFlag.Bottom || direction == DirectionFlag.BottomRight
+        || direction == DirectionFlag.BottomFrontLeft || direction == DirectionFlag.BottomFront || direction == DirectionFlag.BottomFrontRight)
             z -= 1;
         
         switch (rotation)
@@ -109,12 +109,18 @@ public struct MapSpot
         return new MapSpot(X + x, Y + y, Z + z);
     }
     
-    public IEnumerable<KeyValuePair<DirectionFlags, MapSpot>> ListAdjacentSpots(RotationFlag rot = RotationFlag.North, bool includeCenter = false)
+    public IEnumerable<KeyValuePair<DirectionFlag, MapSpot>> ListAdjacentSpots(RotationFlag rot = RotationFlag.North, bool includeVertical = false, bool includeCenter = false)
     {
-        foreach (var direction in (DirectionFlags[]) Enum.GetValues(typeof(DirectionFlags)))
+        foreach (var direction in (DirectionFlag[]) Enum.GetValues(typeof(DirectionFlag)))
         {
-            if(direction != DirectionFlags.None || includeCenter)
-                yield return new KeyValuePair<DirectionFlags, MapSpot>(direction, DirectionToSpot(direction, rot));
+            if(direction == DirectionFlag.None && !includeCenter)
+                continue;
+            if(direction.HasFlag(DirectionFlag.Top) && !includeVertical)
+                continue;
+            if(direction.HasFlag(DirectionFlag.Bottom) && !includeVertical)
+                continue;
+            
+            yield return new KeyValuePair<DirectionFlag, MapSpot>(direction, DirectionToSpot(direction, rot));
         }
     }
 

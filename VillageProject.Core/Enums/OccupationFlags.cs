@@ -111,8 +111,6 @@ public static class OccupationExtentions
         if (turn == RotationDirection.None)
         {
             return occupation;
-            var newFlag = occupation;
-            return newFlag;
         }
         
         var bitSets = new int[]

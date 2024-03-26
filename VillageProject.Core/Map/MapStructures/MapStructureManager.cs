@@ -191,7 +191,7 @@ public class MapStructureManager : BaseManager, IMapPlacementValidator
     //
     // }
 
-    public AdjacencyFlags GetAdjacency(
+    public CellSideFlags GetAdjacency(
         IInst inst,
         IMapSpace mapSpace,
         MapSpot spot,
@@ -201,7 +201,7 @@ public class MapStructureManager : BaseManager, IMapPlacementValidator
         var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(errorIfNull:true);
         var mapStructCompDef = mapStructComp.CompDef as MapStructCompDef;
         
-        var adjacency = AdjacencyFlags.None;
+        var adjacency = CellSideFlags.None;
     
         foreach (var adjPair in spot.ListAdjacentSpots(rotation))
         {
@@ -218,7 +218,7 @@ public class MapStructureManager : BaseManager, IMapPlacementValidator
                     match = AdjacencyHelper.MatchSameDefDelegate(inst, thing);
                 if (match)
                 {
-                    adjacency = adjacency | MapHelper.DirectionToAdjacency(direction);
+                    adjacency = adjacency | direction.ToCellSide();
                     break;
                 }
             }

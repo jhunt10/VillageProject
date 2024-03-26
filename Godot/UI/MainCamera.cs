@@ -3,6 +3,7 @@ using System;
 using VillageProject.Core.DIM;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
+using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Map.Terrain;
 
 public partial class MainCamera : Camera2D
@@ -38,7 +39,7 @@ public partial class MainCamera : Camera2D
 		_followingMapNodeId = mapNodeId;
 	}
 
-	public void MoveCameraInDirection(DirectionFlags direction)
+	public void MoveCameraInDirection(DirectionFlag direction)
 	{
 		var mapNode = GameMaster.MapControllerNode.GetMapNode(_followingMapNodeId);
 		if (mapNode == null)
@@ -103,27 +104,27 @@ public partial class MainCamera : Camera2D
 			}
 			else if (eventKey.Pressed && eventKey.Keycode == Key.W)
 			{
-				MoveCameraInDirection(DirectionFlags.Back);
+				MoveCameraInDirection(DirectionFlag.Back);
 			}
 			else if (eventKey.Pressed && eventKey.Keycode == Key.S)
 			{
-				MoveCameraInDirection(DirectionFlags.Front);
+				MoveCameraInDirection(DirectionFlag.Front);
 			}
 			else if (eventKey.Pressed && eventKey.Keycode == Key.A)
 			{
-				MoveCameraInDirection(DirectionFlags.Left);
+				MoveCameraInDirection(DirectionFlag.Left);
 			}
 			else if (eventKey.Pressed && eventKey.Keycode == Key.D)
 			{
-				MoveCameraInDirection(DirectionFlags.Right);
+				MoveCameraInDirection(DirectionFlag.Right);
 			}
 			if (eventKey.Pressed && eventKey.Keycode == Key.Up)
 			{
-				MoveCameraInDirection(DirectionFlags.Top);
+				MoveCameraInDirection(DirectionFlag.Top);
 			}
 			else if (eventKey.Pressed && eventKey.Keycode == Key.Down)
 			{
-				MoveCameraInDirection(DirectionFlags.Bottom);
+				MoveCameraInDirection(DirectionFlag.Bottom);
 			}
 			else if (eventKey.Pressed && eventKey.Keycode == Key.E)
 			{
@@ -138,8 +139,21 @@ public partial class MainCamera : Camera2D
 		if (@event is InputEventMouseButton eventMouseButton)
 		{
 			GD.Print("Mouse Click/Unclick at: ", eventMouseButton.Position);
-		}
 			
+			if(eventMouseButton.IsPressed() && MouseOverSprite.MosueOverSpot.HasValue)
+			{ 
+				var mapNode = GameMaster.MapControllerNode.GetMouseOverMapNode();
+				if(mapNode != null)
+					MouseClickedSpot(mapNode.MapSpace, MouseOverSprite.MosueOverSpot.Value + new MapSpot(0,0,1));
+			}
+		}
 	}
-	
+
+	public void MouseClickedSpot(IMapSpace mapSpace, MapSpot spot)
+	{
+		var pathNode = GameMaster.PathDisplayNode;
+		var start = new MapSpot(0, 0, spot.Z);
+		Console.WriteLine($"MainCamera Testing Path: {start} to {spot}");
+		pathNode.DisplayPath(mapSpace, start, spot);
+	}
 }

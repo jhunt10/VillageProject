@@ -55,16 +55,16 @@ public class TerrainManager : BaseManager
         return insts;
     }
 
-    public AdjacencyFlags GetHorizontalAdjacency(
+    public CellSideFlags GetHorizontalAdjacency(
         IMapSpace mapSpace, 
         MapSpot spot, 
         RotationFlag rotation = RotationFlag.North, 
         bool matchAny = false)
     {
         var terrain = GetTerrainAtSpot(mapSpace, spot);
-        var adjacency = AdjacencyFlags.None;
+        var adjacency = CellSideFlags.None;
         if (terrain == null)
-            return (AdjacencyFlags) (-1);
+            return (CellSideFlags) (0);
 
         // var topSpot = spot.DirectionToSpot(DirectionFlags.Top);
         // var topTerrain = mapSpace.GetTerrainAtSpot(topSpot);
@@ -75,8 +75,8 @@ public class TerrainManager : BaseManager
         {
             var direction = adjPair.Key;
             var adjSpot = adjPair.Value;
-            if (((direction & DirectionFlags.Top) == DirectionFlags.Top)
-                || ((direction & DirectionFlags.Bottom) == DirectionFlags.Bottom))
+            if (((direction & DirectionFlag.Top) == DirectionFlag.Top)
+                || ((direction & DirectionFlag.Bottom) == DirectionFlag.Bottom))
             {
                 // Console.WriteLine($"Ignoring direction: {direction}");
                 continue;   
@@ -88,7 +88,7 @@ public class TerrainManager : BaseManager
                 continue;
             if (terrainAtSpot.Id == terrain.Id || matchAny)
             {
-                var adjFlag = MapHelper.DirectionToAdjacency(direction);
+                var adjFlag = direction.ToCellSide();
                 
                 // Console.WriteLine($"Before adding {adjFlag} to {adjacency}");
                 adjacency = adjacency | adjFlag;
@@ -102,24 +102,24 @@ public class TerrainManager : BaseManager
     /// <summary>
     /// Returns adjacency for front of block, but translated to horizontal adjacency for PatchSprites
     /// </summary>
-    public AdjacencyFlags GetVerticalAdjacencyAsHorizontal(IMapSpace mapSpace, MapSpot spot, RotationFlag rotation = RotationFlag.North, bool matchAny = false)
+    public CellSideFlags GetVerticalAdjacencyAsHorizontal(IMapSpace mapSpace, MapSpot spot, RotationFlag rotation = RotationFlag.North, bool matchAny = false)
     {
         var terrain = GetTerrainAtSpot(mapSpace, spot);
-        var adjacency = AdjacencyFlags.None;
+        var adjacency = CellSideFlags.None;
         if (terrain == null)
-            return (AdjacencyFlags) (-1);
+            return (CellSideFlags) (-1);
 
-        var frontSpace = spot.DirectionToSpot(DirectionFlags.Front, rotation);
+        var frontSpace = spot.DirectionToSpot(DirectionFlag.Front, rotation);
         var frontTerrain = GetTerrainAtSpot(mapSpace, frontSpace);
         if (frontTerrain != null)
-            return (AdjacencyFlags) (-1);
+            return (CellSideFlags) (-1);
         
         foreach (var adjPair in spot.ListAdjacentSpots(rotation))
         {
             var direction = adjPair.Key;
             var adjSpot = adjPair.Value;
-            if (((direction & DirectionFlags.Front) == DirectionFlags.Front)
-                || ((direction & DirectionFlags.Back) == DirectionFlags.Back))
+            if (((direction & DirectionFlag.Front) == DirectionFlag.Front)
+                || ((direction & DirectionFlag.Back) == DirectionFlag.Back))
             {
                 // Console.WriteLine($"Ignoring direction: {direction}");
                 continue;   
@@ -131,33 +131,33 @@ public class TerrainManager : BaseManager
                 continue;
             if (terrainAtSpot.Id == terrain.Id || matchAny)
             {
-                var adjFlag = MapHelper.DirectionToAdjacency(direction);
+                var adjFlag = direction.ToCellSide();
                 switch (direction)
                 {
-                    case DirectionFlags.TopLeft:
-                        adjFlag = AdjacencyFlags.BackLeft;
+                    case DirectionFlag.TopLeft:
+                        adjFlag = CellSideFlags.BackLeft;
                         break;
-                    case DirectionFlags.Top:
-                        adjFlag = AdjacencyFlags.Back;
+                    case DirectionFlag.Top:
+                        adjFlag = CellSideFlags.Back;
                         break;
-                    case DirectionFlags.TopRight:
-                        adjFlag = AdjacencyFlags.BackRight;
+                    case DirectionFlag.TopRight:
+                        adjFlag = CellSideFlags.BackRight;
                         break;
-                    case DirectionFlags.BottomLeft:
-                        adjFlag = AdjacencyFlags.FrontLeft;
+                    case DirectionFlag.BottomLeft:
+                        adjFlag = CellSideFlags.FrontLeft;
                         break;
-                    case DirectionFlags.Bottom:
+                    case DirectionFlag.Bottom:
                         // If it's got a block to the bottom front of it, show no adj bottom
-                        var botFrontSpot = spot.DirectionToSpot(DirectionFlags.BottomFront);
+                        var botFrontSpot = spot.DirectionToSpot(DirectionFlag.BottomFront);
                         var botFrontTerrain =  GetTerrainAtSpot(mapSpace, botFrontSpot);
                         if(botFrontTerrain != null && (botFrontTerrain.Def.DefName == terrain.Def.DefName || matchAny))
-                            adjFlag = AdjacencyFlags.None;
+                            adjFlag = CellSideFlags.None;
                         else
-                            adjFlag = AdjacencyFlags.Front;
+                            adjFlag = CellSideFlags.Front;
                             
                         break;
-                    case DirectionFlags.BottomRight:
-                        adjFlag = AdjacencyFlags.FrontRight;
+                    case DirectionFlag.BottomRight:
+                        adjFlag = CellSideFlags.FrontRight;
                         break;
                         
                 }

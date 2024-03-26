@@ -67,7 +67,7 @@ public partial class MapNode : Node2D, IInstNode
 
 		var topLeft = new Vector2(MapSpace.MinX * TILE_WIDTH,
 			(-MapSpace.MaxY * TILE_WIDTH) - ((MapSpace.MaxZ+1) * TILE_HIGHT));
-		var bottomRight = new Vector2(MapSpace.MaxX * TILE_WIDTH,
+		var bottomRight = new Vector2((MapSpace.MaxX+1) * TILE_WIDTH,
 			(-MapSpace.MinX * TILE_WIDTH) + (-MapSpace.MinZ * TILE_HIGHT));
 		_worldBounds = new Rect2( topLeft, (-topLeft) + bottomRight);
 		RotateMap(RotationFlag.North);

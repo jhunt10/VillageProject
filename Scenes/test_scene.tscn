@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://dq0d812v1qmf4"]
+[gd_scene load_steps=24 format=3 uid="uid://dq0d812v1qmf4"]
 
 [ext_resource type="Script" path="res://Godot/GameMaster.cs" id="1_ox1jl"]
 [ext_resource type="Script" path="res://Godot/Map/MapNode.cs" id="2_6m56v"]
@@ -21,6 +21,8 @@
 [ext_resource type="Script" path="res://Godot/Map/BaseMapObjectInstNode.cs" id="15_twn1v"]
 [ext_resource type="Texture2D" uid="uid://dpuk5esudt37w" path="res://Assets/Sprites/BedIcon.png" id="16_hakoq"]
 [ext_resource type="Script" path="res://Godot/UI/MiscLable.cs" id="21_h24ff"]
+[ext_resource type="Script" path="res://Godot/Debugging/PathDisplayNode.cs" id="22_ig6yl"]
+[ext_resource type="Texture2D" uid="uid://dkgjwsy8unvot" path="res://Assets/Sprites/path_node_sprite.png" id="23_ots0k"]
 
 [node name="GameMaster" type="Node2D"]
 script = ExtResource("1_ox1jl")
@@ -218,3 +220,12 @@ offset_top = 8.0
 offset_right = 92.0
 offset_bottom = 31.0
 text = "Map View: "
+
+[node name="PathDisplayNode" type="Node2D" parent="."]
+script = ExtResource("22_ig6yl")
+
+[node name="PathTilePrefab" type="Sprite2D" parent="PathDisplayNode"]
+visible = false
+texture = ExtResource("23_ots0k")
+centered = false
+offset = Vector2(0, -32)

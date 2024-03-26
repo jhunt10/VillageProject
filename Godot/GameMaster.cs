@@ -21,6 +21,8 @@ public partial class GameMaster : Node2D, IInstWatcher
 	public static MapControllerNode MapControllerNode;
 	public static Dictionary<string, IInstNode> InstNodes = new Dictionary<string, IInstNode>();
 
+	public static PathDisplayNode PathDisplayNode;
+
 	public TextureButton SaveButton;
 	public TextureButton LoadButton;
 	public TextureButton ClearButton;
@@ -56,6 +58,7 @@ public partial class GameMaster : Node2D, IInstWatcher
 			LoadButton.Pressed += () => LoadGame();
 			ClearButton = GetNode<TextureButton>("CanvasLayer/ClearButton");
 			ClearButton.Pressed += () => ClearGame();
+			PathDisplayNode = GetNode<PathDisplayNode>("PathDisplayNode");
 		}
 	}
 

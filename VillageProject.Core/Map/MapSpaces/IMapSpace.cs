@@ -19,6 +19,9 @@ public interface IMapSpace : ICompInst
 
     public IEnumerable<IInst> ListInstsAtSpot(MapSpot spot, string? layer = null);
     
+    public IEnumerable<TComp> ListCompInstsOfTypeAtSpot<TComp>(MapSpot spot, string? layer = null)
+        where TComp : ICompInst;
+    
     public Result TryAddInstToSpots(IInst inst, List<MapSpot> spot, string layer);
 
     public void RemoveInst(IInst inst);

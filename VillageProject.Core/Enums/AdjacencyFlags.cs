@@ -1,7 +1,7 @@
 ﻿namespace VillageProject.Core.Enums;
 
 /// <summary>
-/// Bitwise enum flags for representing adjacency.
+/// Aggregable bitwise enum flags for representing adjacency.
 /// Values can be concatenated together produce one value representing an array of bits for if adjacent cells match.
 /// For example: TopLeft | BackLeft =  4096 + 1 = 4097 which means a condition is true for the Top Left and Back Left cells.
 /// Two flags can not be joined to create another flag. ie. Back | Left != BackLeft

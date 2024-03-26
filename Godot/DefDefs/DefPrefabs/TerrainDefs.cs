@@ -4,6 +4,7 @@ using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.MapStructures.Constructables;
+using VillageProject.Core.Map.Pathing;
 using VillageProject.Core.Map.Terrain;
 using VillageProject.Godot.Sprites;
 
@@ -48,6 +49,17 @@ public static class TerrainDefs
                 SpriteSheet = "dirt_tiles_front.png",
                 SpriteWidth = 32,
                 SpriteHight = 40
+            },
+            new PathingCompDef()
+            {
+                PathSpotDefs = new Dictionary<MapSpot, PathSpotDef>
+                {
+                    {new MapSpot(0,0,0), new PathSpotDef(){SupportsPathOver = 
+                        CellSideFlags.BackLeft | CellSideFlags.Back | CellSideFlags.BackRight |
+                        CellSideFlags.Left | CellSideFlags.Right |
+                        CellSideFlags.FrontLeft | CellSideFlags.Front | CellSideFlags.FrontRight
+                    }} 
+                }
             }
         },
     };
@@ -89,6 +101,17 @@ public static class TerrainDefs
                 SpriteSheet = "stone_tiles_front.png",
                 SpriteWidth = 32,
                 SpriteHight = 40
+            },
+            new PathingCompDef()
+            {
+                PathSpotDefs = new Dictionary<MapSpot, PathSpotDef>
+                {
+                    {new MapSpot(0,0,0), new PathSpotDef(){SupportsPathOver = 
+                        CellSideFlags.BackLeft | CellSideFlags.Back | CellSideFlags.BackRight |
+                        CellSideFlags.Left | CellSideFlags.Right |
+                        CellSideFlags.FrontLeft | CellSideFlags.Front | CellSideFlags.FrontRight
+                    }} 
+                }
             }
         },
     };

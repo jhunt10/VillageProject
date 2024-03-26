@@ -153,6 +153,27 @@ public class MapSpaceCompInst : BaseCompInst, IMapSpace
                 yield return inst;
             }
     }
+    
+    public IEnumerable<TComp> ListCompInstsOfTypeAtSpot<TComp>(MapSpot spot, string? layer = null)
+        where TComp : ICompInst
+    {
+        var cell = _getCellAtSpot(spot);
+        if(cell != null)
+            foreach (var instId in cell.ListInstIds(layer))
+            {
+                var inst = DimMaster.GetInstById(instId);
+                if (inst == null)
+                {
+                    //TODO: handle lost insts
+                    continue;
+                }
+
+                foreach (var comp in inst.GetComponentsOfType<TComp>())
+                {
+                    yield return comp;
+                }
+            }
+    }
 
     /// <summary>
     /// Try registering the given instance to the map cells defined by spots.

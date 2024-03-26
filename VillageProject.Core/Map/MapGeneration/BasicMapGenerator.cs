@@ -9,7 +9,7 @@ public static class BasicMapGenerator
 {
     public static IMapSpace GenerateTestMap()
     {
-        var def = DimMaster.GetDefByName("Defs.MapSpaces.Testing.TinyTest");
+        var def = DimMaster.GetDefByName("Defs.MapSpaces.Testing.LargerTest");
         var mapInst = DimMaster.InstantiateDef(def);
         var mapSpace = mapInst.GetComponentOfType<MapSpaceCompInst>();
         var mapManager = DimMaster.GetManager<MapManager>();

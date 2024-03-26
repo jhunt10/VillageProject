@@ -23,8 +23,27 @@ public static class MapDefs
         }
     };
     
+    public static IDef LargerTestMapSpace = new Def
+    {
+        DefName = "Defs.MapSpaces.Testing.LargerTest",
+        Label = "LargerTest",
+        CompDefs = new System.Collections.Generic.List<ICompDef>
+        {
+            new MapSpaceCompDef
+            {
+                MaxX = 20,
+                MinX = -20,
+                MaxY = 20,
+                MinY = -20,
+                MaxZ = 1,
+                MinZ = -1
+            }
+        }
+    };
+    
     public static Dictionary<string, IDef> Defs = new Dictionary<string, IDef>
     {
-        { "TinyTest", TinyTestMapSpace }
+        { "TinyTest", TinyTestMapSpace },
+        { "LargerTest", LargerTestMapSpace}
     };
 }

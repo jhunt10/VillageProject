@@ -142,13 +142,13 @@ public static class PathFinder
     private static float CalcToTargetCost(IMapSpace mapSpace, MapSpot currentSpot, MapSpot target)
     {
         // For now just a distance calculation
-        return 0f;
+        // return 0f;
         // MathF.Abs(currentSpot.X - target.X) +
             //MathF.Abs(currentSpot.Y - target.Y) +
             //MathF.Abs(currentSpot.Z - target.Z);
-        //return MathF.Sqrt(MathF.Pow(currentPos.x - targetPos.x, 2f)
-        //        + MathF.Pow(currentPos.y - targetPos.y, 2f)
-        //        + MathF.Pow(currentPos.z - targetPos.z, 2f));
+        return MathF.Sqrt(MathF.Pow(currentSpot.X - target.X, 2f)
+                + MathF.Pow(currentSpot.Y - target.Y, 2f)
+                + MathF.Pow(currentSpot.Z - target.Z, 2f));
     }
 
     private static float CalcSpotQuality(IMapSpace mapSpace, MapSpot newSpot)

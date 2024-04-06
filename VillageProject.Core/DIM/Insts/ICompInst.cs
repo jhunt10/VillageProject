@@ -4,6 +4,7 @@ namespace VillageProject.Core.DIM.Insts;
 
 public interface ICompInst
 {
+    public bool Active { get; }
     public string CompKey { get; }
     IInst Instance { get; } 
     ICompDef CompDef { get; }
@@ -15,5 +16,9 @@ public interface ICompInst
     /// Called when Instance is deleted
     /// </summary>
     void OnDeleteInst();
-    void Update();
+    void Update(float delta);
+
+    void Deactivate();
+
+    void Activate();
 }

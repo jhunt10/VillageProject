@@ -31,6 +31,7 @@ public class MapSpaceCompInst : BaseCompInst, IMapSpace
         MinZ = compDef.MinZ;
         MaxZ = compDef.MaxZ;
         _buildCellMatrix(MaxX, MinX, MaxY, MinY, MaxZ, MinZ);
+        Active = true;
     }
     
     public override DataDict? BuildSaveData()
@@ -168,7 +169,7 @@ public class MapSpaceCompInst : BaseCompInst, IMapSpace
                     continue;
                 }
 
-                foreach (var comp in inst.GetComponentsOfType<TComp>())
+                foreach (var comp in inst.ListComponentsOfType<TComp>())
                 {
                     yield return comp;
                 }
@@ -202,7 +203,7 @@ public class MapSpaceCompInst : BaseCompInst, IMapSpace
             _inst_to_spots[inst.Id].Add(spot);
         }
 
-        Console.WriteLine($"Added Inst {inst._DebugId} to spot [{string.Join(", ", spots.Select(x => x.ToString()))}].");
+        // Console.WriteLine($"Added Inst {inst._DebugId} to spot [{string.Join(", ", spots.Select(x => x.ToString()))}].");
         Instance.FlagWatchedChange(this);
         return new Result(true);
     }

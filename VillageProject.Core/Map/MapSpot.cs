@@ -54,6 +54,13 @@ public struct MapSpot
             X = x; Y = y; Z = z;
         }
     }
+
+    public float DistanceToSpot(MapSpot otherSpot)
+    {
+        return Math.Abs(this.X - otherSpot.X) +
+               Math.Abs(this.Y - otherSpot.Y) +
+               Math.Abs(this.Z - otherSpot.Z);
+    }
     
     // AdjacencyToSpot doesn't make sense because one AdjacencyFlags contains references to multiple spots
     // public MapSpot AdjacencyToSpot(AdjacencyFlags flags, RotationFlag rotationFlag = RotationFlag.North)

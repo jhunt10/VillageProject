@@ -1,4 +1,5 @@
-﻿using VillageProject.Core.DIM.Insts;
+﻿using System.Numerics;
+using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Map.MapSpaces;
 
@@ -70,6 +71,40 @@ public static class PathHelper
         }
 
         return false;
+    }
+
+    public static Vector3 GetPositionBetweenSpot(MapSpot currentSpot, MapSpot nextSpot, float percent)
+    {
+        var xChange = nextSpot.X - currentSpot.X;
+        var yChange = nextSpot.Y - currentSpot.Y;
+        return new Vector3(xChange * percent, yChange * percent, 0);
+
+    }
+
+    public static RotationFlag NextSpotToFacingRotation(MapSpot currentSpot, MapSpot nextSpot)
+    {
+        var xChange = nextSpot.X - currentSpot.X;
+        var yChange = nextSpot.Y - currentSpot.Y;
+        
+        
+        // Prioritize: South > East/West > North
+        
+        // Moving more vertical
+        if (Math.Abs(yChange) >= Math.Abs(xChange) && yChange < 0)
+        { 
+            return RotationFlag.South;
+        }
+        else if(Math.Abs(yChange) > Math.Abs(xChange))
+        {
+            if (yChange < 0)
+                return RotationFlag.South;
+            return RotationFlag.North;
+        }
+        // Moving more horizontal
+        if (xChange > 0)
+            return RotationFlag.East;
+        else
+            return RotationFlag.West;
     }
 
 

@@ -55,7 +55,7 @@ public static class PathFinder
                 // If already in que, skip
                 if (willCheck.Any(x => x.Spot == adjcentSpot))
                     continue;
-
+                // Console.WriteLine($"Checking Path Spot: {adjcentSpot}");
                 var moveToCost = CalcMoveToCost(mapSpace, checkingNode, adjcentSpot);
                 var toTargetCost = float.MaxValue;
                 foreach(var target in targetSpots)
@@ -109,7 +109,7 @@ public static class PathFinder
             }
 
         if (!beenChecked.Any(x => targetSpots.Contains(x.Key)))
-            return null;
+            return new MapPath(null);
 
         var endNode = beenChecked.First(x => targetSpots.Contains(x.Key)).Value;
         foreach(var targSpot in targetSpots)

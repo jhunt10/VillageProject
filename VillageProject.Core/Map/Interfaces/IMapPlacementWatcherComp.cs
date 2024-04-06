@@ -9,5 +9,5 @@ namespace VillageProject.Core.Map;
 /// </summary>
 public interface IMapPlacementWatcherComp : ICompInst
 {
-    public void MapPositionSet(IMapSpace mapSpaceCompInst, MapSpot mapSpot, RotationFlag rotation);
+    public void MapPositionSet(MapPositionData? mapPos);
 }

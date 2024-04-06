@@ -137,8 +137,9 @@ public partial class MapNode : Node2D, IInstNode
 		// var mouseOverSpot = GetMouseOverMapSpot();
 		// if(mouseOverSpot.HasValue)
 		// 	var mouseOverPos = MapSpotToWorldPos(mouseOverSpot.Value);
-		if (Inst.GetWatchedChange(_MAP_NODE_WATCHER_KEY))
-		{
+		var changed = Inst.GetWatchedChange(_MAP_NODE_WATCHER_KEY);
+		if (changed)
+		{ 
 			_ResyncMap();
 		}
 	}

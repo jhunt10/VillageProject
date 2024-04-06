@@ -36,8 +36,7 @@ public abstract class GenericCompDef<TCompInst, TManager> : BaseCompDef
                     _compKey = CompDefClassName;
                 else
                 {
-                    _compKey = ParentDef.DefName + DimMaster.PATH_SEPERATOR 
-                            + CompDefClassName.Split('.').Last(); 
+                    _compKey = CompDefClassName.Split('.').Last(); 
                 }
             }
 

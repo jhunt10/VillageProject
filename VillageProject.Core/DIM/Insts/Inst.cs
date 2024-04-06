@@ -8,7 +8,7 @@ public class Inst : IInst
     public string Id { get; }
     public IDef Def { get; }
 
-    public List<ICompInst> Components { get; }
+    private Dictionary<string, ICompInst> Components { get; }
     
 
     private bool _IsDeleted = false;
@@ -20,53 +20,57 @@ public class Inst : IInst
     {
         Id = Guid.NewGuid().ToString();
         Def = def;
-        Components = new List<ICompInst>();
+        Components = new Dictionary<string, ICompInst>();
     }
     public Inst(string id, IDef def)
     {
         Id = id;
         Def = def;
-        Components = new List<ICompInst>();
+        Components = new Dictionary<string, ICompInst>();
     }
 
     public void AddComponent(ICompInst comp)
     {
-        var conflict = GetComponentWithKey<ICompInst>(comp.CompDef.CompKey);
-        if (conflict != null)
+        if(Components.ContainsKey(comp.CompKey))
             throw new Exception($"Duplicate CompKeys: {comp.CompDef.CompKey}");
-        Components.Add(comp);
+        Components.Add(comp.CompKey, comp);
     }
 
-    public TComp GetComponentWithKey<TComp>(string key)
+    public TComp GetComponentWithKey<TComp>(string key, bool errorIfNull = false)
     {
-        foreach (var comp in Components)
+        if (Components.ContainsKey(key))
         {
-            if (comp.CompDef.CompKey == key)
-            {
-                if (comp is TComp)
-                    return (TComp)comp;
-                else
-                {
-                    throw new Exception($"Component '{key}' is not of type {typeof(TComp).FullName}.");
-                }
-            }
+            var comp = Components[key];
+            if (comp is TComp)
+                return (TComp)comp;
+            else if (errorIfNull)
+                throw new Exception($"Component '{key}' is not of type {typeof(TComp).FullName}.");
         }
+        if(errorIfNull)
+            throw new Exception($"No Component found with key '{key}'.");
+            
         return default(TComp);
     }
     
-    public IEnumerable<TComp> GetComponentsOfType<TComp>()
+    public IEnumerable<TComp> ListComponentsOfType<TComp>(bool activeOnly = true)
     {
-        foreach (var comp in Components)
+        foreach (var comp in Components.Values)
         {
+            if(activeOnly && !comp.Active)
+                continue;
+            
             if (comp is TComp)
                 yield return (TComp)comp;
         }
     }
     
-    public TComp? GetComponentOfType<TComp>(bool errorIfNull = false)
+    public TComp? GetComponentOfType<TComp>(bool activeOnly = true, bool errorIfNull = false)
     {
-        foreach (var comp in Components)
+        foreach (var comp in Components.Values)
         {
+            if(activeOnly && !comp.Active)
+                continue;
+
             if (comp is TComp)
                 return (TComp)comp;
         }
@@ -80,15 +84,24 @@ public class Inst : IInst
     public DataDict BuildSaveData()
     {
         var data = new DataDict(Id);
-        foreach (var comp in Components)
+        foreach (var compPair in Components)
         {
-            var compData = comp.BuildSaveData();
+            var compData = compPair.Value.BuildSaveData();
             if(compData != null)
-                data.AddData(comp.CompDef.CompKey, compData);
+                data.AddData(compPair.Key, compData);
         }
         return data;
     }
 
+    public void Update(float delta)
+    {
+        foreach (var comp in Components.Values)
+        {
+            if(comp.Active)
+                comp.Update(delta);
+        }
+    }
+    
     public void Delete()
     {
         // If we aren't already in the process of being deleted, 
@@ -100,7 +113,7 @@ public class Inst : IInst
             return;
         }
         
-        foreach (var comp in Components)
+        foreach (var comp in Components.Values)
         {
             comp.OnDeleteInst();
         }
@@ -109,7 +122,7 @@ public class Inst : IInst
     public void AddComponentWatcher<TComp>(string key, bool initiallyDirty = true)
         where TComp : ICompInst
     {
-        foreach (var comp in GetComponentsOfType<TComp>())
+        foreach (var comp in ListComponentsOfType<TComp>(activeOnly:false))
         {
             if(!_watchedComps.ContainsKey(comp.CompKey))
                 _watchedComps.Add(comp.CompKey, new Dictionary<string, bool>());

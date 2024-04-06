@@ -14,8 +14,13 @@ public abstract class BaseManager : IManager
         var type = DimMaster.GetTypeByName(compDef.CompInstClassName);
         if(type == null)
             throw new Exception($"Failed to find CompInst type '{compDef.CompInstClassName}'.");
-        
-        var compInst = Activator.CreateInstance(type, new object[] {compDef, newInst});
+
+        var argsList = new List<object>();
+        argsList.Add(compDef);
+        argsList.Add(newInst);
+        if(args != null)
+            argsList.Add(args);
+        var compInst = Activator.CreateInstance(type, argsList.ToArray());
         if (compInst == null)
             throw new Exception($"Failed to instantiate Manager of type '{type.FullName}'.");
 

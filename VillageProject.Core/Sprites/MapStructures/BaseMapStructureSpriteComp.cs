@@ -14,8 +14,10 @@ public abstract class BaseMapStructureSpriteComp : BaseSpriteComp, IMapPlacement
         
     }
 
-    public void MapPositionSet(IMapSpace mapSpaceCompInst, MapSpot mapSpot, RotationFlag rotation)
+    public void MapPositionSet(MapPositionData? mapPos)
     {
+        if (mapPos.HasValue)
+            this.Active = true;
         DirtySprite();
     }
     

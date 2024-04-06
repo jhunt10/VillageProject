@@ -2,11 +2,13 @@
 
 namespace VillageProject.Core.DIM.Insts;
 
-public class BaseCompInst : ICompInst
+public abstract class BaseCompInst : ICompInst
 {
     public string CompKey => CompDef.CompKey;
     public ICompDef CompDef { get; }
     public IInst Instance { get; }
+    
+    public bool Active { get; protected set; }
 
     public BaseCompInst(ICompDef def, IInst inst)
     {
@@ -39,8 +41,28 @@ public class BaseCompInst : ICompInst
         
     }
 
-    public virtual void Update()
+    public virtual void Update(float delta)
     {
         
     }
+
+    protected virtual void _OnDeactivate() {}
+    public void Deactivate()
+    {
+        if(!this.Active)
+            return;
+        this.Active = false;
+        _OnDeactivate();
+    }
+
+    protected virtual void _OnActivate() {}
+    public void Activate()
+    {
+        if(this.Active)
+            return;
+        this.Active = true;
+        _OnActivate();
+    }
+
+    
 }

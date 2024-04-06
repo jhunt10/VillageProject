@@ -11,6 +11,6 @@ public class TerrainCompInst : BaseCompInst
 
     public TerrainCompInst(ICompDef def, IInst inst) : base(def, inst)
     {
-        
+        Active = true;
     }
 }

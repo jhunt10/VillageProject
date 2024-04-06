@@ -31,10 +31,11 @@ public static class MapDefs
         {
             new MapSpaceCompDef
             {
-                MaxX = 20,
-                MinX = -20,
-                MaxY = 20,
-                MinY = -20,
+                
+                MaxX = 8,
+                MinX = -8,
+                MaxY = 8,
+                MinY = -8,
                 MaxZ = 1,
                 MinZ = -1
             }

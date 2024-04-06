@@ -28,16 +28,17 @@ public partial class ConstructablePreview : Sprite2D
 	public override void _Process(double delta)
 	{
 		var spot = GameMaster.MapControllerNode?.GetMouseOverMapSpot();
-		// var node = GameMaster.MapControllerNode?.GetMouseOverCell();;
 		if (spot == null || spot == _currentSpot)
 			return;
 		
-		// this.Position = Vector2.Zero;
-		// if (this.GetParent() != null)
-		// 	this.Reparent(node, false);
-		// else
-		// 	node.AddChild(this);
-		_currentSpot = spot.Value;
+		_currentSpot = spot.Value + new MapSpot(0,0,1);
+		var mapNode = GameMaster.MapControllerNode.GetMouseOverMapNode();
+		var node = mapNode?.GetMapCellNodeAtSpot(_currentSpot) ?? null;
+		this.Position = Vector2.Zero;
+		if (this.GetParent() != null)
+			this.Reparent(node, false);
+		else
+			node.AddChild(this);
 		UpdateSprite();
 	}
 	
@@ -105,7 +106,7 @@ public partial class ConstructablePreview : Sprite2D
 			var res = DimMaster.GetManager<MapManager>()
 				.CouldPlaceDefOnMapSpace(mapNode.MapSpace, _constructableDef, _currentSpot, realRot);
 			canPlace = res.Success;
-			message = res.Message;
+			message = res.Message + " | " + _currentSpot.ToString();
 
 		}
 		if (canPlace)

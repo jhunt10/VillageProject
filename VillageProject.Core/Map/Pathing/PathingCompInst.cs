@@ -9,10 +9,8 @@ public class PathingCompInst : BaseCompInst, ICompInst, IMapPlacementWatcherComp
 {
     private Dictionary<MapSpot, PathSpotDef> _relativePathSpotDefs { get; set; }
         = new Dictionary<MapSpot, PathSpotDef>();
-    
-    private string _cachedMapSpaceId { get; set; }
-    private MapSpot? _cachedMapSpot { get; set; }
-    private RotationFlag _cachedRotation { get; set; }
+
+    private MapPositionData? _cachedPos;
     
     public PathingCompInst(ICompDef def, IInst inst) : base(def, inst)
     {
@@ -47,29 +45,32 @@ public class PathingCompInst : BaseCompInst, ICompInst, IMapPlacementWatcherComp
         return CellSideFlags.None;
     }
 
-    public void MapPositionSet(IMapSpace mapSpaceCompInst, MapSpot mapSpot, RotationFlag rotation)
+    public void MapPositionSet(MapPositionData? mapPos)
     {
         var pathingCompDef = (PathingCompDef)CompDef;
-        if(mapSpaceCompInst.MapSpaceId == _cachedMapSpaceId 
-           && mapSpot == _cachedMapSpot 
-           && rotation == _cachedRotation)
+        if(_cachedPos == mapPos)
             return;
 
-        _cachedMapSpaceId = mapSpaceCompInst.MapSpaceId;
-        _cachedMapSpot = mapSpot;
-        _cachedRotation = rotation;
-        
         _relativePathSpotDefs.Clear();
+        _cachedPos = mapPos;
+
+        if (!_cachedPos.HasValue)
+        {
+            Active = false;
+            return;
+        }
+        Active = true;
+        var pos = _cachedPos.Value;
         foreach (var pathSpotPair in pathingCompDef.PathSpotDefs)
         {
-            var relativeSpot = pathSpotPair.Key.RotateSpot(rotation) + mapSpot;
+            var relativeSpot = pathSpotPair.Key.RotateSpot(pos.Rotation) + pos.MapSpot;
             var relativePathSpot = new PathSpotDef
             {
                 PathOverCost = pathSpotPair.Value.PathOverCost,
                 BlocksPathThrough = pathSpotPair.Value.BlocksPathThrough
-                    .Rotate(rotation.GetRotationDirection(RotationFlag.North)),
+                    .Rotate(pos.Rotation.GetRotationDirection(RotationFlag.North)),
                 SupportsPathOver = pathSpotPair.Value.SupportsPathOver
-                    .Rotate(rotation.GetRotationDirection(RotationFlag.North))
+                    .Rotate(pos.Rotation.GetRotationDirection(RotationFlag.North))
             };
             _relativePathSpotDefs.Add(relativeSpot, relativePathSpot);
         }

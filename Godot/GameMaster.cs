@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using VillageProject.Core.Behavior;
 using VillageProject.Core.DIM;
 using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.DIM.Insts;
@@ -27,7 +28,24 @@ public partial class GameMaster : Node2D, IInstWatcher
 	public TextureButton LoadButton;
 	public TextureButton ClearButton;
 
+	private bool doneTest = false;
 
+	private void DoTest()
+	{
+		var actorDefName = BehaviorDefs.TestActor.DefName;
+		var actorDef = DimMaster.GetDefByName(actorDefName);
+		var actorInst = DimMaster.InstantiateDef(actorDef);
+		
+		// var wanderDefName = BehaviorDefs.WanderBehaviorDef.DefName;
+		// var wanderDef = DimMaster.GetDefByName(wanderDefName);
+		// var behaviorManager = DimMaster.GetManager<BehaviorManager>();
+		// var wanderBehavior = behaviorManager.InstantiateBehavior(wanderDef, actorInst);
+		actorInst.GetComponentOfType<ActorCompInst>()?.SetMapPosition(
+			new MapPositionData(MapControllerNode.GetMainMapNode().MapSpace,
+			new MapSpot(0,0,1), RotationFlag.South));
+
+		var t = true;
+	}
 	
 	public override void _EnterTree()
 	{
@@ -65,6 +83,12 @@ public partial class GameMaster : Node2D, IInstWatcher
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
+		if (!doneTest)
+		{
+			DoTest();
+			doneTest = true;
+		}
+		DimMaster.UpdateGameState((float)delta);
 	}
 
 	public void SaveGame()
@@ -101,12 +125,24 @@ public partial class GameMaster : Node2D, IInstWatcher
 			}
 		}
 		
-		var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(errorIfNull:false);
+		var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(activeOnly:false, errorIfNull:false);
 		if (mapStructComp != null)
 		{
 			if (MapControllerNode != null)
 			{
 				var newNode = MapControllerNode.CreateNewMapStructureNode(inst);
+				if(newNode != null)
+					InstNodes.Add(inst.Id, newNode);
+				
+			}
+		}
+		
+		var actorComp = inst.GetComponentOfType<ActorCompInst>(errorIfNull:false);
+		if (actorComp != null)
+		{
+			if (MapControllerNode != null)
+			{
+				var newNode = MapControllerNode.CreateNewActorNode(inst);
 				if(newNode != null)
 					InstNodes.Add(inst.Id, newNode);
 				
@@ -133,7 +169,7 @@ public partial class GameMaster : Node2D, IInstWatcher
 			}
 		}
 		
-		var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(errorIfNull:false);
+		var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(activeOnly:false, errorIfNull:false);
 		if (mapStructComp != null)
 		{
 			if (MapControllerNode != null)

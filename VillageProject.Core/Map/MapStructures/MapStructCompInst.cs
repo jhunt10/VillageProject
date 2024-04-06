@@ -54,11 +54,11 @@ public class MapStructCompInst : BaseCompInst
 
     private void NotifyWatchers()
     {
-        var watchers = Instance.GetComponentsOfType<IMapPlacementWatcherComp>();
+        var watchers = Instance.ListComponentsOfType<IMapPlacementWatcherComp>(activeOnly:false);
         foreach (var watcherComp in watchers)
         {
             var mapSpace = DimMaster.GetManager<MapManager>().GetMapSpaceById(MapSpaceId);
-            watcherComp.MapPositionSet(mapSpace, MapSpot.Value, Rotation);
+            watcherComp.MapPositionSet(new MapPositionData(mapSpace, MapSpot.Value, Rotation));
         }
     }
 
@@ -77,7 +77,8 @@ public class MapStructCompInst : BaseCompInst
                     $"MapStruct {Instance.Def.DefName}:{Instance.Id} was not added to MapSpace correctly");
             }
         }
-
+        
+        Active = true;
         MapSpaceId = mapSpace.MapSpaceId;
         MapSpot = spot;
         Rotation = rotation;

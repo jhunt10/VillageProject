@@ -64,6 +64,14 @@ public class DimMaster
         ClearGameState();
         _saveLoader.LoadGameState(saveName);
     }
+
+    public static void UpdateGameState(float delta)
+    {
+        foreach (var inst in _insts.Values.ToList())
+        {
+            inst.Update(delta);
+        }
+    }
     
     #region Defs
 
@@ -232,8 +240,7 @@ public class DimMaster
             var manager = GetManagerByName(managerName);
             var compSaveData = saveData.GetValueAs<DataDict>(compDef.CompKey, errorIfMissing: false);
             var compInst = manager.LoadSavedCompInst(compDef, inst, compSaveData);
-            if(!inst.Components.Contains(compInst))
-                inst.AddComponent(compInst);
+            inst.AddComponent(compInst);
         }
         _insts.Add(inst.Id, inst);
         foreach (var watcher in _instWatchers)

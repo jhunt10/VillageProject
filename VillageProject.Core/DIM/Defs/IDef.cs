@@ -10,9 +10,9 @@ public interface IDef
     
     public List<ICompDef> CompDefs { get; }
     
-    TComp? GetComponentWithKey<TComp>(string key);
+    TComp? GetComponentDefWithKey<TComp>(string key);
     
     TComp? GetComponentDefOfType<TComp>(bool errorIfNull = false);
     
-    IEnumerable<TComp> GetComponentsOfType<TComp>();
+    IEnumerable<TComp> ListComponentDefsOfType<TComp>();
 }

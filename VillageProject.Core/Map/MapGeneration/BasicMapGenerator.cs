@@ -9,9 +9,9 @@ public static class BasicMapGenerator
 {
     public static IMapSpace GenerateTestMap()
     {
-        var def = DimMaster.GetDefByName("Defs.MapSpaces.Testing.LargerTest");
+        var def = DimMaster.GetDefByName("Defs.MapSpaces.Testing.TinyTest");
         var mapInst = DimMaster.InstantiateDef(def);
-        var mapSpace = mapInst.GetComponentOfType<MapSpaceCompInst>();
+        var mapSpace = mapInst.GetComponentOfType<MapSpaceCompInst>(activeOnly:false);
         var mapManager = DimMaster.GetManager<MapManager>();
         var terrainManager = DimMaster.GetManager<TerrainManager>();
         var terrains = terrainManager._terrainInsts.Values.Select(x => x.Def).ToList();
@@ -24,7 +24,10 @@ public static class BasicMapGenerator
                 index = 1;
             var terrainDef = terrains[index];
             var terrainInst = DimMaster.InstantiateDef(terrainDef);
-            for (int z = mapSpace.MinZ; z <= 0; z++)
+            var maxZ = 0;
+            if (Math.Abs(x) > 4 || Math.Abs(y) > 4)
+                maxZ += 1;
+            for (int z = mapSpace.MinZ; z <= maxZ; z++)
             {
                 var res = mapManager.TryPlaceInstOnMapSpace(
                     mapSpace, terrainInst, new MapSpot(x, y, z),

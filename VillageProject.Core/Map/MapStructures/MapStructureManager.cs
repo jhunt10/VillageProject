@@ -33,7 +33,7 @@ public class MapStructureManager : BaseManager, IMapPlacementValidator
         if (mapStructCompDef == null)
             return new Result(true);
         
-        Console.WriteLine($"CouldPlaceDefOnMapSpace: Checking Occupation");
+        // Console.WriteLine($"CouldPlaceDefOnMapSpace: Checking Occupation");
         var occupation = new OccupationData(mapStructCompDef.OccupationData.OccupationDict, anchorSpot, rotation);
         foreach (var occSpot in occupation.ListOccupiedSpots())
         {
@@ -43,7 +43,7 @@ public class MapStructureManager : BaseManager, IMapPlacementValidator
             foreach (var existingOcc in AggregateOccupationAtSpot(mapSpace, occSpot))
             foreach (var newOcc in occupation.ListOccupationAtSpot(occSpot))
             {
-                Console.WriteLine($"CouldPlaceDefOnMapSpace: {occSpot} [{newOcc}] [{existingOcc}]");
+                // Console.WriteLine($"CouldPlaceDefOnMapSpace: {occSpot} [{newOcc}] [{existingOcc}]");
                 if (newOcc.OverlapsFlags(existingOcc))
                     return new Result(false, "Occupation Collision");
             }
@@ -53,7 +53,7 @@ public class MapStructureManager : BaseManager, IMapPlacementValidator
 
     Result IMapPlacementValidator.CanPlaceInstOnMapSpace(IMapSpace mapSpace, IInst inst, MapSpot anchorSpot, RotationFlag rotation, object args)
     {
-        var mapStrutCompInst = inst.GetComponentOfType<MapStructCompInst>();
+        var mapStrutCompInst = inst.GetComponentOfType<MapStructCompInst>(activeOnly:false);
         if (mapStrutCompInst == null)
             return new Result(true);
         return CouldPlaceDefOnMapSpace(mapSpace, inst.Def, anchorSpot, rotation, args);
@@ -61,7 +61,7 @@ public class MapStructureManager : BaseManager, IMapPlacementValidator
 
     Result IMapPlacementValidator.TryPlaceInstOnMapSpace(IMapSpace mapSpace, IInst inst, MapSpot anchorSpot, RotationFlag rotation, object args)
     {
-        var mapStrutCompInst = inst.GetComponentOfType<MapStructCompInst>();
+        var mapStrutCompInst = inst.GetComponentOfType<MapStructCompInst>(activeOnly:false);
         if (mapStrutCompInst == null)
             return new Result(true);
 

@@ -30,7 +30,7 @@ public class Def : IDef
     [JsonPropertyName("CompDefs")]
     public List<ICompDef> CompDefs { get; set; }
 
-    public TComp GetComponentWithKey<TComp>(string key)
+    public TComp GetComponentDefWithKey<TComp>(string key)
     {
         foreach (var comp in CompDefs)
         {
@@ -47,7 +47,7 @@ public class Def : IDef
         return default(TComp);
     }
     
-    public IEnumerable<TComp> GetComponentsOfType<TComp>()
+    public IEnumerable<TComp> ListComponentDefsOfType<TComp>()
     {
         foreach (var comp in CompDefs)
         {

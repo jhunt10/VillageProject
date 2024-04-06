@@ -151,9 +151,11 @@ public partial class MainCamera : Camera2D
 
 	public void MouseClickedSpot(IMapSpace mapSpace, MapSpot spot)
 	{
-		var pathNode = GameMaster.PathDisplayNode;
-		var start = new MapSpot(0, 0, spot.Z);
-		Console.WriteLine($"MainCamera Testing Path: {start} to {spot}");
-		pathNode.DisplayPath(mapSpace, start, spot);
+		// var pathNode = GameMaster.PathDisplayNode;
+		// var start = new MapSpot(0, 0, 1);
+		// var time = DateTime.Now;
+		// Console.WriteLine($"MainCamera Testing Path: {start} to {spot} | {time}");
+		// pathNode.DisplayPath(mapSpace, start, spot);
+		// Console.WriteLine($"MainCamera Testing Path: Done : {DateTime.Now} {time - DateTime.Now}");
 	}
 }

@@ -135,7 +135,7 @@ public class MapStructureDefs
             },
             new ConstructableCompDef()
             {
-                IconSprite  = new SpriteDataDef("BrickWallNorth.png", 64, 64, 0, 0),
+                IconSprite  = new SpriteDataDef("BrickWallIcon.png", 64, 64, 0, 0),
                 DefaultSprite = new SpriteDataDef("BrickWallNorth.png", 32, 72, 0, 0),
                 RotationSprites = new Dictionary<RotationFlag, SpriteDataDef>
                 {

@@ -56,8 +56,7 @@ public class MapManager : BaseManager
     public override void OnInstDelete(IInst inst)
     {
         base.OnInstDelete(inst);
-        var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(errorIfNull:false);
-        if (mapStructComp != null)
+        foreach(var mapStructComp in inst.ListComponentsOfType<MapStructCompInst>())
         {
             if (!string.IsNullOrEmpty(mapStructComp.MapSpaceId) && _mapSpaces.ContainsKey(mapStructComp.MapSpaceId))
             {
@@ -75,7 +74,7 @@ public class MapManager : BaseManager
         RotationFlag rotation, 
         Dictionary<string, object>? args = null)
     {
-        Console.WriteLine($"CouldPlaceDefOnMapSpace: {anchorSpot} {rotation}");
+        // Console.WriteLine($"CouldPlaceDefOnMapSpace: {anchorSpot} {rotation}");
         var compArgs = args;
         if (compArgs == null)
             compArgs = new Dictionary<string, object>();

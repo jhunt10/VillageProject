@@ -2,45 +2,38 @@
 
 namespace VillageProject.Core.DIM.Insts;
 
-public class Inst : IInst
+public abstract class BaseInst : IInst
 {
+    protected Dictionary<string, Dictionary<string, bool>> _watchedComps =
+        new Dictionary<string, Dictionary<string, bool>>();
+
+    protected Dictionary<string, ICompInst> _components = 
+        new Dictionary<string, ICompInst>();
+
+    private bool _beingDeleted;
+    
     public string _DebugId => (Def?.Label ?? "NoDef") + ":" + Id;
     public string Id { get; }
     public IDef Def { get; }
-
-    private Dictionary<string, ICompInst> Components { get; }
     
-
-    private bool _IsDeleted = false;
-
-    private Dictionary<string, Dictionary<string, bool>> _watchedComps =
-        new Dictionary<string, Dictionary<string, bool>>();
-
-    public Inst(IDef def)
+    public BaseInst(IDef def)
     {
         Id = Guid.NewGuid().ToString();
         Def = def;
-        Components = new Dictionary<string, ICompInst>();
     }
-    public Inst(string id, IDef def)
+    
+    public BaseInst(IDef def, string id)
     {
         Id = id;
         Def = def;
-        Components = new Dictionary<string, ICompInst>();
     }
 
-    public void AddComponent(ICompInst comp)
+    #region ------Component Access------
+    public virtual TComp? GetComponentWithKey<TComp>(string key, bool errorIfNull = false)
     {
-        if(Components.ContainsKey(comp.CompKey))
-            throw new Exception($"Duplicate CompKeys: {comp.CompDef.CompKey}");
-        Components.Add(comp.CompKey, comp);
-    }
-
-    public TComp GetComponentWithKey<TComp>(string key, bool errorIfNull = false)
-    {
-        if (Components.ContainsKey(key))
+        if (_components.ContainsKey(key))
         {
-            var comp = Components[key];
+            var comp = _components[key];
             if (comp is TComp)
                 return (TComp)comp;
             else if (errorIfNull)
@@ -52,9 +45,9 @@ public class Inst : IInst
         return default(TComp);
     }
     
-    public IEnumerable<TComp> ListComponentsOfType<TComp>(bool activeOnly = true)
+    public virtual IEnumerable<TComp> ListComponentsOfType<TComp>(bool activeOnly = true)
     {
-        foreach (var comp in Components.Values)
+        foreach (var comp in _components.Values)
         {
             if(activeOnly && !comp.Active)
                 continue;
@@ -64,9 +57,9 @@ public class Inst : IInst
         }
     }
     
-    public TComp? GetComponentOfType<TComp>(bool activeOnly = true, bool errorIfNull = false)
+    public virtual TComp? GetComponentOfType<TComp>(bool activeOnly = true, bool errorIfNull = false)
     {
-        foreach (var comp in Components.Values)
+        foreach (var comp in _components.Values)
         {
             if(activeOnly && !comp.Active)
                 continue;
@@ -80,44 +73,29 @@ public class Inst : IInst
                 $"Failed to find Component of type '{typeof(TComp).FullName}' on Inst '{Def.DefName}:{Id}'.");
         return default(TComp);
     }
+    #endregion
 
-    public DataDict BuildSaveData()
-    {
-        var data = new DataDict(Id);
-        foreach (var compPair in Components)
-        {
-            var compData = compPair.Value.BuildSaveData();
-            if(compData != null)
-                data.AddData(compPair.Key, compData);
-        }
-        return data;
-    }
 
-    public void Update(float delta)
-    {
-        foreach (var comp in Components.Values)
-        {
-            if(comp.Active)
-                comp.Update(delta);
-        }
-    }
-    
+    public abstract DataDict BuildSaveData();
+    public abstract void LoadSavedData(DataDict dataDict);
+
+    public abstract void Update(float delta);
+
     public void Delete()
     {
         // If we aren't already in the process of being deleted, 
         //      mark as deleted and pass over to DimMaster
-        if (!_IsDeleted)
+        if (!_beingDeleted)
         {
-            _IsDeleted = true;
+            _beingDeleted = true;
             DimMaster.DeleteInst(this);
             return;
         }
-        
-        foreach (var comp in Components.Values)
-        {
-            comp.OnDeleteInst();
-        }
+
+        _Delete();
     }
+
+    public abstract void _Delete();
 
     public void AddComponentWatcher<TComp>(string key, bool initiallyDirty = true)
         where TComp : ICompInst

@@ -6,11 +6,15 @@ public class DataDict
 {
     public string Id { get; set; }
     public Dictionary<string, object?> Data { get; set; }
+        = new Dictionary<string, object?>();
 
+    public DataDict()
+    {
+        Id = Guid.NewGuid().ToString();
+    }
     public DataDict(string id)
     {
         Id = id;
-        Data = new Dictionary<string, object?>();
     }
 
     public void AddData(string key, object? obj)
@@ -18,6 +22,11 @@ public class DataDict
         Data.Add(key, obj);
     }
 
+    public bool HasKey(string key)
+    {
+        return Data.ContainsKey(key);
+    }
+    
     public TVal? GetValueAs<TVal>(string key, bool errorIfMissing = true)
     {
         if (Data.ContainsKey(key))
@@ -25,8 +34,15 @@ public class DataDict
             var val = Data[key];
             try
             {
-                var jVal = (JsonElement)val;
-                return jVal.Deserialize<TVal>();
+                if (val is JsonElement)
+                {
+                    var jVal = (JsonElement)val;
+                    return jVal.Deserialize<TVal>();
+                }
+                else
+                {
+                    return (TVal)val;
+                }
             }
             catch (Exception e)
             {

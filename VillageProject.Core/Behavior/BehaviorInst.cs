@@ -12,7 +12,7 @@ public enum BehaviorState
     Finished = 3,
 }
 
-public abstract class BehaviorCompInst : BaseCompInst
+public abstract class BehaviorInst : BaseInst
 {
     private ActorCompInst _actor;
     private BehaviorState _curtState;
@@ -22,11 +22,15 @@ public abstract class BehaviorCompInst : BaseCompInst
     
     public string CurrentMessage { get; protected set; }
     
-    public BehaviorCompInst(ICompDef def, IInst inst, BehaviorCompArgs args) : base(def, inst)
+    
+    public BehaviorInst(IDef def, string id, DataDict data) : base(def, id)
     {
-        _curtState = BehaviorState.Queued;
-        _nextState = _curtState;
-        _actor = args.Actor;
+        var actorId = data.GetValueAs<string>("ActorId");
+        var actorInst = DimMaster.GetInstById(actorId);
+        var actorComp = actorInst?.GetComponentOfType<ActorCompInst>(activeOnly: false);
+        if (actorComp == null)
+            throw new Exception("Failed to find actor.");
+        _actor = actorComp;
     }
 
     public ActorCompInst GetActorComp()
@@ -42,7 +46,7 @@ public abstract class BehaviorCompInst : BaseCompInst
     }
 
     protected abstract BehaviorState OnUpdate(float ticks);
-    public void Update(float ticks)
+    public override void Update(float ticks)
     {
         if (_curtState == BehaviorState.Paused && _nextState != BehaviorState.Paused)
             _beenPaused = false;

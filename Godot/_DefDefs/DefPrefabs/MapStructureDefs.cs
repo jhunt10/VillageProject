@@ -12,7 +12,7 @@ namespace VillageProject.Godot.DefDefs.DefPrefabs;
 public class MapStructureDefs
 {
 
-    public static IDef Bed = new Def
+    public static IDef Bed = new ObjectDef
     {
         DefName = "Defs.MapStructures.Furniture.Bed",
         Label = "Bed",
@@ -72,7 +72,7 @@ public class MapStructureDefs
         }
     };
     
-    public static IDef FlowerBed = new Def
+    public static IDef FlowerBed = new ObjectDef
     {
         DefName = "Defs.MapStructures.Furniture.FlowerBed",
         Label = "FlowerBed",
@@ -113,7 +113,7 @@ public class MapStructureDefs
         }
     };
 
-    public static IDef BrickWall = new Def
+    public static IDef BrickWall = new ObjectDef
     {
         DefName = "Defs.MapStructures.Walls.BrickWall",
         Label = "BrickWall",

@@ -12,7 +12,7 @@ namespace VillageProject.Godot.DefDefs.DefPrefabs;
 
 public static class TerrainDefs
 {
-    public static IDef Dirt = new Def
+    public static IDef Dirt = new ObjectDef
     {
         DefName = "Defs.MapStructures.Terrain.Dirt",
         Label = "Dirt",
@@ -64,7 +64,7 @@ public static class TerrainDefs
         },
     };
     
-    public static IDef Stone = new Def
+    public static IDef Stone = new ObjectDef
     {
         DefName = "Defs.MapStructures.Terrain.Stone",
         Label = "Stone",

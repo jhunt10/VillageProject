@@ -1,10 +1,10 @@
 ﻿namespace VillageProject.Core.Behavior;
 
-public class BehaviorCompArgs
+public class BehaviorArgs
 {
     public ActorCompInst Actor { get; }
     
-    public BehaviorCompArgs(ActorCompInst actor)
+    public BehaviorArgs(ActorCompInst actor)
     {
         Actor = actor ?? throw new ArgumentNullException(nameof(actor));
     }

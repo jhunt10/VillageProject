@@ -5,7 +5,7 @@ namespace VillageProject.Godot.DefDefs.DefPrefabs;
 
 public static class MapDefs
 {
-    public static IDef TinyTestMapSpace = new Def
+    public static IDef TinyTestMapSpace = new ObjectDef
     {
         DefName = "Defs.MapSpaces.Testing.TinyTest",
         Label = "TinyTest",
@@ -23,7 +23,7 @@ public static class MapDefs
         }
     };
     
-    public static IDef LargerTestMapSpace = new Def
+    public static IDef LargerTestMapSpace = new ObjectDef
     {
         DefName = "Defs.MapSpaces.Testing.LargerTest",
         Label = "LargerTest",

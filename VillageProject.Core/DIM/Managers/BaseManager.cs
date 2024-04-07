@@ -9,6 +9,59 @@ public abstract class BaseManager : IManager
     {
         
     }
+    public virtual IInst CreateInst(IDef def, DataDict args)
+    {
+        if (!DimMaster.CheckCreatingInst(args.Id))
+        {
+            throw new Exception(
+                "Insts should not be created by directly calling a Manager. Use DimMaster.InstantiateDef instead.");
+        }
+        
+        var type = DimMaster.GetTypeByName(def.InstClassName);
+        if(type == null)
+            throw new Exception($"Failed to find Inst type '{def.InstClassName}'.");
+
+        var argsList = new List<object>();
+        argsList.Add(def);
+        argsList.Add(args.Id);
+        if(args != null)
+            argsList.Add(args);
+        var inst = Activator.CreateInstance(type, argsList.ToArray());
+        if (inst == null)
+            throw new Exception($"Failed to instantiate Inst of type '{type.FullName}'.");
+
+        var iInst = inst as IInst;
+        if (iInst == null)
+            throw new Exception($"Failed cast Inst of type '{type.FullName}' to IInst.");
+
+        return iInst;
+    }
+    
+    public virtual IInst LoadSavedInst(IDef def, DataDict dataDict)
+    {
+        if (!DimMaster.CheckCreatingInst(dataDict.Id))
+        {
+            throw new Exception(
+                "Insts should not be load by directly calling a Manager. Use DimMaster.LoadSavedInst instead.");
+        }
+        
+        var type = DimMaster.GetTypeByName(def.InstClassName);
+        if(type == null)
+            throw new Exception($"Failed to find Inst type '{def.InstClassName}'.");
+        
+        var inst = Activator.CreateInstance(type, new object[] {def, dataDict.Id});
+        if (inst == null)
+            throw new Exception($"Failed to instantiate Inst of type '{type.FullName}'.");
+
+        var iInst = inst as IInst;
+        if (iInst == null)
+            throw new Exception($"Failed cast Inst of type '{type.FullName}' to IInst.");
+
+        if(dataDict != null)
+            iInst.LoadSavedData(dataDict);
+        
+        return iInst;
+    }
     public virtual ICompInst CreateCompInst(ICompDef compDef, IInst newInst, object? args)
     {
         var type = DimMaster.GetTypeByName(compDef.CompInstClassName);
@@ -22,11 +75,11 @@ public abstract class BaseManager : IManager
             argsList.Add(args);
         var compInst = Activator.CreateInstance(type, argsList.ToArray());
         if (compInst == null)
-            throw new Exception($"Failed to instantiate Manager of type '{type.FullName}'.");
+            throw new Exception($"Failed to instantiate CompInst of type '{type.FullName}'.");
 
         var iCompInst = compInst as ICompInst;
         if (iCompInst == null)
-            throw new Exception($"Failed cast Manager of type '{type.FullName}' to IManager.");
+            throw new Exception($"Failed cast CompInst of type '{type.FullName}' to ICompInst.");
 
         return iCompInst;
     }
@@ -39,11 +92,11 @@ public abstract class BaseManager : IManager
         
         var compInst = Activator.CreateInstance(type, new object[] {compDef, newInst});
         if (compInst == null)
-            throw new Exception($"Failed to instantiate Manager of type '{type.FullName}'.");
+            throw new Exception($"Failed to instantiate CompInst of type '{type.FullName}'.");
 
         var iCompInst = compInst as ICompInst;
         if (iCompInst == null)
-            throw new Exception($"Failed cast Manager of type '{type.FullName}' to IManager.");
+            throw new Exception($"Failed cast CompInst of type '{type.FullName}' to ICompInst.");
 
         if(dataDict != null)
             iCompInst.LoadSavedData(dataDict);

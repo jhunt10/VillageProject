@@ -2,14 +2,23 @@
 
 namespace VillageProject.Core.DIM.Defs;
 
-public class Def : IDef
+public abstract class BaseDef : IDef
 {
-    [JsonPropertyName("DefName"), JsonPropertyOrder(-10)]
+    [JsonPropertyName("DefName"), JsonPropertyOrder(-11)]
     public string DefName { get; set; }
+    
+    [JsonPropertyName("CompDefClassName"), JsonPropertyOrder(-10)]
+    public abstract string DefClassName { get; }
+    
+    [JsonPropertyName("CompInstClassName"), JsonPropertyOrder(-9)]
+    public abstract string InstClassName { get; }
+    
+    [JsonPropertyName("ManagerClassName"), JsonPropertyOrder(-8)]
+    public abstract string ManagerClassName { get; }
     
     [JsonPropertyName("Label"), JsonPropertyOrder(-9)]
     private string? _label { get; set; }
-    public string Label
+    public virtual string Label
     {
         get
         {
@@ -26,10 +35,9 @@ public class Def : IDef
     
     [JsonIgnore]
     public string LoadPath { get; internal set; }
-    
-    [JsonPropertyName("CompDefs")]
-    public List<ICompDef> CompDefs { get; set; }
 
+    [JsonPropertyName("CompDefs")] 
+    public List<ICompDef> CompDefs { get; set; } = new List<ICompDef>();
     public TComp GetComponentDefWithKey<TComp>(string key)
     {
         foreach (var comp in CompDefs)

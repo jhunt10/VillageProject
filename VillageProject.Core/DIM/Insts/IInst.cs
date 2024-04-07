@@ -26,6 +26,7 @@ public interface IInst
     IEnumerable<TComp> ListComponentsOfType<TComp>(bool activeOnly = true);
     
     public DataDict BuildSaveData();
+    void LoadSavedData(DataDict dataDict);
 
     public void Update(float delta);
 

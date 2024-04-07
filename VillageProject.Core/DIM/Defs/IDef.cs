@@ -8,6 +8,12 @@ public interface IDef
     string Label { get; }
     string LoadPath { get; }
     
+    string DefClassName { get; }
+    
+    string InstClassName { get; }
+    
+    string ManagerClassName { get; }
+    
     public List<ICompDef> CompDefs { get; }
     
     TComp? GetComponentDefWithKey<TComp>(string key);

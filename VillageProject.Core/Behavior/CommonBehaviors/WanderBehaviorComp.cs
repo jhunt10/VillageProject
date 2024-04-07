@@ -7,16 +7,16 @@ using VillageProject.Core.Map.Pathing;
 
 namespace VillageProject.Core.Behavior.CommonBehaviors;
 
-public class WanderBehaviorCompDef : BehaviorCompDef<WanderBehaviorCompInst>
+public class WanderBehaviorDef : BehaviorDef<WanderBehaviorInst>
 {
         
 }
 
-public class WanderBehaviorCompInst : BehaviorCompInst
+public class WanderBehaviorInst : BehaviorInst
 {
     private MoveAlongPathTask? _task;
     
-    public WanderBehaviorCompInst(ICompDef def, IInst inst, BehaviorCompArgs args) : base(def, inst, args)
+    public WanderBehaviorInst(IDef def, string id, DataDict args) : base(def, id, args)
     {
     }
 
@@ -34,11 +34,11 @@ public class WanderBehaviorCompInst : BehaviorCompInst
         var z = curSpot.Z;
         x = Math.Min(mapSpace.MaxX, Math.Max(mapSpace.MinX, x));
         y = Math.Min(mapSpace.MaxY, Math.Max(mapSpace.MinY, y));
-        var path = PathFinder.FindPath(mapSpace, Instance, curSpot, new MapSpot(x, y, z), cacheSearchedCells: true);
+        var path = PathFinder.FindPath(mapSpace, actorComp.Instance, curSpot, new MapSpot(x, y, z), cacheSearchedCells: true);
         if (!path.Successful)
         {
             var realSpot = PathFinder.CachedSearchedCells.MaxBy(pair => pair.Key.DistanceToSpot(curSpot)).Value;
-            path = PathFinder.FindPath(mapSpace, Instance, curSpot, realSpot.Spot);
+            path = PathFinder.FindPath(mapSpace, actorComp.Instance, curSpot, realSpot.Spot);
         }
 
         _task = new MoveAlongPathTask(this, path);
@@ -70,6 +70,20 @@ public class WanderBehaviorCompInst : BehaviorCompInst
 
     protected override void OnFinish()
     {
-        
+    }
+
+    public override DataDict BuildSaveData()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void LoadSavedData(DataDict dataDict)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void _Delete()
+    {
+        throw new NotImplementedException();
     }
 }

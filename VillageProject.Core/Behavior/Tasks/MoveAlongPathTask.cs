@@ -6,14 +6,14 @@ namespace VillageProject.Core.Behavior.Tasks;
 
 public class MoveAlongPathTask : IBehaviorTask
 {
-    public BehaviorCompInst ParentBehavior { get; }
+    public BehaviorInst ParentBehavior { get; }
     private MapPath _path;
     private string _description;
     private float _subDistance;
     private MapSpot? _curtSpot;
     private MapSpot? _nextSpot;
     
-    public MoveAlongPathTask(BehaviorCompInst parentBehavior, MapPath path, string targetName = null)
+    public MoveAlongPathTask(BehaviorInst parentBehavior, MapPath path, string targetName = null)
     {
         _subDistance = 0;
         ParentBehavior = parentBehavior;

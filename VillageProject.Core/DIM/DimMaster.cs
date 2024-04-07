@@ -2,6 +2,7 @@
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.DIM.Insts;
@@ -117,9 +118,19 @@ public class DimMaster
     private static IDef _loadDefFromFile(string filePath)
     {
         var text = File.ReadAllText(filePath);
-        var def = JsonSerializer.Deserialize<Def>(text);
-        if (def == null)
+        
+        
+        var jsonObj = JsonNode.Parse(text);
+        var className = jsonObj[nameof(IDef.DefClassName)].ToString();
+        var type = GetTypeByName(className);
+        
+        var rawDef = JsonSerializer.Deserialize(text, type);
+        if (rawDef == null)
             throw new Exception($"Failed to deserialize def '{filePath}'.");
+        var def = rawDef as BaseDef;
+        if (def == null)
+            throw new Exception($"Failed to cast deserilaized type '{className}' to BaseDef");
+        
         def.LoadPath = Path.GetDirectoryName(filePath);
         def.CompDefs = def.CompDefs.Where(x => x != null).ToList();
         foreach (var compDef in def.CompDefs)
@@ -200,10 +211,44 @@ public class DimMaster
 
 
     #region Insts
+
+    private static List<string> _creatingInstsIds = new List<string>();
     
-    public static IInst InstantiateDef(IDef def, Dictionary<string, object>? compArgs = null)
+    /// <summary>
+    /// Check if an Inst is being created by the DimMaster. All managers should check with the DimMaster
+    /// to insure Insts aren't being created outside the DimMaster's control.
+    /// </summary>
+    public static bool CheckCreatingInst(string id)
     {
-        var inst = new Inst(def);
+        return _creatingInstsIds.Contains(id);}
+  
+    public static IInst InstantiateDef(IDef def, DataDict? arguments = null)
+    {
+        DataDict args = arguments ?? new DataDict();
+        _creatingInstsIds.Add(args.Id);
+        
+        IInst? inst = null;
+        if (def.ManagerClassName == typeof(DimMaster).FullName)
+        {
+            inst = _createObjectInstFromDef(def, args);
+        }
+        else
+        {
+            var manager = GetManagerByName(def.ManagerClassName);
+            inst = manager.CreateInst(def, args);
+        }
+
+        if (inst == null)
+            throw new Exception($"Failed to create inst from def '{def.DefName}'.");
+        
+        Console.WriteLine($"Instantiated Def '{def.DefName}' to '{inst._DebugId}'.");
+        _creatingInstsIds.Remove(inst.Id);
+        return inst;
+    }
+
+    private static IInst _createObjectInstFromDef(IDef def, DataDict compArgs)
+    {
+        var inst = new ObjectInst(def, compArgs.Id);
         foreach (var compDef in def.CompDefs)
         {
             // Get manager responsible for creating each component
@@ -212,8 +257,8 @@ public class DimMaster
             
             // Get args base off CompKey if args were provided
             var args = default(object?);
-            if (compArgs != null && compArgs.ContainsKey(compDef.CompKey))
-                args = compArgs[compDef.CompKey];
+            if (compArgs != null && compArgs.HasKey(compDef.CompKey))
+                args = compArgs.GetValueAs<object>(compDef.CompKey);
             
             // Manager creates new instance of the Component
             var compInst = manager.CreateCompInst(compDef, inst, args);
@@ -226,14 +271,13 @@ public class DimMaster
         {
             watcher.OnNewInstCreated(inst);
         }
-        
-        Console.WriteLine($"Instantiated Def '{def.DefName}' to '{inst._DebugId}'.");
         return inst;
     }
 
     public static IInst LoadSavedInst(IDef def, DataDict saveData)
     {
-        var inst = new Inst(saveData.Id, def);
+        var inst = new ObjectInst(def, saveData.Id);
+        _creatingInstsIds.Add(inst.Id);
         foreach (var compDef in def.CompDefs)
         {
             var managerName = compDef.ManagerClassName;
@@ -247,6 +291,7 @@ public class DimMaster
         {
             watcher.OnInstLoaded(inst);
         }
+        _creatingInstsIds.Remove(inst.Id);
         return inst;
     }
 

@@ -15,7 +15,7 @@ public class ActorCompInst : BaseCompInst
 
     public MapPositionData? MapPosition;
 
-    private BehaviorCompInst? _currentBehavior = null;
+    private BehaviorInst? _currentBehavior = null;
     
     public ActorCompInst(ICompDef def, IInst inst) : base(def, inst)
     {
@@ -62,25 +62,24 @@ public class ActorCompInst : BaseCompInst
         {
             _currentBehavior = GetNextBehavior();
         }
-
+        
         if (_currentBehavior != null)
         {
             _currentBehavior.Update(delta);
             if (_currentBehavior.GetState() == BehaviorState.Finished)
             {
-                DimMaster.DeleteInst(_currentBehavior.Instance);
+                DimMaster.DeleteInst(_currentBehavior);
                 _currentBehavior = null;
             }
             
         }
     }
 
-    private BehaviorCompInst GetNextBehavior()
+    private BehaviorInst GetNextBehavior()
     {
         var behaviorManager = DimMaster.GetManager<BehaviorManager>();
         var def = DimMaster.GetDefByName("Defs.Behaviors.Common.Wander");
-        var newInst = behaviorManager.InstantiateBehavior(def, this.Instance);
-        var behaviorComp = newInst.GetComponentOfType<BehaviorCompInst>(activeOnly:false);
-        return behaviorComp;
+        var newBehavior = behaviorManager.InstantiateBehavior(def, this.Instance);
+        return newBehavior;
     }
 }

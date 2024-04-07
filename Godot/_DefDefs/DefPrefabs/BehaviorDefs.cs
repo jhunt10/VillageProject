@@ -10,7 +10,7 @@ namespace VillageProject.Godot.DefDefs.DefPrefabs;
 
 public static class BehaviorDefs
 {
-    public static IDef TestActor = new Def()
+    public static IDef TestActor = new ObjectDef()
     {
         DefName = "Defs.Testing.TestActor",
         Label = "TestActor",
@@ -34,15 +34,12 @@ public static class BehaviorDefs
         }
     };
     
-    public static IDef WanderBehaviorDef = new Def
+    public static IDef WanderBehaviorDef = new WanderBehaviorDef()
     {
         DefName = "Defs.Behaviors.Common.Wander",
         Label = "Wander",
         CompDefs = new System.Collections.Generic.List<ICompDef>
         {
-            new WanderBehaviorCompDef()
-            {
-            }
         }
     };
     

@@ -2,7 +2,7 @@
 
 public interface IBehaviorTask
 {
-    public BehaviorCompInst ParentBehavior { get; }
+    public BehaviorInst ParentBehavior { get; }
     /// <summary>
     /// Update the task. Throw an exception if Tasks fails.
     /// </summary>

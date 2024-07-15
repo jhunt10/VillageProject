@@ -8,7 +8,7 @@ using VillageProject.Core.Map.MapSpaces;
 
 namespace VillageProject.Core.Behavior;
 
-public class ActorCompInst : BaseCompInst
+public class ActorCompInst : BaseCompInst, IMapPositionComp
 {
     public const string ACTOR_MAP_LAYER = "Actor";
     public string Layer => ACTOR_MAP_LAYER;
@@ -36,14 +36,15 @@ public class ActorCompInst : BaseCompInst
         return MapPosition?.MapSpace ?? null;
     }
 
-    public void SetMapPosition(MapPositionData mapPos)
+    public Result TrySetMapPosition(MapPositionData mapPos)
     {
         if(MapPosition.HasValue && MapPosition.Value == mapPos)
-            return;
+            return new Result(true, "Already at position.");
         
         Active = true;
         MapPosition = mapPos;
         NotifyWatchers();
+        return new Result(true);
     }
 
     public float rotateTimer = 0;

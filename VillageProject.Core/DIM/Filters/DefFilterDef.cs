@@ -10,7 +10,7 @@ public class DefFilterDef
     public List<string> AllowedTags { get; set; } = new List<string>();
     public List<string> ExcludedTags { get; set; } = new List<string>();
 
-    public List<string> RequiredComps { get; set; } = new List<string>();
+    public List<string> RequiredCompTypes { get; set; } = new List<string>();
 
     /// <summary>
     /// Go through the list of AllowedPaths and Exceptions and remove any redundent or invalid entries

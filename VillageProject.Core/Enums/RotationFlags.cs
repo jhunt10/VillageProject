@@ -56,6 +56,6 @@ public static class RotationExtensions
     /// <returns>Direction to turn</returns>
     public static RotationDirection GetRotationDirection(this RotationFlag rotation, RotationFlag targetRotation)
     {
-        return (RotationDirection)(((int)targetRotation - (int)rotation + 4) % 4);
+        return (RotationDirection)(((int)rotation - (int)targetRotation + 4) % 4);
     }
 }

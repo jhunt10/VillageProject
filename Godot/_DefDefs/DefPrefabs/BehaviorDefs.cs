@@ -40,6 +40,7 @@ public static class BehaviorDefs
         Label = "Wander",
         CompDefs = new System.Collections.Generic.List<ICompDef>
         {
+            
         }
     };
     

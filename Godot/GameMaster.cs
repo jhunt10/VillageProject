@@ -40,10 +40,15 @@ public partial class GameMaster : Node2D, IInstWatcher
 		// var wanderDef = DimMaster.GetDefByName(wanderDefName);
 		// var behaviorManager = DimMaster.GetManager<BehaviorManager>();
 		// var wanderBehavior = behaviorManager.InstantiateBehavior(wanderDef, actorInst);
-		actorInst.GetComponentOfType<ActorCompInst>()?.SetMapPosition(
+		actorInst.GetComponentOfType<ActorCompInst>()?.TrySetMapPosition(
 			new MapPositionData(MapControllerNode.GetMainMapNode().MapSpace,
 			new MapSpot(0,0,1), RotationFlag.South));
 
+		var actorInst2 = DimMaster.InstantiateDef(actorDef);
+		actorInst2.GetComponentOfType<ActorCompInst>()?.TrySetMapPosition(
+			new MapPositionData(MapControllerNode.GetMainMapNode().MapSpace,
+				new MapSpot(0,2,1), RotationFlag.South));
+		
 		var t = true;
 	}
 	

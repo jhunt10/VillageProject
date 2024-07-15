@@ -25,6 +25,7 @@ public class DimMaster
     }
     
     public static char PATH_SEPERATOR = '.';
+    public static char INST_COMP_SEPERATOR = ':';
     public static Dictionary<string, IManager> Managers;
 
     private static SaveLoader _saveLoader;
@@ -96,11 +97,25 @@ public class DimMaster
         }
     }
 
-    public static IDef GetDefByName(string defName)
+    public static IDef? GetDefByName(string defName, bool errorIfMissing = true)
     {
         if (_defs.ContainsKey(defName))
             return _defs[defName];
-        throw new Exception($"Failed to find def by name '{defName}'.");
+        if(errorIfMissing)
+            throw new Exception($"Failed to find def by name '{defName}'.");
+        return null;
+    }
+    
+    public static IDef? GetDefByPartialName(string sufix, bool errorIfMissing = true)
+    {
+        foreach (var def in _defs)
+        {
+            if (def.Key.EndsWith(sufix))
+                return def.Value;
+        }
+        if(errorIfMissing)
+            throw new Exception($"Failed to find with suffix '{sufix}'.");
+        return null;
     }
 
     public static IEnumerable<IDef> GetAllDefsWithCompDefType<TCompDef>()
@@ -135,8 +150,9 @@ public class DimMaster
         def.CompDefs = def.CompDefs.Where(x => x != null).ToList();
         foreach (var compDef in def.CompDefs)
         {
-            if(compDef == null)
-                continue;
+            if (compDef.CompKey.Contains(INST_COMP_SEPERATOR))
+                throw new Exception(
+                    $"Invalid CompKey {compDef.CompKey} on Def {def.DefName}. Can not contain \"{INST_COMP_SEPERATOR}\".");
             ((BaseCompDef)compDef).ParentDef = def;
         }
         return def;
@@ -302,6 +318,21 @@ public class DimMaster
         if (errorIfNull)
             throw new Exception($"Failed to find inst with Id '{id}'.");
         return null;
+    }
+    
+    public static TComp? GetCompAsTypeById<TComp>(string id, bool errorIfNull = false)
+        where TComp : ICompInst
+    {
+        var tokens = id.Split(INST_COMP_SEPERATOR);
+        if (tokens.Length != 2)
+            throw new Exception($"Invalid CompId '{id}'. Expected format: INST_ID{INST_COMP_SEPERATOR}COMP_KEY ");
+        if (_insts.ContainsKey(tokens[0]))
+        {
+            return _insts[tokens[0]].GetComponentWithKey<TComp>(tokens[1], errorIfNull);
+        }
+        if (errorIfNull)
+            throw new Exception($"Failed to find inst with Id '{id}'.");
+        return default(TComp);
     }
 
     public static IEnumerable<IInst> ListAllInsts()

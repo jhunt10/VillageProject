@@ -69,7 +69,7 @@ public class MapStructureManager : BaseManager, IMapPlacementValidator
         var occupation = mapStructCompDef.OccupationData.BuildNewOccupationData(anchorSpot, rotation);
         var occSpots = occupation.ListOccupiedSpots().ToList();
         var res = mapSpace.TryAddInstToSpots(inst, occSpots, mapStructCompDef.MapLayer);
-        mapStrutCompInst.SetMapSpot(mapSpace, anchorSpot, rotation);
+        mapStrutCompInst.TrySetMapPosition(new MapPositionData(mapSpace, anchorSpot, rotation));
         return res;
     }
     

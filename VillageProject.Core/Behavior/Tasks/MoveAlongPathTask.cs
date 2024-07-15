@@ -40,7 +40,7 @@ public class MoveAlongPathTask : IBehaviorTask
             var rotation = RotationFlag.South;
             if(_curtSpot.HasValue )
                 rotation = PathHelper.NextSpotToFacingRotation(_curtSpot.Value, _nextSpot.Value);
-            actor.SetMapPosition(
+            actor.TrySetMapPosition(
                 new MapPositionData(actor.GetMapSpace(), _curtSpot.Value, rotation, pos));
 
         }
@@ -53,7 +53,7 @@ public class MoveAlongPathTask : IBehaviorTask
                 rotation = PathHelper.NextSpotToFacingRotation(_curtSpot.Value, _nextSpot.Value);
             
             _curtSpot = _nextSpot;
-            actor.SetMapPosition(
+            actor.TrySetMapPosition(
                 new MapPositionData(actor.GetMapSpace(), _curtSpot.Value, rotation));
             
             _nextSpot = _path.NextSpot();

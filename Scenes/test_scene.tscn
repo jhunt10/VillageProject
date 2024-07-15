@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://dq0d812v1qmf4"]
+[gd_scene load_steps=27 format=3 uid="uid://dq0d812v1qmf4"]
 
 [ext_resource type="Script" path="res://Godot/GameMaster.cs" id="1_ox1jl"]
 [ext_resource type="Script" path="res://Godot/Map/MapNode.cs" id="2_6m56v"]
@@ -25,6 +25,7 @@
 [ext_resource type="Script" path="res://Godot/UI/MiscLable.cs" id="21_h24ff"]
 [ext_resource type="Script" path="res://Godot/Debugging/PathDisplayNode.cs" id="22_ig6yl"]
 [ext_resource type="Texture2D" uid="uid://dkgjwsy8unvot" path="res://Assets/Sprites/path_node_sprite.png" id="23_ots0k"]
+[ext_resource type="Script" path="res://Godot/UI/DevConsole.cs" id="26_x2jio"]
 
 [node name="GameMaster" type="Node2D"]
 script = ExtResource("1_ox1jl")
@@ -230,6 +231,35 @@ offset_top = 8.0
 offset_right = 92.0
 offset_bottom = 31.0
 text = "Map View: "
+
+[node name="DevConsole" type="Panel" parent="CanvasLayer"]
+visible = false
+anchors_preset = 10
+anchor_right = 1.0
+grow_horizontal = 2
+size_flags_horizontal = 3
+script = ExtResource("26_x2jio")
+
+[node name="BoxContainer" type="BoxContainer" parent="CanvasLayer/DevConsole"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 43.0
+grow_horizontal = 2
+vertical = true
+
+[node name="InputLine" type="LineEdit" parent="CanvasLayer/DevConsole/BoxContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="CanvasLayer/DevConsole/BoxContainer"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="TextEdit" type="TextEdit" parent="CanvasLayer/DevConsole/BoxContainer/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+text = "line 1"
 
 [node name="PathDisplayNode" type="Node2D" parent="."]
 script = ExtResource("22_ig6yl")

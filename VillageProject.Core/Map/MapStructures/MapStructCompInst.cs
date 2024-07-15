@@ -6,7 +6,7 @@ using VillageProject.Core.Map.MapSpaces;
 
 namespace VillageProject.Core.Map.MapStructures;
 
-public class MapStructCompInst : BaseCompInst
+public class MapStructCompInst : BaseCompInst, IMapPositionComp
 {
     public string? MapSpaceId { get; protected set; }
     public MapSpot? MapSpot { get; protected set; }
@@ -62,16 +62,26 @@ public class MapStructCompInst : BaseCompInst
         }
     }
 
-    public void SetMapSpot(IMapSpace mapSpace, MapSpot spot, RotationFlag rotation)
+    public Result TrySetMapPosition(MapPositionData mapPos)
     {
-        if(mapSpace.MapSpaceId == MapSpaceId && MapSpot == spot && Rotation == rotation)
-            return;
+        if(mapPos.MapSpaceId == MapSpaceId && MapSpot == mapPos.MapSpot && Rotation == mapPos.Rotation)
+            return new Result(true, "Already at position");
+        
+        // Check if map knows we're here
+        var here = mapPos.MapSpace.ListInstsAtSpot(mapPos.MapSpot).Any(x => x.Id == this.Instance.Id);
+        if (!here)
+        {
+            var mapManager = DimMaster.GetManager<MapManager>();
+            var res = mapManager.TryPlaceInstOnMapSpace(mapPos.MapSpace, this.Instance, mapPos.MapSpot, mapPos.Rotation);
+            if (!res.Success)
+                return res;
+        }
         
         // Validate that the map knows we are here
-        var newOcc = MapStructDef.OccupationData.BuildNewOccupationData(spot, rotation);
+        var newOcc = MapStructDef.OccupationData.BuildNewOccupationData(mapPos.MapSpot, mapPos.Rotation);
         foreach (var newSpot in newOcc.ListOccupiedSpots())
         {
-            if (!mapSpace.ListInstsAtSpot(newSpot).Contains(this.Instance))
+            if (!mapPos.MapSpace.ListInstsAtSpot(newSpot).Contains(this.Instance))
             {
                 throw new Exception(
                     $"MapStruct {Instance.Def.DefName}:{Instance.Id} was not added to MapSpace correctly");
@@ -79,11 +89,12 @@ public class MapStructCompInst : BaseCompInst
         }
         
         Active = true;
-        MapSpaceId = mapSpace.MapSpaceId;
-        MapSpot = spot;
-        Rotation = rotation;
+        MapSpaceId = mapPos.MapSpaceId;
+        MapSpot = mapPos.MapSpot;
+        Rotation = mapPos.Rotation;
         OccupationData = newOcc;
 
         NotifyWatchers();
+        return new Result(true);
     }
 }

@@ -4,6 +4,7 @@ using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.MapStructures.Constructables;
+using VillageProject.Core.Map.Pathing;
 using VillageProject.Core.Sprites;
 using VillageProject.Godot.Sprites;
 
@@ -154,6 +155,15 @@ public class MapStructureDefs
                     { RotationFlag.East, new SpriteDataDef("BrickWallEast.png", 32, 72, 0, 0)},
                     { RotationFlag.South, new SpriteDataDef("BrickWallSouth.png", 32, 72, 0, 0)},
                     { RotationFlag.West, new SpriteDataDef("BrickWallWest.png", 32, 72, 0, 0)},
+                }
+            },
+            new PathingCompDef()
+            {
+                PathSpotDefs = new Dictionary<MapSpot, PathSpotDef>
+                {
+                    {new MapSpot(0,0,0), new PathSpotDef(){
+                        BlocksPathThrough = CellSideFlags.BackLeft | CellSideFlags.Back | CellSideFlags.BackRight
+                    }} 
                 }
             }
         }

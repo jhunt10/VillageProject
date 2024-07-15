@@ -54,10 +54,15 @@ public static class TerrainDefs
             {
                 PathSpotDefs = new Dictionary<MapSpot, PathSpotDef>
                 {
-                    {new MapSpot(0,0,0), new PathSpotDef(){SupportsPathOver = 
-                        CellSideFlags.BackLeft | CellSideFlags.Back | CellSideFlags.BackRight |
-                        CellSideFlags.Left | CellSideFlags.Right |
-                        CellSideFlags.FrontLeft | CellSideFlags.Front | CellSideFlags.FrontRight
+                    {new MapSpot(0,0,0), new PathSpotDef(){
+                        SupportsPathOver = 
+                            CellSideFlags.BackLeft | CellSideFlags.Back | CellSideFlags.BackRight |
+                            CellSideFlags.Left | CellSideFlags.Right |
+                            CellSideFlags.FrontLeft | CellSideFlags.Front | CellSideFlags.FrontRight,
+                        BlocksPathThrough = 
+                            CellSideFlags.BackLeft | CellSideFlags.Back | CellSideFlags.BackRight |
+                            CellSideFlags.Left | CellSideFlags.Right |
+                            CellSideFlags.FrontLeft | CellSideFlags.Front | CellSideFlags.FrontRight,
                     }} 
                 }
             }
@@ -106,10 +111,15 @@ public static class TerrainDefs
             {
                 PathSpotDefs = new Dictionary<MapSpot, PathSpotDef>
                 {
-                    {new MapSpot(0,0,0), new PathSpotDef(){SupportsPathOver = 
-                        CellSideFlags.BackLeft | CellSideFlags.Back | CellSideFlags.BackRight |
-                        CellSideFlags.Left | CellSideFlags.Right |
-                        CellSideFlags.FrontLeft | CellSideFlags.Front | CellSideFlags.FrontRight
+                    {new MapSpot(0,0,0), new PathSpotDef(){
+                        SupportsPathOver = 
+                            CellSideFlags.BackLeft | CellSideFlags.Back | CellSideFlags.BackRight |
+                            CellSideFlags.Left | CellSideFlags.Right |
+                            CellSideFlags.FrontLeft | CellSideFlags.Front | CellSideFlags.FrontRight,
+                        BlocksPathThrough = 
+                            CellSideFlags.BackLeft | CellSideFlags.Back | CellSideFlags.BackRight |
+                            CellSideFlags.Left | CellSideFlags.Right |
+                            CellSideFlags.FrontLeft | CellSideFlags.Front | CellSideFlags.FrontRight,
                     }} 
                 }
             }

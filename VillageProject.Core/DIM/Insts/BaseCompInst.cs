@@ -4,6 +4,7 @@ namespace VillageProject.Core.DIM.Insts;
 
 public abstract class BaseCompInst : ICompInst
 {
+    public string Id => Instance.Id + ":" + CompDef.CompKey;
     public string CompKey => CompDef.CompKey;
     public ICompDef CompDef { get; }
     public IInst Instance { get; }

@@ -2,7 +2,7 @@
 
 namespace VillageProject.Godot;
 
-public interface IInstNode
+public interface Old_IInstNode
 {
     public IInst Inst { get; }
     public void Delete();

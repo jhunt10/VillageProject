@@ -10,6 +10,9 @@ namespace VillageProject.Core.Behavior;
 
 public class ActorCompInst : BaseCompInst, IMapPositionComp
 {
+    public string? MapSpaceId { get; protected set; }
+    public MapSpot? MapSpot { get; }
+
     public const string ACTOR_MAP_LAYER = "Actor";
     public string Layer => ACTOR_MAP_LAYER;
 

@@ -1,6 +1,7 @@
 ﻿using VillageProject.Core.Behavior;
 using VillageProject.Core.DIM;
 using VillageProject.Core.Enums;
+using VillageProject.Core.Items;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapStructures;
 
@@ -38,6 +39,13 @@ public class SpawnAtDevCommand : IDevConsoleCommand
                         mapspot, RotationFlag.South));
 
                 return new Result(true, $"Spawned '{tokens[1]}' at {mapspot}.");
+            }
+
+            var itemComp = newInst.GetComponentOfType<ItemCompInst>(activeOnly: false);
+            if (itemComp != null)
+            {
+                ItemHelper.DropItemOnMap(itemComp, mapspot, mapController.MapSpace);
+                return new Result(true, $"Spawned Item '{tokens[1]}' at {mapspot}.");
             }
             
             return new Result(true, $"Spawned '{tokens[1]}' No POS.");

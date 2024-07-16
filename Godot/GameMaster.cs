@@ -20,7 +20,7 @@ public partial class GameMaster : Node2D, IInstWatcher
 	private bool inited = false;
 	public static MainCamera MainCamera;
 	public static MapControllerNode MapControllerNode;
-	public static Dictionary<string, IInstNode> InstNodes = new Dictionary<string, IInstNode>();
+	public static Dictionary<string, Old_IInstNode> InstNodes = new Dictionary<string, Old_IInstNode>();
 
 	public static PathDisplayNode PathDisplayNode;
 

@@ -17,7 +17,7 @@ using VillageProject.Godot;
 using VillageProject.Godot.Map;
 using VillageProject.Godot.Sprites;
 
-public partial class MapNode : Node2D, IInstNode
+public partial class MapNode : Node2D, Old_IInstNode
 {
 	private const string _MAP_NODE_WATCHER_KEY = "MapNodeMapSpaceWatcher";
 	public const int TILE_WIDTH = 32;

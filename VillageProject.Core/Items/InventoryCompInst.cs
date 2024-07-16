@@ -24,14 +24,14 @@ public class InventoryCompInst : BaseCompInst
         _filter = new DefFilter(compDef.ItemFilter);
     }
 
-    // public IEnumerable<ItemCompInst> ListHeldItems()
-    // {
-    //     var manager = DimMaster.GetManager<ItemManager>();
-    //     foreach (var item_id in _holdingItems)
-    //     {
-    //         var item = manager.
-    //     }
-    // }
+    public IEnumerable<ItemCompInst> ListHeldItems()
+    {
+        foreach (var item_id in _holdingItems)
+        {
+            var item = DimMaster.GetCompAsTypeById<ItemCompInst>(item_id, errorIfNull:true);
+            yield return item;
+        }
+    }
 
     public bool HasItem(ItemCompInst item)
     {

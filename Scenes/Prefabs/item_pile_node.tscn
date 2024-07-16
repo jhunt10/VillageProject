@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://crja8mk4i0dwp"]
+
+[ext_resource type="Script" path="res://Godot/InstNodes/ItemPileNode.cs" id="1_vbybg"]
+[ext_resource type="Texture2D" uid="uid://bbrujo6l8wrw" path="res://Assets/Sprites/TerrainSpriteTop.png" id="2_g62df"]
+
+[node name="ItemPileNode" type="Node2D"]
+script = ExtResource("1_vbybg")
+
+[node name="HeldItemSprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_g62df")

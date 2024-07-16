@@ -4,7 +4,7 @@ using VillageProject.Core.Map.MapSpaces;
 
 namespace VillageProject.Godot.Map;
 
-public interface IMapObjectNode : IInstNode
+public interface IMapObjectNode : Old_IInstNode
 {
     public MapNode MapNode { get; set; }
     public void ForceUpdateSprite();

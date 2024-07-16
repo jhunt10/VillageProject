@@ -29,6 +29,7 @@ public static class DefWriter
         defs.AddRange(TerrainDefs.Defs.Values.ToList());
         defs.AddRange(MapStructureDefs.Defs.Values.ToList());
         defs.AddRange(BehaviorDefs.Defs.Values.ToList());
+        defs.AddRange(ItemDefs.Defs.Values.ToList());
         foreach (var def in defs)
         {
             if (def == null)

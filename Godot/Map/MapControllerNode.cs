@@ -9,6 +9,7 @@ using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Sprites;
 using VillageProject.Godot;
+using VillageProject.Godot.InstNodes;
 using VillageProject.Godot.Map;
 
 public partial class MapControllerNode : Node2D
@@ -58,7 +59,24 @@ public partial class MapControllerNode : Node2D
 	{
 	}
 
-	public IInstNode CreateNewMapStructureNode(IInst mapStructInst)
+	public void PlaceInstNodeOnMap(IInstNode instNode)
+	{
+		var inst = instNode.Inst;
+		
+		var mapPositionComp = inst.GetComponentOfType<IMapPositionComp>(activeOnly:true, errorIfNull: false);
+		if (mapPositionComp == null)
+			throw new Exception($"Inst {inst._DebugId} does not have a IMapPositionComp.");
+		if(string.IsNullOrEmpty(mapPositionComp.MapSpaceId))
+			throw new Exception($"Inst {inst._DebugId} is not placed on map.");
+		
+		var mapNode = _mapNodes[mapPositionComp.MapSpaceId];
+		var spot = mapPositionComp.MapSpot.Value;
+		var cellNode = mapNode.GetMapCellNodeAtSpot(spot);
+		cellNode.AddInstNode(instNode);
+		
+	}
+	
+	public Old_IInstNode CreateNewMapStructureNode(IInst mapStructInst)
 	{
 		if (_mapObjectNodes.ContainsKey(mapStructInst.Id))
 		{
@@ -94,7 +112,7 @@ public partial class MapControllerNode : Node2D
 		return newNode;
 	}
 	
-	public IInstNode CreateNewActorNode(IInst mapStructInst)
+	public Old_IInstNode CreateNewActorNode(IInst mapStructInst)
 	{
 		
 		if (_mapObjectNodes.ContainsKey(mapStructInst.Id))
@@ -159,7 +177,7 @@ public partial class MapControllerNode : Node2D
 		// _mapNodes.Clear();
 	}
 
-	public IInstNode LoadMap(MapSpaceCompInst mapSpace)
+	public Old_IInstNode LoadMap(MapSpaceCompInst mapSpace)
 	{
 		var newMapNode = (MapNode)MapNodePrefab.Duplicate();
 		newMapNode.Visible = true;

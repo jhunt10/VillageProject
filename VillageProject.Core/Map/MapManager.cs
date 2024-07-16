@@ -9,6 +9,7 @@ namespace VillageProject.Core.Map;
 
 public class MapManager : BaseManager
 {
+    private List<string> _placingQueue = new List<string>();
     private Dictionary<string, MapSpaceCompInst> _mapSpaces = new Dictionary<string, MapSpaceCompInst>();
     
     // public void SetMainMapSpace(MapSpaceCompInst space)
@@ -122,6 +123,11 @@ public class MapManager : BaseManager
         return new Result();
     }
 
+    public bool IsInstInPlacementQue(IInst inst)
+    {
+        return _placingQueue.Contains(inst.Id);
+    }
+
     public Result TryPlaceInstOnMapSpace(
         IMapSpace mapSpace,
         IInst inst,
@@ -132,7 +138,9 @@ public class MapManager : BaseManager
         var compArgs = args;
         if (compArgs == null)
             compArgs = new Dictionary<string, object>();
-        
+        if(!_placingQueue.Contains(inst.Id))
+            _placingQueue.Add(inst.Id);
+            
         var canRes = CanPlaceInstOnMapSpace(mapSpace, inst, anchorSpot, rotation, compArgs);
         if (!canRes.Success)
             return canRes;
@@ -149,6 +157,8 @@ public class MapManager : BaseManager
                 failedRes = res;
             }
         }
+
+        _placingQueue.Remove(inst.Id);
 
         if (failedRes != null)
         {

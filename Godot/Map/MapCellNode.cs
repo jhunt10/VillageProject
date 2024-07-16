@@ -3,11 +3,13 @@ using System;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapSpaces;
+using VillageProject.Godot.InstNodes;
 using VillageProject.Godot.Map;
 
 public partial class MapCellNode : Node2D
 {
 	public MapNode MapNode;
+	public List<IInstNode> InstNodes = new List<IInstNode>();
 	public List<IMapObjectNode> MapObjectNodes = new List<IMapObjectNode>();
 	public string MapSpaceId { get; set; }
 	public MapSpot Spot { get; set; }
@@ -28,6 +30,13 @@ public partial class MapCellNode : Node2D
 		this.AddChild((Node2D)newNode);
 		MapObjectNodes.Add(newNode);
 		newNode.MapNode = MapNode;
+	}
+
+	public void AddInstNode(IInstNode instNode)
+	{
+		this.AddChild((Node2D)instNode);
+		InstNodes.Add(instNode);
+		instNode.MapNode = MapNode;
 	}
 
 	public void UpdateSprites(IMapSpace mapSpace, MapSpot spot, RotationFlag rotation)

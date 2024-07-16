@@ -313,8 +313,11 @@ public class DimMaster
 
     public static IInst? GetInstById(string id, bool errorIfNull = false)
     {
-        if (_insts.ContainsKey(id))
-            return _insts[id];
+        var instId = id;
+        if (id.Contains(":"))
+            instId = id.Split(':').First();
+        if (_insts.ContainsKey(instId))
+            return _insts[instId];
         if (errorIfNull)
             throw new Exception($"Failed to find inst with Id '{id}'.");
         return null;

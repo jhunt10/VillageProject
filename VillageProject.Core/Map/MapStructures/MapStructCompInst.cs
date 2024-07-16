@@ -67,14 +67,12 @@ public class MapStructCompInst : BaseCompInst, IMapPositionComp
         if(mapPos.MapSpaceId == MapSpaceId && MapSpot == mapPos.MapSpot && Rotation == mapPos.Rotation)
             return new Result(true, "Already at position");
         
+        var mapManager = DimMaster.GetManager<MapManager>();
         // Check if map knows we're here
-        var here = mapPos.MapSpace.ListInstsAtSpot(mapPos.MapSpot).Any(x => x.Id == this.Instance.Id);
-        if (!here)
+        if (!mapManager.IsInstInPlacementQue(Instance))
         {
-            var mapManager = DimMaster.GetManager<MapManager>();
             var res = mapManager.TryPlaceInstOnMapSpace(mapPos.MapSpace, this.Instance, mapPos.MapSpot, mapPos.Rotation);
-            if (!res.Success)
-                return res;
+            return res;
         }
         
         // Validate that the map knows we are here

@@ -52,19 +52,25 @@ public class InventoryCompInst : BaseCompInst
         var res = CanAddItem(item, item.Count);
         if (!res.Success)
             return res;
-        
+
         // Check if it can merge with any held item.
+        var foundMerge = false;
         foreach (var itemComp in _enumerateHeldItemComp())
         {
             if (itemComp.CanMerge(item))
             {
                 itemComp.MergeWithStack(item);
-                return new Result(true);
+                foundMerge = true;
+                break;
             }
         }
-        // Couldn't merge with any held items.
-        _holdingItems.Add(item.Id);
-        item.SetInventory(this);
+        if(!foundMerge)
+        {
+            // Couldn't merge with any held items.
+            _holdingItems.Add(item.Id);
+            item.SetInventory(this);
+        }
+        Instance.FlagCompChange(this);
         return new Result(true);
     }
 

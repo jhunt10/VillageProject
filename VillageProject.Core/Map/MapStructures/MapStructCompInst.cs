@@ -92,6 +92,7 @@ public class MapStructCompInst : BaseCompInst, IMapPositionComp
         Rotation = mapPos.Rotation;
         OccupationData = newOcc;
 
+        Instance.FlagCompChange(this);
         NotifyWatchers();
         return new Result(true);
     }

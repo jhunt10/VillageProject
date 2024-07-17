@@ -1,4 +1,5 @@
 ﻿using VillageProject.Core.DIM.Defs;
+using VillageProject.Core.Sprites.Items;
 
 namespace VillageProject.Core.DIM.Insts;
 
@@ -10,6 +11,7 @@ public abstract class BaseCompInst : ICompInst
     public IInst Instance { get; }
     
     public bool Active { get; protected set; }
+    private bool _inited;
 
     public BaseCompInst(ICompDef def, IInst inst)
     {
@@ -45,6 +47,15 @@ public abstract class BaseCompInst : ICompInst
     public virtual void Update(float delta)
     {
         
+    }
+    
+    protected virtual void _Init() {}
+    public void Init()
+    {
+        if(_inited)
+            return;
+        _Init();
+        _inited = true;
     }
 
     protected virtual void _OnDeactivate() {}

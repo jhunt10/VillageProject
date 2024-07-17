@@ -21,7 +21,7 @@ public abstract class BaseSpriteComp : BaseCompInst, ISpriteComp
     public virtual void DirtySprite()
     {
         _dirtySprite = true;
-        Instance.FlagWatchedChange(this);
+        Instance.FlagCompChange(this);
     }
 
     public virtual void SetViewRotation(RotationFlag viewRotation)

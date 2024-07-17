@@ -109,7 +109,7 @@ public abstract class BaseInst : IInst
         }
     }
 
-    public void FlagWatchedChange(ICompInst comp)
+    public void FlagCompChange(ICompInst comp)
     {
         if(_watchedComps.ContainsKey(comp.CompKey))
             foreach (var pair in _watchedComps[comp.CompKey])

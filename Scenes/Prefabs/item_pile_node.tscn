@@ -8,3 +8,4 @@ script = ExtResource("1_vbybg")
 
 [node name="HeldItemSprite" type="Sprite2D" parent="."]
 texture = ExtResource("2_g62df")
+centered = false

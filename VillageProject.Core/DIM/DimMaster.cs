@@ -256,6 +256,10 @@ public class DimMaster
 
         if (inst == null)
             throw new Exception($"Failed to create inst from def '{def.DefName}'.");
+        foreach (var comp in inst.ListComponentsOfType<ICompInst>(activeOnly:false))
+        {
+            comp.Init();
+        }
         
         Console.WriteLine($"Instantiated Def '{def.DefName}' to '{inst._DebugId}'.");
         _creatingInstsIds.Remove(inst.Id);
@@ -303,6 +307,10 @@ public class DimMaster
             inst.AddComponent(compInst);
         }
         _insts.Add(inst.Id, inst);
+        foreach (var comp in inst.ListComponentsOfType<ICompInst>(activeOnly:false))
+        {
+            comp.Init();
+        }
         foreach (var watcher in _instWatchers)
         {
             watcher.OnInstLoaded(inst);

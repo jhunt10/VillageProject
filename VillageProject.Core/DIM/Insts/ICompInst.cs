@@ -18,6 +18,7 @@ public interface ICompInst
     void OnDeleteInst();
     void Update(float delta);
 
+    void Init();
     void Deactivate();
 
     void Activate();

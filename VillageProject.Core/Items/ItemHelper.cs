@@ -39,7 +39,7 @@ public static class ItemHelper
             Console.Error.WriteLine($"Failed to drop item on map: {res2.Message}.");
         else
         {
-            var res = newPile.GetComponentOfType<InventoryCompInst>()?.TryAddItem(itemComp);
+            var res = newPile.GetComponentOfType<InventoryCompInst>(activeOnly:false)?.TryAddItem(itemComp);
             if (res == null)
                 Console.Error.Write("Failed to find InventoryCompInst on ItemPile");
             else if(!res.Success)

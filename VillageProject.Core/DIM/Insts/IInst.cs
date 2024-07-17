@@ -47,7 +47,7 @@ public interface IInst
     /// Should only be called by the component it's self.
     /// </summary>
     /// <param name="comp">Component who has changed</param>
-    public void FlagWatchedChange(ICompInst comp);
+    public void FlagCompChange(ICompInst comp);
 
     /// <summary>
     /// Check if a change in components has occured since the last time this key was checked.

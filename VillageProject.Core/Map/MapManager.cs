@@ -165,7 +165,7 @@ public class MapManager : BaseManager
             mapSpace.RemoveInst(inst);
             return failedRes;
         }
-
+        // Console.WriteLine($"Inst: {inst._DebugId} PlacedOnMap at {anchorSpot}");
         return new Result(true);
     }
 }

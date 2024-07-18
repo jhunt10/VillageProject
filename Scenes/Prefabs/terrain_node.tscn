@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://cv8qwna1vsseg"]
+
+[ext_resource type="Script" path="res://Godot/InstNodes/TerrainNode.cs" id="1_s7txu"]
+[ext_resource type="Texture2D" uid="uid://bobbmxqax1spf" path="res://Assets/Sprites/shadow_sprite.png" id="2_k8kta"]
+[ext_resource type="Texture2D" uid="uid://bbrujo6l8wrw" path="res://Assets/Sprites/TerrainSpriteTop.png" id="3_n673g"]
+[ext_resource type="Texture2D" uid="uid://dk0c1g65hs8ei" path="res://Assets/Sprites/TerrainSpriteFront.png" id="4_5h3ok"]
+
+[node name="TerrainNodePrefab" type="Node2D"]
+script = ExtResource("1_s7txu")
+
+[node name="ShadowSprite" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.313726)
+texture = ExtResource("2_k8kta")
+centered = false
+offset = Vector2(0, -32)
+
+[node name="TopSprite" type="Sprite2D" parent="."]
+texture = ExtResource("3_n673g")
+centered = false
+offset = Vector2(0, -72)
+
+[node name="FrontSprite" type="Sprite2D" parent="."]
+texture = ExtResource("4_5h3ok")
+centered = false
+offset = Vector2(0, -40)

@@ -5,6 +5,24 @@ namespace VillageProject.Godot.DefDefs.DefPrefabs;
 
 public static class MapDefs
 {
+    public static IDef SingleCellMapSpace = new ObjectDef
+    {
+        DefName = "Defs.MapSpaces.Testing.SingleCell",
+        Label = "TinyTest",
+        CompDefs = new System.Collections.Generic.List<ICompDef>
+        {
+            new MapSpaceCompDef
+            {
+                MaxX = 0,
+                MinX = 0,
+                MaxY = 0,
+                MinY = 0,
+                MaxZ = 0,
+                MinZ = 0
+            }
+        }
+    };
+    
     public static IDef TinyTestMapSpace = new ObjectDef
     {
         DefName = "Defs.MapSpaces.Testing.TinyTest",
@@ -44,6 +62,7 @@ public static class MapDefs
     
     public static Dictionary<string, IDef> Defs = new Dictionary<string, IDef>
     {
+        {"SingleCell", SingleCellMapSpace},
         { "TinyTest", TinyTestMapSpace },
         { "LargerTest", LargerTestMapSpace}
     };

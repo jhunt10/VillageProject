@@ -19,35 +19,35 @@ public enum TerrainAdjacency
 public class TerrainManager : BaseManager
 {
     public const string TERRAIN_LAYER = MapStructureManager.DEFAULT_MAP_LAYER;
-    public Dictionary<string, IInst> _terrainInsts;
+    // public Dictionary<string, IInst> _terrainInsts;
     
     public TerrainManager()
     {
-        _terrainInsts = new Dictionary<string, IInst>();
+        // _terrainInsts = new Dictionary<string, IInst>();
     }
 
     public override void Init()
     {
-        LoadDefsToInsts();
+        // LoadDefsToInsts();
         base.Init();
     }
     
-    private void LoadDefsToInsts()
-    {
-        var terrainDefs = DimMaster.GetAllDefsWithCompDefType<TerrainCompDef>();
-        foreach (var def in terrainDefs)
-        {
-            var inst = DimMaster.InstantiateDef(def);
-            _terrainInsts.Add(def.DefName, inst);
-        }
-    }
+    // private void LoadDefsToInsts()
+    // {
+    //     var terrainDefs = DimMaster.GetAllDefsWithCompDefType<TerrainCompDef>();
+    //     foreach (var def in terrainDefs)
+    //     {
+    //         var inst = DimMaster.InstantiateDef(def);
+    //         _terrainInsts.Add(def.DefName, inst);
+    //     }
+    // }
 
-    public IInst? GetTerrainByName(string name)
-    {
-        if (_terrainInsts.ContainsKey(name))
-            return _terrainInsts[name];
-        return null;
-    }
+    // public IInst? GetTerrainByName(string name)
+    // {
+    //     if (_terrainInsts.ContainsKey(name))
+    //         return _terrainInsts[name];
+    //     return null;
+    // }
 
     public IInst? GetTerrainAtSpot(IMapSpace mapSpace, MapSpot spot)
     {

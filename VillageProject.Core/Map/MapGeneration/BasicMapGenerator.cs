@@ -14,7 +14,8 @@ public static class BasicMapGenerator
         var mapSpace = mapInst.GetComponentOfType<MapSpaceCompInst>(activeOnly:false);
         var mapManager = DimMaster.GetManager<MapManager>();
         var terrainManager = DimMaster.GetManager<TerrainManager>();
-        var terrains = terrainManager._terrainInsts.Values.Select(x => x.Def).ToList();
+        var terrains = DimMaster.GetAllDefsWithCompDefType<TerrainCompDef>().ToList();
+        var cellCount = 0;
 		
         for(int x = mapSpace.MinX; x <= mapSpace.MaxX; x++)
         for (int y = mapSpace.MinY; y <= mapSpace.MaxY; y++)
@@ -22,21 +23,21 @@ public static class BasicMapGenerator
             var index = 0;
             if (x + y > 0)
                 index = 1;
-            var terrainDef = terrains[index];
-            var terrainInst = DimMaster.InstantiateDef(terrainDef);
             var maxZ = 0;
-            if (Math.Abs(x) > 4 || Math.Abs(y) > 4)
-                maxZ += 1;
             for (int z = mapSpace.MinZ; z <= maxZ; z++)
             {
+                // if (z % 2 == 0)
+                //     index = 1;
+                var terrainDef = terrains[index];
+                var terrainInst = DimMaster.InstantiateDef(terrainDef);
                 var res = mapManager.TryPlaceInstOnMapSpace(
                     mapSpace, terrainInst, new MapSpot(x, y, z),
                     RotationFlag.North);
                 if (!res.Success)
                     throw new Exception($"Failed placing terrain in map generation: {res.Message}.");
+                cellCount++;
             }
         }
-
         return mapSpace;
     }
 }

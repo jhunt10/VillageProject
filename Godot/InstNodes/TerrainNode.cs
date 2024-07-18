@@ -5,26 +5,20 @@ using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapSpaces;
+using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.Terrain;
 using VillageProject.Core.Sprites.PatchSprites;
+using VillageProject.Godot.InstNodes;
 using VillageProject.Godot.Map;
 using VillageProject.Godot.Sprites;
 
-public partial class TerrainNode : Node2D, IMapObjectNode
+public partial class TerrainNode : Node2D, IInstNode
 {
 	public MapNode MapNode { get; set; }
-	public IInst TerrainInst { get; set; }
-	public IInst Inst => TerrainInst;
-	public void DirtySprite()
-	{
-		throw new NotImplementedException();
-	}
-
-	public string? MapSpaceId { get; set; }
-	public MapSpot? MapSpot { get; set; }
+	public IInst Inst { get; set; }
 	public RotationFlag RealRotation { get; private set; }
 	public RotationFlag ViewRotation { get; private set; }
-	
+	//
 	public LayerVisibility LayerVisibility { get; private set; }
 
 	private bool _forceUpdate;
@@ -33,8 +27,6 @@ public partial class TerrainNode : Node2D, IMapObjectNode
 	{
 		get
 		{
-			if(_shadowSprite == null)
-				_init();
 			return _shadowSprite;
 		}
 	}
@@ -44,8 +36,6 @@ public partial class TerrainNode : Node2D, IMapObjectNode
 	{
 		get
 		{
-			if(_topSprite == null)
-				_init();
 			return _topSprite;
 		}
 	}
@@ -55,24 +45,17 @@ public partial class TerrainNode : Node2D, IMapObjectNode
 	{
 		get
 		{
-			if(_frontSprite == null)
-				_init();
 			return _frontSprite;
 		}
 	}
 
-	private bool _inited;
-
-	private void _init()
+	public void SetInst(IInst inst)
 	{
-		if(_inited)
-			return;
-
+		this.Inst = inst;
 		_shadowSprite = GetNode<Sprite2D>("ShadowSprite");
 		_topSprite = GetNode<Sprite2D>("TopSprite");
 		_frontSprite = GetNode<Sprite2D>("FrontSprite");
-		
-		_inited = true;
+		Inst.AddComponentWatcher<MapStructCompInst>("TerrainNode:MapPos", true);
 	}
 
 	public void Delete()
@@ -83,24 +66,14 @@ public partial class TerrainNode : Node2D, IMapObjectNode
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		var t = true;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		if (_forceUpdate)
-		{
-			UpdateSprite();
-			_forceUpdate = false;
-		}
-	}
-
-
-	public void SetShow(bool show, bool showShadows = false)
-	{
-		_topSprite.Visible = show;
-		_frontSprite.Visible = show;
-		_shadowSprite.Visible = showShadows;
+		if(Inst.GetWatchedChange("TerrainNode:MapPos", true))
+			SetSprites();
 	}
 
 	public void SetViewRotation(RotationFlag viewRotation)
@@ -110,6 +83,7 @@ public partial class TerrainNode : Node2D, IMapObjectNode
 			ViewRotation = viewRotation;
 			_forceUpdate = true;
 		}
+		SetSprites();
 	}
 	
 	public void SetLayerVisibility(LayerVisibility visibility)
@@ -150,50 +124,36 @@ public partial class TerrainNode : Node2D, IMapObjectNode
 		}
 	}
 
-	public void ForceUpdateSprite()
+	public void SetSprites()
 	{
-		_forceUpdate = true;
-	}
-
-	public void SetMapPosition(IMapSpace mapSpace, MapSpot spot, RotationFlag rotation)
-	{
-		if(MapSpaceId == mapSpace.MapSpaceId && spot == MapSpot && RealRotation == rotation)
-			return;
-		MapSpaceId = mapSpace.MapSpaceId;
-		MapSpot = spot;
-		RealRotation = rotation;
-		_forceUpdate = true;
-	}
-
-	public void UpdateSprite()
-	{
-		if(TerrainInst == null)
+		if(Inst == null)
 			return;
 
 		var rotation = RealRotation.AddRotation(ViewRotation);
-		
-		var mapSpace = DimMaster.GetManager<MapManager>().GetMapSpaceById(MapSpaceId);
+		var mapStructComp = Inst.GetComponentOfType<MapStructCompInst>();
+		var mapSpot = mapStructComp.MapSpot;
+		var mapSpace = DimMaster.GetManager<MapManager>().GetMapSpaceById(mapStructComp.MapSpaceId);
 		var terrainManager = DimMaster.GetManager<TerrainManager>();
 		
-		var topSpriteComp = TerrainInst.GetComponentWithKey<GodotPatchCellSpriteComp>("TopSprite");
+		var topSpriteComp = Inst.GetComponentWithKey<GodotPatchCellSpriteComp>("TopSprite");
 		var topSpriteDef = topSpriteComp.CompDef as IPatchSpriteCompDef;
 		var topSprite = topSpriteComp.GetPatchSprite(() =>
 		{
-			return terrainManager.GetHorizontalAdjacency(mapSpace, MapSpot.Value, rotation, matchAny:true);
+			return terrainManager.GetHorizontalAdjacency(mapSpace, mapSpot.Value, rotation, matchAny:true);
 		});
 
-		var frontSpriteComp = TerrainInst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
+		var frontSpriteComp = Inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
 		var frontSpriteDef = frontSpriteComp.CompDef as IPatchSpriteCompDef;
 		var frontSprite = frontSpriteComp.GetPatchSprite(() =>
 		{
-			return terrainManager.GetVerticalAdjacencyAsHorizontal(mapSpace, MapSpot.Value, rotation, matchAny:true);
+			return terrainManager.GetVerticalAdjacencyAsHorizontal(mapSpace, mapSpot.Value, rotation, matchAny:true);
 		});
 		
-		var shadowSpriteComp = TerrainInst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
+		var shadowSpriteComp = Inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
 		var shadowSpriteDef = topSpriteComp.CompDef as IPatchSpriteCompDef;
 		var shadowSprite = frontSpriteComp.GetPatchSprite(() =>
 		{
-			return terrainManager.GetVerticalAdjacencyAsHorizontal(mapSpace, MapSpot.Value, rotation, matchAny:true);
+			return terrainManager.GetVerticalAdjacencyAsHorizontal(mapSpace, mapSpot.Value, rotation, matchAny:true);
 		});
 		
 		this.TopSprite.Texture = (ImageTexture)topSprite.Sprite; 

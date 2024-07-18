@@ -1,4 +1,4 @@
-[gd_scene load_steps=27 format=3 uid="uid://dq0d812v1qmf4"]
+[gd_scene load_steps=25 format=3 uid="uid://dq0d812v1qmf4"]
 
 [ext_resource type="Script" path="res://Godot/GameMaster.cs" id="1_ox1jl"]
 [ext_resource type="Script" path="res://Godot/Map/MapNode.cs" id="2_6m56v"]
@@ -7,10 +7,8 @@
 [ext_resource type="Script" path="res://Godot/Map/ZLayerPrefab.cs" id="3_qhcw6"]
 [ext_resource type="Texture2D" uid="uid://bobbmxqax1spf" path="res://Assets/Sprites/shadow_sprite.png" id="4_ep16e"]
 [ext_resource type="Script" path="res://Godot/UI/MouseOverSprite.cs" id="4_qemjc"]
-[ext_resource type="Script" path="res://Godot/Map/TerrainNode.cs" id="5_njey8"]
 [ext_resource type="Texture2D" uid="uid://bbrujo6l8wrw" path="res://Assets/Sprites/TerrainSpriteTop.png" id="6_47g7n"]
 [ext_resource type="Script" path="res://Godot/UI/MainCamera.cs" id="7_0kvpc"]
-[ext_resource type="Texture2D" uid="uid://dk0c1g65hs8ei" path="res://Assets/Sprites/TerrainSpriteFront.png" id="7_466ww"]
 [ext_resource type="Script" path="res://Godot/Map/MapStructureNode.cs" id="8_1vd1e"]
 [ext_resource type="Script" path="res://Godot/Actors/ActorNode.cs" id="10_1uygh"]
 [ext_resource type="Texture2D" uid="uid://bcxpfm8apnu6n" path="res://Assets/Sprites/actor_place_holder.png" id="11_hpayu"]
@@ -41,26 +39,6 @@ script = ExtResource("8_1vd1e")
 
 [node name="Sprite2D" type="Sprite2D" parent="MapControllerNode/PrefabNodes/MapStructureNodePrefab"]
 centered = false
-
-[node name="TerrainNodePrefab" type="Node2D" parent="MapControllerNode/PrefabNodes"]
-visible = false
-script = ExtResource("5_njey8")
-
-[node name="ShadowSprite" type="Sprite2D" parent="MapControllerNode/PrefabNodes/TerrainNodePrefab"]
-modulate = Color(1, 1, 1, 0.313726)
-texture = ExtResource("4_ep16e")
-centered = false
-offset = Vector2(0, -32)
-
-[node name="TopSprite" type="Sprite2D" parent="MapControllerNode/PrefabNodes/TerrainNodePrefab"]
-texture = ExtResource("6_47g7n")
-centered = false
-offset = Vector2(0, -72)
-
-[node name="FrontSprite" type="Sprite2D" parent="MapControllerNode/PrefabNodes/TerrainNodePrefab"]
-texture = ExtResource("7_466ww")
-centered = false
-offset = Vector2(0, -40)
 
 [node name="MapCellPrefab" type="Node2D" parent="MapControllerNode/PrefabNodes"]
 script = ExtResource("13_os1mb")

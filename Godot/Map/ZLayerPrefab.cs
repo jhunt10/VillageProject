@@ -47,9 +47,14 @@ public partial class ZLayerPrefab : Node2D
 	{
 		foreach (var node in _cellNodes.Values)
 		{
-			foreach (var mapObj in node.MapObjectNodes)
+			// foreach (var mapObj in node.MapObjectNodes)
+			// {
+			// 	mapObj.SetLayerVisibility(visibility);
+			// }
+
+			foreach (var instNode in node.InstNodes)
 			{
-				mapObj.SetLayerVisibility(visibility);
+				instNode.SetLayerVisibility(visibility);
 			}
 			
 		}
@@ -84,7 +89,6 @@ public partial class ZLayerPrefab : Node2D
 
 	public void ResyncRotation()
 	{
-		var terrainManager = DimMaster.GetManager<TerrainManager>();
 		var spots = _cellNodes.Keys.ToList().OrderBy(x => x.Y);
 		switch (MapNode.ViewRotation)
 		{
@@ -111,17 +115,17 @@ public partial class ZLayerPrefab : Node2D
 		}
 	}
 	
-	public Node2D CreateTerrainNode(MapSpot spot, IInst inst)
-	{
-		Init();
-		var newNode = (TerrainNode)MapControllerNode.TerrainNodePrefab.Duplicate(); // Create a new Sprite2D.
-		newNode.TerrainInst = inst;
-		newNode.Visible = true;
-		var cellNode = GetCellNode(spot);
-		cellNode.AddMapObjectNode(newNode);
-		newNode.SetMapPosition(MapNode.MapSpace, spot, RotationFlag.North);
-		return newNode;
-	}
+	// public Node2D CreateTerrainNode(MapSpot spot, IInst inst)
+	// {
+	// 	Init();
+	// 	var newNode = (TerrainNode)MapControllerNode.TerrainNodePrefab.Duplicate(); // Create a new Sprite2D.
+	// 	newNode.TerrainInst = inst;
+	// 	newNode.Visible = true;
+	// 	var cellNode = GetCellNode(spot);
+	// 	cellNode.AddMapObjectNode(newNode);
+	// 	newNode.SetMapPosition(MapNode.MapSpace, spot, RotationFlag.North);
+	// 	return newNode;
+	// }
 
 	private Vector2 SpotToLocalPosition(MapSpot spot, RotationFlag rotation)
 	{

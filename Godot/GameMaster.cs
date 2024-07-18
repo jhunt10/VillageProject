@@ -40,14 +40,14 @@ public partial class GameMaster : Node2D, IInstWatcher
 		// var wanderDef = DimMaster.GetDefByName(wanderDefName);
 		// var behaviorManager = DimMaster.GetManager<BehaviorManager>();
 		// var wanderBehavior = behaviorManager.InstantiateBehavior(wanderDef, actorInst);
-		actorInst.GetComponentOfType<ActorCompInst>()?.TrySetMapPosition(
-			new MapPositionData(MapControllerNode.GetMainMapNode().MapSpace,
-			new MapSpot(0,0,1), RotationFlag.South));
-
-		var actorInst2 = DimMaster.InstantiateDef(actorDef);
-		actorInst2.GetComponentOfType<ActorCompInst>()?.TrySetMapPosition(
-			new MapPositionData(MapControllerNode.GetMainMapNode().MapSpace,
-				new MapSpot(0,2,1), RotationFlag.South));
+		// actorInst.GetComponentOfType<ActorCompInst>()?.TrySetMapPosition(
+		// 	new MapPositionData(MapControllerNode.GetMainMapNode().MapSpace,
+		// 	new MapSpot(0,0,1), RotationFlag.South));
+		//
+		// var actorInst2 = DimMaster.InstantiateDef(actorDef);
+		// actorInst2.GetComponentOfType<ActorCompInst>()?.TrySetMapPosition(
+		// 	new MapPositionData(MapControllerNode.GetMainMapNode().MapSpace,
+		// 		new MapSpot(0,2,1), RotationFlag.South));
 		
 		var t = true;
 	}
@@ -130,29 +130,29 @@ public partial class GameMaster : Node2D, IInstWatcher
 			}
 		}
 		
-		var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(activeOnly:false, errorIfNull:false);
-		if (mapStructComp != null)
-		{
-			if (MapControllerNode != null)
-			{
-				var newNode = MapControllerNode.CreateNewMapStructureNode(inst);
-				if(newNode != null)
-					InstNodes.Add(inst.Id, newNode);
-				
-			}
-		}
+		// var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(activeOnly:false, errorIfNull:false);
+		// if (mapStructComp != null)
+		// {
+		// 	if (MapControllerNode != null)
+		// 	{
+		// 		var newNode = MapControllerNode.CreateNewMapStructureNode(inst);
+		// 		if(newNode != null)
+		// 			InstNodes.Add(inst.Id, newNode);
+		// 		
+		// 	}
+		// }
 		
-		var actorComp = inst.GetComponentOfType<ActorCompInst>(errorIfNull:false);
-		if (actorComp != null)
-		{
-			if (MapControllerNode != null)
-			{
-				var newNode = MapControllerNode.CreateNewActorNode(inst);
-				if(newNode != null)
-					InstNodes.Add(inst.Id, newNode);
-				
-			}
-		}
+		// var actorComp = inst.GetComponentOfType<ActorCompInst>(errorIfNull:false);
+		// if (actorComp != null)
+		// {
+		// 	if (MapControllerNode != null)
+		// 	{
+		// 		var newNode = MapControllerNode.CreateNewActorNode(inst);
+		// 		if(newNode != null)
+		// 			InstNodes.Add(inst.Id, newNode);
+		// 		
+		// 	}
+		// }
 	}
 
 	public void OnInstLoaded(IInst inst)
@@ -174,17 +174,17 @@ public partial class GameMaster : Node2D, IInstWatcher
 			}
 		}
 		
-		var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(activeOnly:false, errorIfNull:false);
-		if (mapStructComp != null)
-		{
-			if (MapControllerNode != null)
-			{
-				var newNode = MapControllerNode.CreateNewMapStructureNode(inst);
-				if(newNode != null)
-					InstNodes.Add(inst.Id, newNode);
-				
-			}
-		}
+		// var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(activeOnly:false, errorIfNull:false);
+		// if (mapStructComp != null)
+		// {
+		// 	if (MapControllerNode != null)
+		// 	{
+		// 		var newNode = MapControllerNode.CreateNewMapStructureNode(inst);
+		// 		if(newNode != null)
+		// 			InstNodes.Add(inst.Id, newNode);
+		// 		
+		// 	}
+		// }
 	}
 
 	public void OnInstDeleted(IInst inst)

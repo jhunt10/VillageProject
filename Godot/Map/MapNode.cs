@@ -75,22 +75,22 @@ public partial class MapNode : Node2D, Old_IInstNode
 			GameMaster.MainCamera.FollowMap(mapSpace.MapSpaceId);
 	}
 	
-	private void _ResyncMap()
-	{
-		foreach (var spot in MapSpace.EnumerateMapSpots().OrderBy(x => -x.Y))
-		{
-			foreach (var inst in MapSpace.ListInstsAtSpot(spot))
-			{
-				if (inst.GetComponentOfType<TerrainCompInst>() != null)
-				{
-					var node = GetMapCellNodeAtSpot(spot);
-					if(node.MapObjectNodes.All(x => x.Inst.Id != inst.Id))
-						CreateMapNode(spot);
-				}
-				
-			}
-		}
-	}
+	// private void _ResyncMap()
+	// {
+	// 	foreach (var spot in MapSpace.EnumerateMapSpots().OrderBy(x => -x.Y))
+	// 	{
+	// 		foreach (var inst in MapSpace.ListInstsAtSpot(spot))
+	// 		{
+	// 			if (inst.GetComponentOfType<TerrainCompInst>() != null)
+	// 			{
+	// 				var node = GetMapCellNodeAtSpot(spot);
+	// 				if(node.MapObjectNodes.All(x => x.Inst.Id != inst.Id))
+	// 					CreateMapNode(spot);
+	// 			}
+	// 			
+	// 		}
+	// 	}
+	// }
 
 	public void ShowZLayer(int zLayer)
 	{
@@ -137,11 +137,11 @@ public partial class MapNode : Node2D, Old_IInstNode
 		// var mouseOverSpot = GetMouseOverMapSpot();
 		// if(mouseOverSpot.HasValue)
 		// 	var mouseOverPos = MapSpotToWorldPos(mouseOverSpot.Value);
-		var changed = Inst.GetWatchedChange(_MAP_NODE_WATCHER_KEY);
-		if (changed)
-		{ 
-			_ResyncMap();
-		}
+		// var changed = Inst.GetWatchedChange(_MAP_NODE_WATCHER_KEY);
+		// if (changed)
+		// { 
+		// 	_ResyncMap();
+		// }
 	}
 
 	public Vector2 MapSpotToWorldPos(MapSpot spot)
@@ -157,23 +157,11 @@ public partial class MapNode : Node2D, Old_IInstNode
 	{
 		if(!ZLayers.ContainsKey(spot.Z))
 			CreateZLayer(spot.Z);
-		var insts = MapSpace.ListInstsAtSpot(spot).ToList();
-		
-		foreach (var inst in MapSpace.ListInstsAtSpot(spot))
-		{
-			var terrainComp = inst.GetComponentOfType<TerrainCompInst>();
-			if (terrainComp != null)
-			{
-				var newNode = ZLayers[spot.Z].CreateTerrainNode(spot, inst);
-				break;
-			}
-		}
 	}
 	
 	private void CreateZLayer(int z)
 	{
 		var prefab = GetNode("ZLayerPrefab");
-
 		var newLayer = (ZLayerPrefab)prefab.Duplicate();
 		newLayer.MapNode = this;
 		newLayer.Position = new Vector2(0, -40 * z);

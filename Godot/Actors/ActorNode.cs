@@ -144,7 +144,7 @@ public partial class ActorNode : Node2D, IMapObjectNode
 			{
 				if(this.GetParent() != null)
 					this.GetParent().RemoveChild(this);
-				cell.AddMapObjectNode(this);
+				// cell.AddMapObjectNode(this);
 			}
 
 			MapSpaceId = mapPos.MapSpaceId;

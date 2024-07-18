@@ -10,7 +10,7 @@ public partial class MapCellNode : Node2D
 {
 	public MapNode MapNode;
 	public List<IInstNode> InstNodes = new List<IInstNode>();
-	public List<IMapObjectNode> MapObjectNodes = new List<IMapObjectNode>();
+	// public List<IMapObjectNode> MapObjectNodes = new List<IMapObjectNode>();
 	public string MapSpaceId { get; set; }
 	public MapSpot Spot { get; set; }
 	public RotationFlag Rotation { get; set; }
@@ -25,12 +25,12 @@ public partial class MapCellNode : Node2D
 	{
 	}
 
-	public void AddMapObjectNode(IMapObjectNode newNode)
-	{
-		this.AddChild((Node2D)newNode);
-		MapObjectNodes.Add(newNode);
-		newNode.MapNode = MapNode;
-	}
+	// public void AddMapObjectNode(IMapObjectNode newNode)
+	// {
+	// 	this.AddChild((Node2D)newNode);
+	// 	MapObjectNodes.Add(newNode);
+	// 	newNode.MapNode = MapNode;
+	// }
 
 	public void AddInstNode(IInstNode instNode)
 	{
@@ -44,10 +44,14 @@ public partial class MapCellNode : Node2D
 		MapSpaceId = mapSpace.MapSpaceId;
 		Spot = spot;
 		Rotation = rotation;
-		foreach (var objNode in MapObjectNodes)
+		// foreach (var objNode in MapObjectNodes)
+		// {
+		// 	objNode.SetViewRotation(rotation);
+		// 	objNode.ForceUpdateSprite();
+		// }
+		foreach (var objNode in InstNodes)
 		{
 			objNode.SetViewRotation(rotation);
-			objNode.ForceUpdateSprite();
 		}
 	}
 }

@@ -6,6 +6,7 @@ using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.MapStructures.Constructables;
 using VillageProject.Core.Map.Pathing;
 using VillageProject.Core.Map.Terrain;
+using VillageProject.Godot.InstNodes;
 using VillageProject.Godot.Sprites;
 
 namespace VillageProject.Godot.DefDefs.DefPrefabs;
@@ -65,6 +66,10 @@ public static class TerrainDefs
                             CellSideFlags.FrontLeft | CellSideFlags.Front | CellSideFlags.FrontRight,
                     }} 
                 }
+            },
+            new InstNodeCompDef()
+            {
+                PrefabNodeName = "terrain_node.tscn"
             }
         },
     };
@@ -122,6 +127,10 @@ public static class TerrainDefs
                             CellSideFlags.FrontLeft | CellSideFlags.Front | CellSideFlags.FrontRight,
                     }} 
                 }
+            },
+            new InstNodeCompDef()
+            {
+                PrefabNodeName = "terrain_node.tscn"
             }
         },
     };

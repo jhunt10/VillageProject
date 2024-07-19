@@ -1,4 +1,5 @@
 ﻿using Godot;
+using VillageProject.Core.Behavior;
 using VillageProject.Core.DIM.Defs;
 using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Map;
@@ -31,6 +32,7 @@ public class InstNodeCompInst : BaseCompInst
         var newNode = prefab.Instantiate<Node2D>();
         InstNode = (IInstNode)newNode;
         InstNode.SetInst(this.Instance);
+        GameMaster.Instance.CallDeferred("add_child", (Node2D)InstNode);
 
         var mapStructComp = Instance.GetComponentOfType<MapStructCompInst>(activeOnly: false);
         if(mapStructComp != null)

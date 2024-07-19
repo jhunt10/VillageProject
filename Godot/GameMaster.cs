@@ -17,6 +17,7 @@ using Timer = Godot.Timer;
 
 public partial class GameMaster : Node2D, IInstWatcher
 {
+	public static GameMaster Instance { get; private set; }
 	private bool inited = false;
 	public static MainCamera MainCamera;
 	public static MapControllerNode MapControllerNode;
@@ -44,10 +45,10 @@ public partial class GameMaster : Node2D, IInstWatcher
 		// 	new MapPositionData(MapControllerNode.GetMainMapNode().MapSpace,
 		// 	new MapSpot(0,0,1), RotationFlag.South));
 		//
-		// var actorInst2 = DimMaster.InstantiateDef(actorDef);
-		// actorInst2.GetComponentOfType<ActorCompInst>()?.TrySetMapPosition(
-		// 	new MapPositionData(MapControllerNode.GetMainMapNode().MapSpace,
-		// 		new MapSpot(0,2,1), RotationFlag.South));
+		var actorInst2 = DimMaster.InstantiateDef(actorDef);
+		actorInst2.GetComponentOfType<ActorCompInst>()?.TrySetMapPosition(
+			new MapPositionData(MapControllerNode.GetMainMapNode().MapSpace,
+				new MapSpot(0,2,1), RotationFlag.South));
 		
 		var t = true;
 	}
@@ -56,6 +57,7 @@ public partial class GameMaster : Node2D, IInstWatcher
 	{
 		if (!inited)
 		{
+			Instance = this;
 			DimMaster.AddInstWatcher(this);
 			DefWriter.SaveAllDefs();
 			DimMaster.StartUp();

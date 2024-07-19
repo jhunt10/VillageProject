@@ -34,7 +34,10 @@ public partial class MapCellNode : Node2D
 
 	public void AddInstNode(IInstNode instNode)
 	{
-		this.AddChild((Node2D)instNode);
+		var node = (Node2D)instNode;
+		if(node.GetParent() != null)
+			node.GetParent().RemoveChild(node);
+		this.AddChild(node);
 		InstNodes.Add(instNode);
 		instNode.MapNode = MapNode;
 	}

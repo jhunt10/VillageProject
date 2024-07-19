@@ -36,7 +36,6 @@ public partial class MapControllerNode : Node2D
 		MouseOverSprite = GetNode<MouseOverSprite>("MouseOverSprite");
 		// ConstructablePreview = GetNode<ConstructablePreview>("ConstructablePreview");
 		
-		ActorNodePrefab = GetNode<ActorNode>("PrefabNodes/ActorNodePrefab");
 		MapStructureNodePrefab = GetNode<MapStructureNode>("PrefabNodes/MapStructureNodePrefab");
 		MapCellPrefab = GetNode<MapCellNode>("PrefabNodes/MapCellPrefab");
 		MapNodePrefab = GetNode<MapNode>("MapNode");

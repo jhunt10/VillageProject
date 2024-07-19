@@ -5,6 +5,7 @@ using VillageProject.Core.Enums;
 using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Sprites;
 using VillageProject.Godot.Actors;
+using VillageProject.Godot.InstNodes;
 
 namespace VillageProject.Godot.DefDefs.DefPrefabs;
 
@@ -30,6 +31,10 @@ public static class BehaviorDefs
                     { RotationFlag.South, new SpriteDataDef("test_actor_south.png", 32, 40, 0, 0)},
                     { RotationFlag.West, new SpriteDataDef("test_actor_west.png", 32, 40, 0, 0)},
                 }
+            },
+            new InstNodeCompDef()
+            {
+                PrefabNodeName = "actor_node.tscn"
             }
         }
     };

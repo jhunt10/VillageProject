@@ -10,8 +10,8 @@ namespace VillageProject.Core.Behavior;
 
 public class ActorCompInst : BaseCompInst, IMapPositionComp
 {
-    public string? MapSpaceId { get; protected set; }
-    public MapSpot? MapSpot { get; }
+    public string? MapSpaceId => MapPosition?.MapSpaceId;
+    public MapSpot? MapSpot => MapPosition?.MapSpot;
 
     public const string ACTOR_MAP_LAYER = "Actor";
     public string Layer => ACTOR_MAP_LAYER;
@@ -46,7 +46,7 @@ public class ActorCompInst : BaseCompInst, IMapPositionComp
         
         Active = true;
         MapPosition = mapPos;
-        NotifyWatchers();
+        Instance.FlagCompChange(this);
         return new Result(true);
     }
 

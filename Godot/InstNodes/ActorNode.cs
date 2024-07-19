@@ -6,16 +6,17 @@ using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Godot.Actors;
+using VillageProject.Godot.InstNodes;
 using VillageProject.Godot.Map;
 using VillageProject.Godot.Sprites;
 
-public partial class ActorNode : Node2D, IMapObjectNode
+public partial class ActorNode : Node2D, IInstNode
 {
 	public MapNode MapNode { get; set; }
 	public Sprite2D Spite;
 	public IInst Inst { get; private set; }
-	public string? MapSpaceId { get; set; }
-	public MapSpot? MapSpot { get; set; }
+	// public string? MapSpaceId { get; set; }
+	// public MapSpot? MapSpot { get; set; }
 	public RotationFlag RealRotation { get; set; }
 	public RotationFlag ViewRotation { get; set; }
 	
@@ -59,30 +60,15 @@ public partial class ActorNode : Node2D, IMapObjectNode
 		}
 	}
 
-	private bool _inited;
 	private bool _forceUpdate = false;
 	private const string SPRITE_WATCHER_KEY = "MapStructNodeSpriteWatcher";
 	
-	private void _init()
-	{
-		if(_inited)
-			return;
-		Spite = GetNode<Sprite2D>("Sprite2D");
-		_inited = true;
-	}
 
 	public void Delete()
 	{
 		this.QueueFree();
 	}
 	
-	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
-	{
-		if(!_inited)
-			_init();
-	}
-
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
@@ -90,11 +76,13 @@ public partial class ActorNode : Node2D, IMapObjectNode
 		{
 			return;
 		}
+		if(Inst.GetWatchedChange("ActorNode"))
+			GameMaster.MapControllerNode.PlaceInstNodeOnMap(this);
 
 		// Get sprite comp to check for updates
-		var spriteChange = Inst.GetWatchedChange(SPRITE_WATCHER_KEY);
-		if (spriteChange)
-			UpdateSprite();
+		// var spriteChange = Inst.GetWatchedChange(SPRITE_WATCHER_KEY);
+		// if (spriteChange)
+		UpdateSprite();
 	}
 
 	public void SetShow(bool show)
@@ -106,10 +94,11 @@ public partial class ActorNode : Node2D, IMapObjectNode
 	{
 		if (Inst != null)
 			throw new Exception("Inst already set");
-		_init();
 		Inst = inst;
+		Spite = GetNode<Sprite2D>("Sprite2D");
 		Inst.AddComponentWatcher<GodotActorSpriteComp>(SPRITE_WATCHER_KEY);
 		Console.WriteLine($"Inst {inst._DebugId} assigned to Node {this.Name}.");
+		Inst.AddComponentWatcher<ActorCompInst>("ActorNode", false);
 		this.Visible = true;
 		this.Spite.Visible = true;
 	}
@@ -130,33 +119,35 @@ public partial class ActorNode : Node2D, IMapObjectNode
 			return;
 		}
 		var mapPos = actorComp.MapPosition.Value;
+		RealRotation = actorComp.MapPosition.Value.Rotation;
 		
 		// Move Node position if needed
-		if (_forceUpdate 
-		    || mapPos.MapSpot != MapSpot || mapPos.Rotation != RealRotation || mapPos.MapSpaceId != MapSpaceId
-		    || spriteComp.ViewRotation != ViewRotation)
-		{
-			var mapNode = GameMaster.MapControllerNode.GetMapNode(mapPos.MapSpaceId);
-			if (mapNode == null)
-				throw new Exception($"Failed to find MapNode for MapSpace '{mapPos.MapSpaceId}'.");
-			var cell = mapNode.GetMapCellNodeAtSpot(mapPos.MapSpot);
-			if (this.GetParent() != cell)
-			{
-				if(this.GetParent() != null)
-					this.GetParent().RemoveChild(this);
-				// cell.AddMapObjectNode(this);
-			}
-
-			MapSpaceId = mapPos.MapSpaceId;
-			MapSpot = mapPos.MapSpot;
-			RealRotation = mapPos.Rotation;
-			if(MapNode != null)
-				ViewRotation = MapNode.ViewRotation;
-		}
+		// if (_forceUpdate 
+		//     || mapPos.MapSpot != MapSpot || mapPos.Rotation != RealRotation || mapPos.MapSpaceId != MapSpaceId
+		//     || spriteComp.ViewRotation != ViewRotation)
+		// {
+		// 	var mapNode = GameMaster.MapControllerNode.GetMapNode(mapPos.MapSpaceId);
+		// 	if (mapNode == null)
+		// 		throw new Exception($"Failed to find MapNode for MapSpace '{mapPos.MapSpaceId}'.");
+		// 	var cell = mapNode.GetMapCellNodeAtSpot(mapPos.MapSpot);
+		// 	if (this.GetParent() != cell)
+		// 	{
+		// 		if(this.GetParent() != null)
+		// 			this.GetParent().RemoveChild(this);
+		// 		// cell.AddMapObjectNode(this);
+		// 	}
+		//
+		// 	MapSpaceId = mapPos.MapSpaceId;
+		// 	MapSpot = mapPos.MapSpot;
+		// 	RealRotation = mapPos.Rotation;
+		// 	if(MapNode != null)
+		// 		ViewRotation = MapNode.ViewRotation;
+		// }
 		
 		// Reset sprite
 		if (spriteComp == null)
 			throw new Exception($"Inst {Inst._DebugId} has no GodotActorSpriteComp");
+		spriteComp.DirtySprite();
 		var sprite = spriteComp.GetSprite();
 		var imageText = (ImageTexture)sprite.Sprite;
 		this.Spite.Texture = imageText;

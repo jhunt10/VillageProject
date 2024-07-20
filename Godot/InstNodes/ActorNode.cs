@@ -5,6 +5,7 @@ using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapStructures;
+using VillageProject.Core.Sprites;
 using VillageProject.Godot.Actors;
 using VillageProject.Godot.InstNodes;
 using VillageProject.Godot.Map;
@@ -76,7 +77,7 @@ public partial class ActorNode : Node2D, IInstNode
 		{
 			return;
 		}
-		if(Inst.GetWatchedChange("ActorNode"))
+		if(Inst.ListWatchedChanges("ActorNode").Any())
 			GameMaster.MapControllerNode.PlaceInstNodeOnMap(this);
 
 		// Get sprite comp to check for updates
@@ -96,9 +97,13 @@ public partial class ActorNode : Node2D, IInstNode
 			throw new Exception("Inst already set");
 		Inst = inst;
 		Spite = GetNode<Sprite2D>("Sprite2D");
-		Inst.AddComponentWatcher<GodotActorSpriteComp>(SPRITE_WATCHER_KEY);
 		Console.WriteLine($"Inst {inst._DebugId} assigned to Node {this.Name}.");
-		Inst.AddComponentWatcher<ActorCompInst>("ActorNode", false);
+		Inst.AddChangeWatcher("ActorNode", new []
+		{
+			SpriteChangeFlags.SpriteChanged,
+			MapStructChangeFlags.MapPositionChanged, 
+			MapStructChangeFlags.MapRotationChanged
+		}, false);
 		this.Visible = true;
 		this.Spite.Visible = true;
 	}

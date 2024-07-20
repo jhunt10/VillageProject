@@ -70,7 +70,7 @@ public class InventoryCompInst : BaseCompInst
             _holdingItems.Add(item.Id);
             item.SetInventory(this);
         }
-        Instance.FlagCompChange(this);
+        Instance.FlagWatchedChange(InventoryChangeFlags.HeldItemsChange);
         return new Result(true);
     }
 

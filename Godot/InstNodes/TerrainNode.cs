@@ -55,7 +55,11 @@ public partial class TerrainNode : Node2D, IInstNode
 		_shadowSprite = GetNode<Sprite2D>("ShadowSprite");
 		_topSprite = GetNode<Sprite2D>("TopSprite");
 		_frontSprite = GetNode<Sprite2D>("FrontSprite");
-		Inst.AddComponentWatcher<MapStructCompInst>("TerrainNode:MapPos", true);
+		Inst.AddChangeWatcher("TerrainNode", new []
+		{
+			MapStructChangeFlags.MapPositionChanged,
+			MapStructChangeFlags.MapRotationChanged
+		}, true);
 	}
 
 	public void Delete()
@@ -72,7 +76,7 @@ public partial class TerrainNode : Node2D, IInstNode
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		if(Inst.GetWatchedChange("TerrainNode:MapPos", true))
+		if(Inst.ListWatchedChanges("TerrainNode").Any())
 			SetSprites();
 	}
 

@@ -1,4 +1,5 @@
 ﻿using VillageProject.Core.DIM.Defs;
+using VillageProject.Core.DIM.Watchers;
 
 namespace VillageProject.Core.DIM.Insts;
 
@@ -15,6 +16,8 @@ public abstract class BaseInst : IInst
     public string _DebugId => (Def?.Label ?? "NoDef") + ":" + Id;
     public string Id { get; }
     public IDef Def { get; }
+
+    private ChangeWatchTracker _changeTracker { get; } = new ChangeWatchTracker();
     
     public BaseInst(IDef def)
     {
@@ -97,41 +100,23 @@ public abstract class BaseInst : IInst
 
     public abstract void _Delete();
 
-    public void AddComponentWatcher<TComp>(string key, bool initiallyDirty = true)
-        where TComp : ICompInst
+    public void AddChangeWatcher(string key, IEnumerable<string> changeFlag, bool initiallyDirty = true)
     {
-        foreach (var comp in ListComponentsOfType<TComp>(activeOnly:false))
-        {
-            if(!_watchedComps.ContainsKey(comp.CompKey))
-                _watchedComps.Add(comp.CompKey, new Dictionary<string, bool>());
-            if(!_watchedComps[comp.CompKey].ContainsKey(key))
-                _watchedComps[comp.CompKey].Add(key, initiallyDirty);
-        }
+        _changeTracker.AddWatcher(key, changeFlag, initiallyDirty);
     }
 
-    public void FlagCompChange(ICompInst comp)
+    public void FlagWatchedChange(string changeFlag)
     {
-        if(_watchedComps.ContainsKey(comp.CompKey))
-            foreach (var pair in _watchedComps[comp.CompKey])
-            {
-                _watchedComps[comp.CompKey][pair.Key] = true;
-            }
+        _changeTracker.AddChange(changeFlag);
     }
 
-    public bool GetWatchedChange(string key, bool consumeChange = true)
+    public List<string> ListWatchedChanges(string key, bool consumeChanges = true)
     {
-        var change = false;
-        foreach (var watchedComp in _watchedComps.Values)
-        {
-            if(!watchedComp.ContainsKey(key))
-                continue;
-            if (watchedComp[key])
-            {
-                change = true;
-                if (consumeChange)
-                    watchedComp[key] = false;
-            }
-        }
-        return change;
+        return _changeTracker.ListChanges(key, consumeChanges);
+    }
+
+    public bool GetWatchedChange(string key, string changeFlag, bool consumeChanges = true)
+    {
+        return _changeTracker.GetChange(key, changeFlag, consumeChanges);
     }
 }

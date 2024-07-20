@@ -59,7 +59,10 @@ public partial class MapNode : Node2D, Old_IInstNode
 	public void LoadMap(IMapSpace mapSpace)
 	{
 		MapSpace = mapSpace;
-		MapSpace.Instance.AddComponentWatcher<IMapSpace>(_MAP_NODE_WATCHER_KEY);
+		MapSpace.Instance.AddChangeWatcher(_MAP_NODE_WATCHER_KEY, new []
+		{
+			MapSpaceChangeFlags.HeldInstsChanged
+		});
 		foreach (var spot in MapSpace.EnumerateMapSpots().OrderBy(x => -x.Y))
 		{
 			CreateMapNode(spot);

@@ -37,22 +37,31 @@ public interface IInst
     /// The watcher can call GetWatchedChange(key) to check if changes have occured since it last checked. 
     /// </summary>
     /// <param name="key">Instance unique key to be used when checking</param>
+    /// <param name="changeFlag">Flags of changes to watch for</param>
     /// <param name="initiallyDirty">Set this flag as dirty upon creating it</param>
-    /// <typeparam name="TComp">Type of component(s) to watch for change on</typeparam>
-    public void AddComponentWatcher<TComp>(string key, bool initiallyDirty = true)
-        where TComp : ICompInst;
+    public void AddChangeWatcher(string key, IEnumerable<string> changeFlag, bool initiallyDirty = true);
 
     /// <summary>
     /// Flags a component's change for any watcher of that component.
     /// Should only be called by the component it's self.
     /// </summary>
-    /// <param name="comp">Component who has changed</param>
-    public void FlagCompChange(ICompInst comp);
+    /// <param name="changeFlag">Flag of change that occured</param>
+    public void FlagWatchedChange(string changeFlag);
 
+    /// <summary>
+    /// List all changes that have occured since the last time this key was checked.
+    /// </summary>
+    /// <param name="key">Instance unique key provided when watcher was added</param>
+    /// <param name="consumeChanges">Mark all changes as false after checking</param>
+    /// <returns>List of changes</returns>
+    public List<string> ListWatchedChanges(string key, bool consumeChanges = true);
+    
     /// <summary>
     /// Check if a change in components has occured since the last time this key was checked.
     /// </summary>
     /// <param name="key">Instance unique key provided when watcher was added</param>
+    /// <param name="changeFlag">Flag of change to check for</param>
+    /// <param name="consumeChanges">Mark changes as false after checking</param>
     /// <returns>True if any chane has occured</returns>
-    public bool GetWatchedChange(string key, bool consumeChange = true);
+    public bool GetWatchedChange(string key, string changeFlag, bool consumeChanges = true);
 }

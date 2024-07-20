@@ -3,6 +3,7 @@ using System;
 using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Items;
+using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Godot.InstNodes;
 using VillageProject.Godot.Map;
@@ -25,7 +26,7 @@ public partial class ItemPileNode : Node2D, IInstNode
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		if(Inst.GetWatchedChange("ItemPileNode:Inv", true))
+		if(Inst.ListWatchedChanges("ItemPileNode").Any())
 			SetSprites();
 	}
 
@@ -35,8 +36,12 @@ public partial class ItemPileNode : Node2D, IInstNode
 	{
 		this.Inst = inst;
 		ItemSprite = GetNode<Sprite2D>("HeldItemSprite");
-		inst.AddComponentWatcher<MapStructCompInst>("ItemPileNode:MapPos", true);
-		inst.AddComponentWatcher<InventoryCompInst>("ItemPileNode:Inv", true);
+		inst.AddChangeWatcher("ItemPileNode", new []
+		{
+			MapStructChangeFlags.MapPositionChanged,
+			MapStructChangeFlags.MapRotationChanged,
+			InventoryChangeFlags.HeldItemsChange
+		});
 	}
 	
 	public void Delete()

@@ -87,12 +87,16 @@ public class MapStructCompInst : BaseCompInst, IMapPositionComp
         }
         
         Active = true;
+        if(this.MapSpot.HasValue && this.MapSpot.Value != mapPos.MapSpot)
+            Instance.FlagWatchedChange(MapStructChangeFlags.MapPositionChanged);
+        if(this.Rotation != mapPos.Rotation)
+            Instance.FlagWatchedChange(MapStructChangeFlags.MapRotationChanged);
         MapSpaceId = mapPos.MapSpaceId;
         MapSpot = mapPos.MapSpot;
         Rotation = mapPos.Rotation;
         OccupationData = newOcc;
 
-        Instance.FlagCompChange(this);
+        
         NotifyWatchers();
         return new Result(true);
     }

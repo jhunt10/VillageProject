@@ -20,7 +20,7 @@ public class InstNodeCompInst : BaseCompInst
 
     public override void Update(float delta)
     {
-        if(Instance.GetWatchedChange("GodotInstNode:MapStruct"))
+        if(Instance.ListWatchedChanges("GodotInstNode").Any())
             GameMaster.MapControllerNode.PlaceInstNodeOnMap(InstNode);
     }
 
@@ -36,6 +36,10 @@ public class InstNodeCompInst : BaseCompInst
 
         var mapStructComp = Instance.GetComponentOfType<MapStructCompInst>(activeOnly: false);
         if(mapStructComp != null)
-            Instance.AddComponentWatcher<MapStructCompInst>("GodotInstNode:MapStruct", mapStructComp.Active);
+            Instance.AddChangeWatcher("GodotInstNode", new []
+            {
+                MapStructChangeFlags.MapPositionChanged,
+                MapStructChangeFlags.MapRotationChanged,
+            });
     }
 }

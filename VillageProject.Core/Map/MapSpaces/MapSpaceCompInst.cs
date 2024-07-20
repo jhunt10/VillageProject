@@ -204,7 +204,7 @@ public class MapSpaceCompInst : BaseCompInst, IMapSpace
         }
 
         // Console.WriteLine($"Added Inst {inst._DebugId} to spot [{string.Join(", ", spots.Select(x => x.ToString()))}].");
-        Instance.FlagCompChange(this);
+        Instance.FlagWatchedChange(MapSpaceChangeFlags.HeldInstsChanged);
         return new Result(true);
     }
 
@@ -220,7 +220,7 @@ public class MapSpaceCompInst : BaseCompInst, IMapSpace
         }
         _inst_to_spots[inst.Id].Clear();
         _inst_to_spots.Remove(inst.Id);
-        Instance.FlagCompChange(this);
+        Instance.FlagWatchedChange(MapSpaceChangeFlags.HeldInstsChanged);
     }
 
     private class MapCell

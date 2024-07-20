@@ -93,7 +93,7 @@ public partial class MapStructureNode : Node2D, IMapObjectNode
 			return;
 		
 		// Get sprite comp to check for updates
-		var spriteChange = Inst.GetWatchedChange(SPRITE_WATCHER_KEY);
+		var spriteChange = Inst.GetWatchedChange(SPRITE_WATCHER_KEY, SpriteChangeFlags.SpriteChanged);
 		if (spriteChange)
 			UpdateSprite();
 	}
@@ -109,7 +109,7 @@ public partial class MapStructureNode : Node2D, IMapObjectNode
 			throw new Exception("Inst already set");
 		_init();
 		Inst = inst;
-		Inst.AddComponentWatcher<GodotMapStructSpriteComp>(SPRITE_WATCHER_KEY);
+		Inst.AddChangeWatcher(SPRITE_WATCHER_KEY, new []{SpriteChangeFlags.SpriteChanged});
 		Console.WriteLine($"Inst {inst._DebugId} assigned to Node {this.Name}.");
 	}
 	

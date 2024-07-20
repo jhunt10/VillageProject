@@ -24,15 +24,6 @@ public class ActorCompInst : BaseCompInst, IMapPositionComp
     {
         Active = true;
     }
-    
-    private void NotifyWatchers()
-    {
-        var watchers = Instance.ListComponentsOfType<IMapPlacementWatcherComp>(activeOnly:false);
-        foreach (var watcherComp in watchers)
-        {
-            watcherComp.MapPositionSet(MapPosition);
-        }
-    }
 
     public IMapSpace GetMapSpace()
     {
@@ -44,13 +35,14 @@ public class ActorCompInst : BaseCompInst, IMapPositionComp
         if(MapPosition.HasValue && MapPosition.Value == mapPos)
             return new Result(true, "Already at position.");
         
+        if(MapPosition.HasValue && MapPosition.Value.MapSpot != mapPos.MapSpot)
+            Instance.FlagWatchedChange(MapStructChangeFlags.MapPositionChanged);
+        if(MapPosition.HasValue && MapPosition.Value.Rotation != mapPos.Rotation)
+            Instance.FlagWatchedChange(MapStructChangeFlags.MapRotationChanged);
         Active = true;
         MapPosition = mapPos;
-        Instance.FlagCompChange(this);
         return new Result(true);
     }
-
-    public float rotateTimer = 0;
 
     public override void Update(float delta)
     {

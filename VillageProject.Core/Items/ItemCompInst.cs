@@ -69,7 +69,7 @@ public class ItemCompInst : BaseCompInst, IReservable
         finally
         {
             _settingInventory = false;
-            Instance.FlagCompChange(this);
+            Instance.FlagWatchedChange(ItemChangeFlags.ParentInventoryChange);
         }
     }
 

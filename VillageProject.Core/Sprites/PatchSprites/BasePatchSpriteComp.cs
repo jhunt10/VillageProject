@@ -5,11 +5,11 @@ using VillageProject.Core.Map;
 
 namespace VillageProject.Core.Sprites.PatchSprites;
 
-public abstract class BasePatchCellSpriteComp : BaseSpriteComp
+public abstract class BasePatchCellSpriteCompInst : BaseSpriteCompInst
 {
     public const string SPRITE_KEY = "full_sprite";
     
-    public BasePatchCellSpriteComp(ICompDef def, IInst inst) : base(def, inst)
+    public BasePatchCellSpriteCompInst(ICompDef def, IInst inst) : base(def, inst)
     {
         
     }

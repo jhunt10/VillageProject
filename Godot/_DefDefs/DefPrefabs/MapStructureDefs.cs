@@ -6,6 +6,8 @@ using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.MapStructures.Constructables;
 using VillageProject.Core.Map.Pathing;
 using VillageProject.Core.Sprites;
+using VillageProject.Core.Sprites.MapStructures;
+using VillageProject.Godot.InstNodes;
 using VillageProject.Godot.Sprites;
 
 namespace VillageProject.Godot.DefDefs.DefPrefabs;
@@ -59,7 +61,7 @@ public class MapStructureDefs
                     { RotationFlag.West, new SpriteDataDef("BedWest.png", 64, 72, 0, 0)},
                 }
             },
-            new GodotMapStructSpriteCompDef()
+            new MapStructSpriteCompDef()
             {
                 DefaultSprite = new SpriteDataDef("BedNorth.png", 32, 104, 0, 32),
                 RotationSprites = new Dictionary<RotationFlag, SpriteDataDef>
@@ -69,6 +71,10 @@ public class MapStructureDefs
                     { RotationFlag.South, new SpriteDataDef("BedSouth.png", 32, 104, 0, 0)},
                     { RotationFlag.West, new SpriteDataDef("BedWest.png", 64, 72, 0, 0)},
                 }
+            },
+            new InstNodeCompDef()
+            {
+                PrefabNodeName = "map_struct_node.tscn"
             }
         }
     };
@@ -110,6 +116,10 @@ public class MapStructureDefs
                 SpriteHight = 32,
                 SpriteWidth = 32,
                 SpriteSheet = "planter_tiles.png"
+            },
+            new InstNodeCompDef()
+            {
+                PrefabNodeName = "map_struct_node.tscn"
             }
         }
     };
@@ -146,7 +156,7 @@ public class MapStructureDefs
                     { RotationFlag.West, new SpriteDataDef("BrickWallWest.png", 32, 72, 0, 0)},
                 }
             },
-            new GodotMapStructSpriteCompDef()
+            new MapStructSpriteCompDef()
             {
                 DefaultSprite = new SpriteDataDef("BrickWallNorth.png", 32, 72, 0, 0),
                 RotationSprites = new Dictionary<RotationFlag, SpriteDataDef>
@@ -165,6 +175,10 @@ public class MapStructureDefs
                         BlocksPathThrough = CellSideFlags.BackLeft | CellSideFlags.Back | CellSideFlags.BackRight
                     }} 
                 }
+            },
+            new InstNodeCompDef()
+            {
+                PrefabNodeName = "map_struct_node.tscn"
             }
         }
     };

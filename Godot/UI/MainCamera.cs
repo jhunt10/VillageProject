@@ -5,6 +5,7 @@ using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Map.Terrain;
+using VillageProject.Core.Sprites;
 
 public partial class MainCamera : Camera2D
 {
@@ -16,11 +17,15 @@ public partial class MainCamera : Camera2D
 
 	private bool _started = false;
 	
+	public LayerVisibility LayerVisibility { get; private set; }
+	
+	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		FacingDirection = RotationFlag.North;
 		CenterMapSpot = new MapSpot(0, 0, 0);
+		LayerVisibility = LayerVisibility.Full;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -120,11 +125,11 @@ public partial class MainCamera : Camera2D
 			}
 			if (eventKey.Pressed && eventKey.Keycode == Key.Up)
 			{
-				MoveCameraInDirection(DirectionFlag.Top);
+				IncrementViewLayer(true);
 			}
 			else if (eventKey.Pressed && eventKey.Keycode == Key.Down)
 			{
-				MoveCameraInDirection(DirectionFlag.Bottom);
+				IncrementViewLayer(false);
 			}
 			else if (eventKey.Pressed && eventKey.Keycode == Key.E)
 			{
@@ -146,6 +151,42 @@ public partial class MainCamera : Camera2D
 				if(mapNode != null)
 					MouseClickedSpot(mapNode.MapSpace, MouseOverSprite.MosueOverSpot.Value + new MapSpot(0,0,1));
 			}
+		}
+	}
+
+	public void IncrementViewLayer(bool up)
+	{
+		if (LayerVisibility == LayerVisibility.Full)
+		{
+			if (up)
+			{
+				MoveCameraInDirection(DirectionFlag.Top);
+				LayerVisibility = LayerVisibility.Shadow;
+			}
+			else // down
+				LayerVisibility = LayerVisibility.Half;
+		}
+		else if (LayerVisibility == LayerVisibility.Half)
+		{
+			if (up)
+				LayerVisibility = LayerVisibility.Full;
+			else // down
+				LayerVisibility = LayerVisibility.Shadow;
+		}
+		else if (LayerVisibility == LayerVisibility.Shadow)
+		{
+			if (up)
+				LayerVisibility = LayerVisibility.Half;
+			else
+			{
+				MoveCameraInDirection(DirectionFlag.Bottom);
+				LayerVisibility = LayerVisibility.Full;
+			}
+		}
+		var mapNode = GameMaster.MapControllerNode.GetMapNode(_followingMapNodeId);
+		if (mapNode != null)
+		{
+			mapNode.ShowZLayer(CenterMapSpot.Z, LayerVisibility);
 		}
 	}
 

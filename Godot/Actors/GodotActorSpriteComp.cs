@@ -10,9 +10,9 @@ using VillageProject.Godot.Sprites;
 
 namespace VillageProject.Godot.Actors;
 
-public class GodotActorSpriteComp : BaseActorSpriteComp
+public class GodotActorSpriteCompInst : BaseActorSpriteCompInst
 {
-    public GodotActorSpriteComp(ICompDef def, IInst inst) : base(def, inst)
+    public GodotActorSpriteCompInst(ICompDef def, IInst inst) : base(def, inst)
     {
         Active = true;
     }

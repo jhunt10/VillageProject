@@ -16,6 +16,7 @@ public partial class ActorNode : Node2D, IInstNode
 	public MapNode MapNode { get; set; }
 	public Sprite2D Spite;
 	public IInst Inst { get; private set; }
+	public InstNodeCompInst InstNodeComp { get; private set; }
 	// public string? MapSpaceId { get; set; }
 	// public MapSpot? MapSpot { get; set; }
 	public RotationFlag RealRotation { get; set; }
@@ -25,7 +26,7 @@ public partial class ActorNode : Node2D, IInstNode
 
 	public void SetLayerVisibility(LayerVisibility visibility)
 	{
-		
+		InstNodeComp.SetLayerVisibility(visibility);
 		this.LayerVisibility = visibility;
 		switch (LayerVisibility)
 		{
@@ -52,12 +53,12 @@ public partial class ActorNode : Node2D, IInstNode
 
 	public void SetViewRotation(RotationFlag viewRotation)
 	{
+		InstNodeComp.SetViewRotation(viewRotation);
 		if (ViewRotation != viewRotation)
 		{
-			var spriteComp = Inst.GetComponentOfType<GodotActorSpriteComp>(errorIfNull: true);
-			spriteComp.SetViewRotation(viewRotation);
+			Inst.FlagWatchedChange(MapStructChangeFlags.ViewRotationChanged);
+			Inst.FlagWatchedChange(SpriteChangeFlags.SpriteDirtied);
 			ViewRotation = viewRotation;
-			ForceUpdateSprite();
 		}
 	}
 
@@ -77,7 +78,7 @@ public partial class ActorNode : Node2D, IInstNode
 		{
 			return;
 		}
-		if(Inst.ListWatchedChanges("ActorNode").Any())
+		if(Inst.GetWatchedChange("ActorNode", MapStructChangeFlags.MapPositionChanged))
 			GameMaster.MapControllerNode.PlaceInstNodeOnMap(this);
 
 		// Get sprite comp to check for updates
@@ -96,13 +97,15 @@ public partial class ActorNode : Node2D, IInstNode
 		if (Inst != null)
 			throw new Exception("Inst already set");
 		Inst = inst;
+		InstNodeComp = Inst.GetComponentOfType<InstNodeCompInst>();
 		Spite = GetNode<Sprite2D>("Sprite2D");
 		Console.WriteLine($"Inst {inst._DebugId} assigned to Node {this.Name}.");
 		Inst.AddChangeWatcher("ActorNode", new []
 		{
-			SpriteChangeFlags.SpriteChanged,
+			SpriteChangeFlags.SpriteRefreshed,
 			MapStructChangeFlags.MapPositionChanged, 
-			MapStructChangeFlags.MapRotationChanged
+			MapStructChangeFlags.MapRotationChanged,
+			MapStructChangeFlags.ViewRotationChanged
 		}, false);
 		this.Visible = true;
 		this.Spite.Visible = true;
@@ -110,14 +113,14 @@ public partial class ActorNode : Node2D, IInstNode
 	
 	public void ForceUpdateSprite()
 	{
-		var spriteComp = Inst.GetComponentOfType<GodotActorSpriteComp>(errorIfNull: true);
+		var spriteComp = Inst.GetComponentOfType<GodotActorSpriteCompInst>(errorIfNull: true);
 		spriteComp?.DirtySprite();
 	}
 
 	public void UpdateSprite()
 	{
 		var actorComp = Inst.GetComponentOfType<ActorCompInst>(errorIfNull: true);
-		var spriteComp = Inst.GetComponentOfType<GodotActorSpriteComp>();
+		var spriteComp = Inst.GetComponentOfType<GodotActorSpriteCompInst>();
 		if (!actorComp.MapPosition.HasValue)
 		{
 			this.Visible = false;

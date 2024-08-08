@@ -1,4 +1,4 @@
-﻿namespace VillageProject.Godot.Map;
+﻿namespace VillageProject.Core.Enums;
 
 public enum LayerVisibility
 {

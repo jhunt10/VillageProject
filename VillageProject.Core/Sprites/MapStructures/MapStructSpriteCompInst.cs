@@ -4,23 +4,35 @@ using VillageProject.Core.DIM.Insts;
 using VillageProject.Core.Enums;
 using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapSpaces;
+using VillageProject.Core.Map.MapStructures;
 
 namespace VillageProject.Core.Sprites.MapStructures;
 
-public abstract class BaseMapStructureSpriteComp : BaseSpriteComp, IMapPlacementWatcherComp
+public class MapStructSpriteCompInst : BaseSpriteCompInst
 {
-    public BaseMapStructureSpriteComp(ICompDef def, IInst inst) : base(def, inst)
+    public MapStructSpriteCompInst(ICompDef def, IInst inst) : base(def, inst)
     {
         
     }
 
-    public void MapPositionSet(MapPositionData? mapPos)
+    protected override SpriteData _UpdateSprite()
     {
-        if (mapPos.HasValue)
-            this.Active = true;
-        DirtySprite();
+        var mapStructComp = Instance.GetComponentOfType<MapStructCompInst>();
+        if (mapStructComp == null)
+            throw new Exception($"No MapStructCompInst found on IInst '{Instance._DebugId}'.");
+        var def = (MapStructSpriteCompDef)this.CompDef;
+        var spriteDef = def.DefaultSprite;
+
+        var rotation = mapStructComp.Rotation.SubtractRotation(ViewRotation);
+        if (def.RotationSprites.ContainsKey(rotation))
+            spriteDef = def.RotationSprites[rotation];
+
+        var layerVis = mapStructComp.MapViewData?.LayerVisibility ?? LayerVisibility.Full;
+        
+        var manager = DimMaster.GetManager<SpriteManager>();
+        return manager.LoadSprite(def.ParentDef, spriteDef);
     }
-    
+
     // /// <summary>
     // /// Lower value means closer to front (SouthTop)
     // /// </summary>

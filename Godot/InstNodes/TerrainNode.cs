@@ -7,6 +7,7 @@ using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.Terrain;
+using VillageProject.Core.Sprites;
 using VillageProject.Core.Sprites.PatchSprites;
 using VillageProject.Godot.InstNodes;
 using VillageProject.Godot.Map;
@@ -14,8 +15,10 @@ using VillageProject.Godot.Sprites;
 
 public partial class TerrainNode : Node2D, IInstNode
 {
+	private string ChangeKey = "TerrainNode";
 	public MapNode MapNode { get; set; }
 	public IInst Inst { get; set; }
+	public InstNodeCompInst InstNodeComp { get; private set; }
 	public RotationFlag RealRotation { get; private set; }
 	public RotationFlag ViewRotation { get; private set; }
 	//
@@ -52,13 +55,16 @@ public partial class TerrainNode : Node2D, IInstNode
 	public void SetInst(IInst inst)
 	{
 		this.Inst = inst;
+		InstNodeComp = Inst.GetComponentOfType<InstNodeCompInst>();
 		_shadowSprite = GetNode<Sprite2D>("ShadowSprite");
 		_topSprite = GetNode<Sprite2D>("TopSprite");
 		_frontSprite = GetNode<Sprite2D>("FrontSprite");
-		Inst.AddChangeWatcher("TerrainNode", new []
+		Inst.AddChangeWatcher(ChangeKey, new []
 		{
 			MapStructChangeFlags.MapPositionChanged,
-			MapStructChangeFlags.MapRotationChanged
+			MapStructChangeFlags.MapRotationChanged,
+			MapStructChangeFlags.ViewRotationChanged,
+			SpriteChangeFlags.SpriteDirtied
 		}, true);
 	}
 
@@ -76,22 +82,31 @@ public partial class TerrainNode : Node2D, IInstNode
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		if(Inst.ListWatchedChanges("TerrainNode").Any())
-			SetSprites();
+		if(Inst == null)
+			return;
+		if (Inst.GetWatchedChange(ChangeKey, MapStructChangeFlags.MapPositionChanged))
+		{
+			GameMaster.MapControllerNode.PlaceInstNodeOnMap(this);
+			Inst.FlagWatchedChange(SpriteChangeFlags.SpriteDirtied);
+		}
+		if (Inst.GetWatchedChange(ChangeKey, SpriteChangeFlags.SpriteDirtied))
+			UpdateSprites();
 	}
 
 	public void SetViewRotation(RotationFlag viewRotation)
 	{
+		InstNodeComp.SetViewRotation(viewRotation);
 		if (ViewRotation != viewRotation)
 		{
 			ViewRotation = viewRotation;
-			_forceUpdate = true;
+			Inst.FlagWatchedChange(MapStructChangeFlags.ViewRotationChanged);
+			Inst.FlagWatchedChange(SpriteChangeFlags.SpriteDirtied);
 		}
-		SetSprites();
 	}
 	
 	public void SetLayerVisibility(LayerVisibility visibility)
 	{
+		InstNodeComp.SetLayerVisibility(visibility);
 		this.LayerVisibility = visibility;
 		switch (LayerVisibility)
 		{
@@ -128,7 +143,7 @@ public partial class TerrainNode : Node2D, IInstNode
 		}
 	}
 
-	public void SetSprites()
+	public void UpdateSprites()
 	{
 		if(Inst == null)
 			return;
@@ -139,21 +154,21 @@ public partial class TerrainNode : Node2D, IInstNode
 		var mapSpace = DimMaster.GetManager<MapManager>().GetMapSpaceById(mapStructComp.MapSpaceId);
 		var terrainManager = DimMaster.GetManager<TerrainManager>();
 		
-		var topSpriteComp = Inst.GetComponentWithKey<GodotPatchCellSpriteComp>("TopSprite");
+		var topSpriteComp = Inst.GetComponentWithKey<GodotPatchCellSpriteCompInst>("TopSprite");
 		var topSpriteDef = topSpriteComp.CompDef as IPatchSpriteCompDef;
 		var topSprite = topSpriteComp.GetPatchSprite(() =>
 		{
 			return terrainManager.GetHorizontalAdjacency(mapSpace, mapSpot.Value, rotation, matchAny:true);
 		});
 
-		var frontSpriteComp = Inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
+		var frontSpriteComp = Inst.GetComponentWithKey<GodotPatchCellSpriteCompInst>("FrontSprite");
 		var frontSpriteDef = frontSpriteComp.CompDef as IPatchSpriteCompDef;
 		var frontSprite = frontSpriteComp.GetPatchSprite(() =>
 		{
 			return terrainManager.GetVerticalAdjacencyAsHorizontal(mapSpace, mapSpot.Value, rotation, matchAny:true);
 		});
 		
-		var shadowSpriteComp = Inst.GetComponentWithKey<GodotPatchCellSpriteComp>("FrontSprite");
+		var shadowSpriteComp = Inst.GetComponentWithKey<GodotPatchCellSpriteCompInst>("FrontSprite");
 		var shadowSpriteDef = topSpriteComp.CompDef as IPatchSpriteCompDef;
 		var shadowSprite = frontSpriteComp.GetPatchSprite(() =>
 		{

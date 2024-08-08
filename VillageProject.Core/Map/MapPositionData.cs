@@ -10,7 +10,6 @@ public struct MapPositionData
     public MapSpot MapSpot { get; }
     public RotationFlag Rotation { get; }
     public Vector3 Offset { get; }
-
     public string MapSpaceId { get; }
     public IMapSpace MapSpace
     {

@@ -5,14 +5,6 @@ using VillageProject.Core.Serialization;
 
 namespace VillageProject.Core.Map;
 
-
-
-
-
-
-
-
-
 [JsonConverter(typeof(MapSpotJsonConverter))]
 public struct MapSpot
 {

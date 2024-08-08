@@ -8,9 +8,12 @@ namespace VillageProject.Core.Map.MapStructures;
 
 public class MapStructCompInst : BaseCompInst, IMapPositionComp
 {
-    public string? MapSpaceId { get; protected set; }
-    public MapSpot? MapSpot { get; protected set; }
-    public RotationFlag Rotation { get; protected set; }
+    public string? MapSpaceId => MapPosition?.MapSpaceId;
+    public MapSpot? MapSpot => MapPosition?.MapSpot;
+    public RotationFlag Rotation => MapPosition?.Rotation ?? RotationFlag.North;
+    
+    public MapPositionData? MapPosition { get; protected set; }
+    public MapViewData? MapViewData { get; protected set; }
 
     public string Layer => this.GetCompDefAs<MapStructCompDef>().MapLayer;
     
@@ -34,11 +37,11 @@ public class MapStructCompInst : BaseCompInst, IMapPositionComp
 
     public override void LoadSavedData(DataDict dataDict)
     {
-        MapSpot = dataDict.GetValueAs<MapSpot>("MapSpot");
-        Rotation = dataDict.GetValueAs<RotationFlag>("Rotation");
+        var mapSpot = dataDict.GetValueAs<MapSpot>("MapSpot");
+        var rotation = dataDict.GetValueAs<RotationFlag>("Rotation");
         OccupationData = MapStructDef.OccupationData.BuildNewOccupationData(MapSpot.Value, Rotation);
 
-        MapSpaceId = dataDict.GetValueAs<string>("MapSpaceId");
+        var mapSpaceId = dataDict.GetValueAs<string>("MapSpaceId");
         var mapManager = DimMaster.GetManager<MapManager>();
         var mapSpace = mapManager.GetMapSpaceById(MapSpaceId, errorIfNull: false);
         if(mapSpace == null)
@@ -48,7 +51,7 @@ public class MapStructCompInst : BaseCompInst, IMapPositionComp
             var res = mapSpace.TryAddInstToSpots(Instance, OccupationData.ListOccupiedSpots().ToList(), Layer);
             if (!res.Success)
                 throw new Exception("Failed to place self in spot: " + res.Message);
-            
+            MapPosition = new MapPositionData(mapSpace, mapSpot, rotation);
         }
     }
 
@@ -91,9 +94,7 @@ public class MapStructCompInst : BaseCompInst, IMapPositionComp
             Instance.FlagWatchedChange(MapStructChangeFlags.MapPositionChanged);
         if(this.Rotation != mapPos.Rotation)
             Instance.FlagWatchedChange(MapStructChangeFlags.MapRotationChanged);
-        MapSpaceId = mapPos.MapSpaceId;
-        MapSpot = mapPos.MapSpot;
-        Rotation = mapPos.Rotation;
+        this.MapPosition = mapPos;
         OccupationData = newOcc;
 
         

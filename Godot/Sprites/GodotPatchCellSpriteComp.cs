@@ -11,7 +11,7 @@ using Array = Godot.Collections.Array;
 
 namespace VillageProject.Godot.Sprites;
 
-public class GodotPatchCellSpriteComp : BasePatchCellSpriteComp, ISpriteComp
+public class GodotPatchCellSpriteCompInst : BasePatchCellSpriteCompInst, ISpriteComp
 {
     public const string SPRITE_KEY = "full_sprite";
 
@@ -20,7 +20,7 @@ public class GodotPatchCellSpriteComp : BasePatchCellSpriteComp, ISpriteComp
 
     private Image _image;
 
-    public GodotPatchCellSpriteComp(ICompDef def, IInst inst) : base(def, inst)
+    public GodotPatchCellSpriteCompInst(ICompDef def, IInst inst) : base(def, inst)
     {
         
     }

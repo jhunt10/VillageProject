@@ -9,15 +9,21 @@ using VillageProject.Core.Map;
 using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Map.Terrain;
+using VillageProject.Core.Sprites;
 using VillageProject.Godot;
 using VillageProject.Godot.DefDefs;
 using VillageProject.Godot.DefDefs.DefPrefabs;
+using VillageProject.Godot.InstNodes;
+using VillageProject.Godot.Sprites;
 using Environment = System.Environment;
 using Timer = Godot.Timer;
 
-public partial class GameMaster : Node2D, IInstWatcher
+public partial class GameMaster : Node2D
 {
+	
+	public static string PrefabScenePath = @"res://Scenes\Prefabs";
 	public static GameMaster Instance { get; private set; }
+	public static GodotSpriteHelper SpriteHelper = new GodotSpriteHelper();
 	private bool inited = false;
 	public static MainCamera MainCamera;
 	public static MapControllerNode MapControllerNode;
@@ -58,8 +64,8 @@ public partial class GameMaster : Node2D, IInstWatcher
 		if (!inited)
 		{
 			Instance = this;
-			DimMaster.AddInstWatcher(this);
 			DefWriter.SaveAllDefs();
+			SpriteManager.SetSpriteLoader(SpriteHelper);
 			DimMaster.StartUp();
 			MapControllerNode = GetNode<MapControllerNode>("MapControllerNode");
 			inited = true;
@@ -113,97 +119,64 @@ public partial class GameMaster : Node2D, IInstWatcher
 		DimMaster.ClearGameState();
 	}
 
-	public void OnNewInstCreated(IInst inst)
-	{
-		// Skip terrain to be handled by MapNode
-		var terrainComp = inst.GetComponentOfType<TerrainCompInst>(errorIfNull:false);
-		if(terrainComp != null)
-			return;
-		
-		Console.WriteLine($"Game Master: Create New Inst '{inst._DebugId}'.");
-		var mapSpaceComp = inst.GetComponentOfType<MapSpaceCompInst>(errorIfNull:false);
-		if (mapSpaceComp != null)
-		{
-			if (MapControllerNode != null)
-			{
-				var newMap = MapControllerNode.LoadMap(mapSpaceComp);
-				if(newMap != null)
-					InstNodes.Add(inst.Id, newMap);
-			}
-		}
-		
-		// var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(activeOnly:false, errorIfNull:false);
-		// if (mapStructComp != null)
-		// {
-		// 	if (MapControllerNode != null)
-		// 	{
-		// 		var newNode = MapControllerNode.CreateNewMapStructureNode(inst);
-		// 		if(newNode != null)
-		// 			InstNodes.Add(inst.Id, newNode);
-		// 		
-		// 	}
-		// }
-		
-		// var actorComp = inst.GetComponentOfType<ActorCompInst>(errorIfNull:false);
-		// if (actorComp != null)
-		// {
-		// 	if (MapControllerNode != null)
-		// 	{
-		// 		var newNode = MapControllerNode.CreateNewActorNode(inst);
-		// 		if(newNode != null)
-		// 			InstNodes.Add(inst.Id, newNode);
-		// 		
-		// 	}
-		// }
-	}
+	// public void OnInstLoaded(IInst inst)
+	// {
+	// 	// Skip terrain to be handled by MapNode
+	// 	var terrainComp = inst.GetComponentOfType<TerrainCompInst>(errorIfNull:false);
+	// 	if(terrainComp != null)
+	// 		return;
+	// 	
+	// 	Console.WriteLine($"Game Master: Load Saved Inst '{inst._DebugId}'.");
+	// 	var mapSpaceComp = inst.GetComponentOfType<MapSpaceCompInst>(errorIfNull:false);
+	// 	if (mapSpaceComp != null)
+	// 	{
+	// 		if (MapControllerNode != null)
+	// 		{
+	// 			var newMap = MapControllerNode.LoadMap(mapSpaceComp);
+	// 			if(newMap != null)
+	// 				InstNodes.Add(inst.Id, newMap);
+	// 		}
+	// 	}
+	// 	
+	// 	// var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(activeOnly:false, errorIfNull:false);
+	// 	// if (mapStructComp != null)
+	// 	// {
+	// 	// 	if (MapControllerNode != null)
+	// 	// 	{
+	// 	// 		var newNode = MapControllerNode.CreateNewMapStructureNode(inst);
+	// 	// 		if(newNode != null)
+	// 	// 			InstNodes.Add(inst.Id, newNode);
+	// 	// 		
+	// 	// 	}
+	// 	// }
+	// }
+	//
+	// public void OnInstDeleted(IInst inst)
+	// {
+	// 	Console.WriteLine($"GameMaster asked to delete {inst._DebugId}.");
+	// 	MapControllerNode.NotifyOfDeletedInst(inst);
+	// 	if (InstNodes.ContainsKey(inst.Id))
+	// 	{
+	// 		var instNode = InstNodes[inst.Id];
+	// 		instNode.Delete();
+	// 		Console.WriteLine($"\tGameMaster deleted {inst._DebugId}.");
+	//
+	// 	}
+	// 	else
+	// 	{
+	// 		Console.WriteLine($"\tNo node found for inst {inst._DebugId}.");
+	// 	}
+	// }
 
-	public void OnInstLoaded(IInst inst)
+	public static IInstNode CreateInstNodeForInst(InstNodeCompInst instComp)
 	{
-		// Skip terrain to be handled by MapNode
-		var terrainComp = inst.GetComponentOfType<TerrainCompInst>(errorIfNull:false);
-		if(terrainComp != null)
-			return;
-		
-		Console.WriteLine($"Game Master: Load Saved Inst '{inst._DebugId}'.");
-		var mapSpaceComp = inst.GetComponentOfType<MapSpaceCompInst>(errorIfNull:false);
-		if (mapSpaceComp != null)
-		{
-			if (MapControllerNode != null)
-			{
-				var newMap = MapControllerNode.LoadMap(mapSpaceComp);
-				if(newMap != null)
-					InstNodes.Add(inst.Id, newMap);
-			}
-		}
-		
-		// var mapStructComp = inst.GetComponentOfType<MapStructCompInst>(activeOnly:false, errorIfNull:false);
-		// if (mapStructComp != null)
-		// {
-		// 	if (MapControllerNode != null)
-		// 	{
-		// 		var newNode = MapControllerNode.CreateNewMapStructureNode(inst);
-		// 		if(newNode != null)
-		// 			InstNodes.Add(inst.Id, newNode);
-		// 		
-		// 	}
-		// }
-	}
-
-	public void OnInstDeleted(IInst inst)
-	{
-		Console.WriteLine($"GameMaster asked to delete {inst._DebugId}.");
-		MapControllerNode.NotifyOfDeletedInst(inst);
-		if (InstNodes.ContainsKey(inst.Id))
-		{
-			var instNode = InstNodes[inst.Id];
-			instNode.Delete();
-			Console.WriteLine($"\tGameMaster deleted {inst._DebugId}.");
-
-		}
-		else
-		{
-			Console.WriteLine($"\tNo node found for inst {inst._DebugId}.");
-		}
+		var scenePath = Path.Combine(PrefabScenePath, instComp.InstNodeCompDef.PrefabNodeName);
+		var prefab = GD.Load<PackedScene>(scenePath);
+		var newNode = prefab.Instantiate<Node2D>();
+		var instNode = (IInstNode)newNode;
+		instNode.SetInst(instComp.Instance);
+		Instance.CallDeferred("add_child", (Node2D)instNode);
+		return instNode;
 	}
 
 	public static Result CreateInstAtSpot(IDef def, IMapSpace mapSpace, MapSpot mapSpot, RotationFlag rotation)

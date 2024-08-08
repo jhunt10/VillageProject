@@ -21,8 +21,6 @@ public partial class MapControllerNode : Node2D
 	public MouseOverSprite MouseOverSprite;
 	// public ConstructablePreview ConstructablePreview;
 
-	public static ActorNode ActorNodePrefab;
-	public static MapStructureNode MapStructureNodePrefab;
 	public static MapCellNode MapCellPrefab;
 	
 	private static Vector2 _lastMousePos = Vector2.Zero;
@@ -36,7 +34,6 @@ public partial class MapControllerNode : Node2D
 		MouseOverSprite = GetNode<MouseOverSprite>("MouseOverSprite");
 		// ConstructablePreview = GetNode<ConstructablePreview>("ConstructablePreview");
 		
-		MapStructureNodePrefab = GetNode<MapStructureNode>("PrefabNodes/MapStructureNodePrefab");
 		MapCellPrefab = GetNode<MapCellNode>("PrefabNodes/MapCellPrefab");
 		MapNodePrefab = GetNode<MapNode>("MapNode");
 		

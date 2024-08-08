@@ -95,7 +95,7 @@ public partial class MapNode : Node2D, Old_IInstNode
 	// 	}
 	// }
 
-	public void ShowZLayer(int zLayer)
+	public void ShowZLayer(int zLayer, LayerVisibility layerVisibility = LayerVisibility.Full)
 	{
 		if(!ZLayers.Any())
 			return;
@@ -111,11 +111,13 @@ public partial class MapNode : Node2D, Old_IInstNode
 		for (int z = minZ; z <= maxZ; z++)
 			if (ZLayers.ContainsKey(z))
 			{
-				if(z > VisibleZLayer + 1)
+				if(z == VisibleZLayer)
+					ZLayers[z].SetLayerVisibility(layerVisibility);
+				else if(z > VisibleZLayer)
 					ZLayers[z].SetLayerVisibility(LayerVisibility.None);
-				else if (z == VisibleZLayer + 1)
+				else if (z == VisibleZLayer + 1 && layerVisibility == LayerVisibility.Full)
 					ZLayers[z].SetLayerVisibility(LayerVisibility.Shadow);
-				else
+				else 
 					ZLayers[z].SetLayerVisibility(LayerVisibility.Full);
 			}
 	}

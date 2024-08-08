@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://dq0d812v1qmf4"]
+[gd_scene load_steps=22 format=3 uid="uid://dq0d812v1qmf4"]
 
 [ext_resource type="Script" path="res://Godot/GameMaster.cs" id="1_ox1jl"]
 [ext_resource type="Script" path="res://Godot/Map/MapNode.cs" id="2_6m56v"]
@@ -9,7 +9,6 @@
 [ext_resource type="Script" path="res://Godot/UI/MouseOverSprite.cs" id="4_qemjc"]
 [ext_resource type="Texture2D" uid="uid://bbrujo6l8wrw" path="res://Assets/Sprites/TerrainSpriteTop.png" id="6_47g7n"]
 [ext_resource type="Script" path="res://Godot/UI/MainCamera.cs" id="7_0kvpc"]
-[ext_resource type="Script" path="res://Godot/Map/MapStructureNode.cs" id="8_1vd1e"]
 [ext_resource type="Script" path="res://Godot/UI/BuildBar.cs" id="12_atnyw"]
 [ext_resource type="Script" path="res://Godot/UI/ConstructablePreview.cs" id="12_eybiu"]
 [ext_resource type="Texture2D" uid="uid://tt8fvcymku6r" path="res://Assets/Sprites/nine_patch_72x72_rounded.png" id="13_75ih2"]
@@ -31,13 +30,6 @@ script = ExtResource("2_aiy8y")
 
 [node name="PrefabNodes" type="Node2D" parent="MapControllerNode"]
 
-[node name="MapStructureNodePrefab" type="Node2D" parent="MapControllerNode/PrefabNodes"]
-visible = false
-script = ExtResource("8_1vd1e")
-
-[node name="Sprite2D" type="Sprite2D" parent="MapControllerNode/PrefabNodes/MapStructureNodePrefab"]
-centered = false
-
 [node name="MapCellPrefab" type="Node2D" parent="MapControllerNode/PrefabNodes"]
 script = ExtResource("13_os1mb")
 
@@ -45,7 +37,6 @@ script = ExtResource("13_os1mb")
 script = ExtResource("15_twn1v")
 
 [node name="MapNode" type="Node2D" parent="MapControllerNode"]
-visible = false
 script = ExtResource("2_6m56v")
 
 [node name="ZLayerPrefab" type="Node2D" parent="MapControllerNode/MapNode"]

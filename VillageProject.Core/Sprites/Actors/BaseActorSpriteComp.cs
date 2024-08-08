@@ -6,9 +6,9 @@ using VillageProject.Core.Map.MapSpaces;
 
 namespace VillageProject.Core.Sprites.Actors;
 
-public abstract class BaseActorSpriteComp : BaseSpriteComp, IMapPlacementWatcherComp
+public abstract class BaseActorSpriteCompInst : BaseSpriteCompInst, IMapPlacementWatcherComp
 {
-    public BaseActorSpriteComp(ICompDef def, IInst inst) : base(def, inst)
+    public BaseActorSpriteCompInst(ICompDef def, IInst inst) : base(def, inst)
     {
         
     }

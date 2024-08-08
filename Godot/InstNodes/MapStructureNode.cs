@@ -8,15 +8,21 @@ using VillageProject.Core.Map.MapSpaces;
 using VillageProject.Core.Map.MapStructures;
 using VillageProject.Core.Sprites;
 using VillageProject.Core.Sprites.Interfaces;
+using VillageProject.Core.Sprites.MapStructures;
 using VillageProject.Core.Sprites.PatchSprites;
+using VillageProject.Godot.InstNodes;
 using VillageProject.Godot.Map;
 using VillageProject.Godot.Sprites;
 
-public partial class MapStructureNode : Node2D, IMapObjectNode
+public partial class MapStructureNode : Node2D, IInstNode
 {
+	private string ChangeKey = "MapStructNode";
+	
 	public MapNode MapNode { get; set; }
 	public Sprite2D Spite;
+	public Sprite2D ShadowSpite;
 	public IInst Inst { get; private set; }
+	public InstNodeCompInst InstNodeComp { get; private set; }
 	public string? MapSpaceId { get; set; }
 	public MapSpot? MapSpot { get; set; }
 	public RotationFlag RealRotation { get; set; }
@@ -26,6 +32,7 @@ public partial class MapStructureNode : Node2D, IMapObjectNode
 
 	public void SetLayerVisibility(LayerVisibility visibility)
 	{
+		InstNodeComp.SetLayerVisibility(visibility);
 		
 		this.LayerVisibility = visibility;
 		switch (LayerVisibility)
@@ -53,10 +60,11 @@ public partial class MapStructureNode : Node2D, IMapObjectNode
 
 	public void SetViewRotation(RotationFlag viewRotation)
 	{
+		InstNodeComp.SetViewRotation(viewRotation);
 		if (ViewRotation != viewRotation)
 		{
-			var mapStructSpriteComp = Inst.GetComponentOfType<GodotMapStructSpriteComp>(errorIfNull: true);
-			mapStructSpriteComp.SetViewRotation(viewRotation);
+			Inst.FlagWatchedChange(MapStructChangeFlags.ViewRotationChanged);
+			Inst.FlagWatchedChange(SpriteChangeFlags.SpriteDirtied);
 			ViewRotation = viewRotation;
 			ForceUpdateSprite();
 		}
@@ -70,7 +78,8 @@ public partial class MapStructureNode : Node2D, IMapObjectNode
 	{
 		if(_inited)
 			return;
-		Spite = GetNode<Sprite2D>("Sprite2D");
+		Spite = GetNode<Sprite2D>("Sprite");
+		ShadowSpite = GetNode<Sprite2D>("ShadowSprite");
 		_inited = true;
 	}
 
@@ -91,10 +100,12 @@ public partial class MapStructureNode : Node2D, IMapObjectNode
 	{
 		if(Inst == null)
 			return;
-		
-		// Get sprite comp to check for updates
-		var spriteChange = Inst.GetWatchedChange(SPRITE_WATCHER_KEY, SpriteChangeFlags.SpriteChanged);
-		if (spriteChange)
+		if (Inst.GetWatchedChange(ChangeKey, MapStructChangeFlags.MapPositionChanged))
+		{
+			GameMaster.MapControllerNode.PlaceInstNodeOnMap(this);
+			Inst.FlagWatchedChange(SpriteChangeFlags.SpriteDirtied);
+		}
+		if (Inst.GetWatchedChange(ChangeKey, SpriteChangeFlags.SpriteDirtied))
 			UpdateSprite();
 	}
 
@@ -109,20 +120,27 @@ public partial class MapStructureNode : Node2D, IMapObjectNode
 			throw new Exception("Inst already set");
 		_init();
 		Inst = inst;
-		Inst.AddChangeWatcher(SPRITE_WATCHER_KEY, new []{SpriteChangeFlags.SpriteChanged});
+		InstNodeComp = Inst.GetComponentOfType<InstNodeCompInst>();
+		Inst.AddChangeWatcher(ChangeKey, new []
+		{
+			SpriteChangeFlags.SpriteDirtied,
+			MapStructChangeFlags.MapPositionChanged,
+			MapStructChangeFlags.MapRotationChanged,
+			MapStructChangeFlags.ViewRotationChanged
+		}, initiallyDirty:true);
 		Console.WriteLine($"Inst {inst._DebugId} assigned to Node {this.Name}.");
 	}
 	
 	public void ForceUpdateSprite()
 	{
-		var mapStructSpriteComp = Inst.GetComponentOfType<GodotMapStructSpriteComp>(errorIfNull: true);
+		var mapStructSpriteComp = Inst.GetComponentOfType<MapStructSpriteCompInst>(errorIfNull: true);
 		mapStructSpriteComp?.DirtySprite();
 	}
 
 	public void UpdateSprite()
 	{
-		var mapStructComp = Inst.GetComponentOfType<MapStructCompInst>(errorIfNull: true);
-		var mapStructSpriteComp = Inst.GetComponentOfType<GodotMapStructSpriteComp>(errorIfNull: true);
+		var mapStructComp = Inst.GetComponentOfType<MapStructCompInst>(activeOnly:false, errorIfNull: true);
+		var mapStructSpriteComp = Inst.GetComponentOfType<MapStructSpriteCompInst>(activeOnly:false, errorIfNull: true);
 		// Move Node position if needed
 		if (_forceUpdate 
 		    || mapStructComp.MapSpot != MapSpot || mapStructComp.Rotation != RealRotation || mapStructComp.MapSpaceId != MapSpaceId
@@ -133,6 +151,7 @@ public partial class MapStructureNode : Node2D, IMapObjectNode
 				this.Visible = false;
 				return;
 			}
+
 			var mapNode = GameMaster.MapControllerNode.GetMapNode(mapStructComp.MapSpaceId);
 			if (mapNode == null)
 				throw new Exception($"Failed to find MapNode for MapSpace '{mapStructComp.MapSpaceId}'.");
@@ -147,17 +166,15 @@ public partial class MapStructureNode : Node2D, IMapObjectNode
 			MapSpaceId = mapStructComp.MapSpaceId;
 			MapSpot = mapStructComp.MapSpot.Value;
 			RealRotation = mapStructComp.Rotation;
+			this.Visible = true;
 			if(MapNode != null)
 				ViewRotation = MapNode.ViewRotation;
 		}
 		
 		// Reset sprite
-		var spriteComp = Inst.GetComponentOfType<GodotMapStructSpriteComp>();
-		if (spriteComp == null)
+		if (mapStructSpriteComp == null)
 			throw new Exception($"Inst {Inst._DebugId} has no GodotMapStructSpriteComp");
-		var sprite = spriteComp.GetSprite();
-		var imageText = (ImageTexture)sprite.Sprite;
-		this.Spite.Texture = imageText;
-		this.Spite.Offset = new Vector2(sprite.XOffset, -sprite.Hight + sprite.YOffset);
+		var sprite = mapStructSpriteComp.GetSprite();
+		GameMaster.SpriteHelper.SetSpriteFromData(this.Spite, sprite);
 	}
 }

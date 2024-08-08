@@ -31,10 +31,12 @@ public partial class ItemPileNode : Node2D, IInstNode
 	}
 
 	public IInst Inst { get; set; }
-	
+	public InstNodeCompInst InstNodeComp { get; private set; }
+
 	public void SetInst(IInst inst)
 	{
 		this.Inst = inst;
+		InstNodeComp = Inst.GetComponentOfType<InstNodeCompInst>();
 		ItemSprite = GetNode<Sprite2D>("HeldItemSprite");
 		inst.AddChangeWatcher("ItemPileNode", new []
 		{
@@ -55,13 +57,14 @@ public partial class ItemPileNode : Node2D, IInstNode
 		foreach (var itemComp in invComp.ListHeldItems())
 		{
 			var itemSpriteDef = itemComp.ItemCompDef.ItemSpriteDef;
-			GodotSpriteHelper.SetSpriteFromDef(ItemSprite, itemComp.Instance.Def, itemSpriteDef);
+			GameMaster.SpriteHelper.SetSpriteFromDef(ItemSprite, itemComp.Instance.Def, itemSpriteDef);
 		}
 	}
 	
 	
 	public void SetViewRotation(RotationFlag viewRotation)
 	{
+		InstNodeComp.SetViewRotation(viewRotation);
 		if (ViewRotation != viewRotation)
 		{
 			ViewRotation = viewRotation;
@@ -70,6 +73,7 @@ public partial class ItemPileNode : Node2D, IInstNode
 	
 	public void SetLayerVisibility(LayerVisibility visibility)
 	{
+		InstNodeComp.SetLayerVisibility(visibility);
 		this.LayerVisibility = visibility;
 		switch (LayerVisibility)
 		{

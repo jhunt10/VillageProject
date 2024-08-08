@@ -5,43 +5,34 @@ using VillageProject.Core.Sprites.Interfaces;
 
 namespace VillageProject.Core.Sprites;
 
-public abstract class BaseSpriteComp : BaseCompInst, ISpriteComp
+public abstract class BaseSpriteCompInst : BaseCompInst, ISpriteComp
 {
     public RotationFlag ViewRotation { get; protected set; }
+    public LayerVisibility LayerVisibility { get; protected set; }
     // private List<ISpriteWatcher> _spriteWatchers = new List<ISpriteWatcher>();
     private SpriteData? _currentSprite;
-    private bool _dirtySprite;
-
-    public bool IsDirty => _dirtySprite;
-    protected BaseSpriteComp(ICompDef def, IInst inst) : base(def, inst)
+    protected BaseSpriteCompInst(ICompDef def, IInst inst) : base(def, inst)
     {
-        _dirtySprite = true;
+        
     }
     
     public virtual void DirtySprite()
     {
-        _dirtySprite = true;
-        Instance.FlagWatchedChange(SpriteChangeFlags.SpriteChanged);
-    }
-
-    public virtual void SetViewRotation(RotationFlag viewRotation)
-    {
-        if (ViewRotation != viewRotation)
-        {
-            ViewRotation = viewRotation;
-            DirtySprite();
-        }
+        Active = true;
+        Instance.FlagWatchedChange(SpriteChangeFlags.SpriteDirtied);
     }
 
     protected abstract SpriteData _UpdateSprite();
     
     public virtual SpriteData GetSprite()
     {
-        if (_currentSprite == null || _dirtySprite)
+        if(_currentSprite == null)
+            Instance.AddChangeWatcher(this.Id, new []{SpriteChangeFlags.SpriteDirtied}, true);
+        if (Instance.GetWatchedChange(this.Id, SpriteChangeFlags.SpriteDirtied))
         {
             var sprite = _UpdateSprite();
             _currentSprite = sprite ?? throw new Exception($"Failed to update sprite. {Instance._DebugId}");
-            _dirtySprite = false;
+            this.Instance.FlagWatchedChange(SpriteChangeFlags.SpriteRefreshed);
         }
         return _currentSprite;
     }

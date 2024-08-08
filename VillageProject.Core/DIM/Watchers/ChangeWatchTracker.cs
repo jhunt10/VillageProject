@@ -80,10 +80,10 @@ public class ChangeWatchTracker
     public bool GetChange(string key, string flag, bool consumeChange)
     {
         if (!_changeDict.ContainsKey(key))
-            return false;
-        if (!_changeDict[key].ContainsKey(flag))
-            return false;
-        if (_changeDict[key][flag])
+            Console.Error.WriteLine($"Unregistered key {key} asking for change flag {flag}.");
+        else if (!_changeDict[key].ContainsKey(flag))
+            Console.Error.WriteLine($"Key {key} asking for unregistered flag {flag}.");
+        else if (_changeDict[key][flag])
         {
             if (consumeChange)
                 _changeDict[key][flag] = false;
